@@ -58,7 +58,7 @@ classdef RRT_input_output_deltaInput < handle
                 x = node(1);
                 y = node(2);
                 theta = node(3); 
-                distance = sqrt((x-new_node(1))^2 + (y-new_node(2))^2 + 1*(theta-new_node(3))^2);
+                distance = sqrt((x-new_node(1))^2 + (y-new_node(2))^2 + 1*0*(theta-new_node(3))^2);
                 if(distance < best_distance)
                     best_distance = distance;
                     near_index = k;

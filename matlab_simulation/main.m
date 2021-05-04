@@ -1,3 +1,4 @@
+clear all;
 %x y theta x_dot y_dot theta_dot
 state_robot = [4 10 0 0 0 0];
 dt = 0.1;
