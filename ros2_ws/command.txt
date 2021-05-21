@@ -1,0 +1,5 @@
+ros2 run rviz2 rviz2
+
+ros2 launch slam_toolbox online_sync_launch.py
+
+ros2 run key_teleop key_teleop

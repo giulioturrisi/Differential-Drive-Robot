@@ -138,7 +138,8 @@ classdef RRT_input_output_deltaInput < handle
             radius = 0.3;
             %height = 0.2;
             %width = 0.2;
-            scale = 20;
+            %scale = 20;
+            scale = 1/0.05
             
             top = [int16(x*scale), int16((y + radius)*scale)];
             bottom = [int16(x*scale), int16((y - radius)*scale)];

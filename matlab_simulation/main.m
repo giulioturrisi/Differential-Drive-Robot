@@ -1,12 +1,15 @@
 clear all;
 %x y theta x_dot y_dot theta_dot
-state_robot = [4 10 0 0 0 0];
+%state_robot = [4 10 0 0 0 0];
+state_robot = [1 1 0 0 0 0];
 dt = 0.1;
 
-image = imread('map.pgm');
+%image = imread('map.pgm');
+image = imread('coppeliasim_simple.pgm');
 imageNorm = double(image)/255;
 imageOccupancy = 1 - imageNorm;
 map = occupancyMap(imageOccupancy,20);
+
 %N.B 0.0039 è free, sopra tutto occupato o incerto
 
 %LQR for input-output planning (if used)
@@ -24,8 +27,11 @@ R = 10;
 
 %RRT choice
 %RRT = RRT_input_output(state_robot,dt,[20,20],[9,5],image);
-RRT = RRT_input_output_deltaInput(state_robot,dt,[20,20],[9,5],image);
+%RRT = RRT_input_output_deltaInput(state_robot,dt,[20,20],[9,5],image);
 %RRT = RRT_primitives(state_robot,dt,[20,20],[10,4],image);
+
+
+RRT = RRT_input_output_deltaInput(state_robot,dt,[3,3],[2,2],image);
 
 %RRT loop
 for j = 1:100000
@@ -89,13 +95,19 @@ for d = 2:size_path(1)-1
     
     u1 = -k1*e1;
     if(e3 == 0)
-        u2 = -k2*near_node(5)*(sin(e3)/(e3 + 0.1))*e2 - k3*e3;
+        u2 = -k2*near_node(5)*(sin(e3)/(e3 + 0.001))*e2 - k3*e3;
     else
-        u2 = -k2*near_node(5)*(sin(e3)/(e3))*e2 - k3*e3;
+        u2 = -k2*near_node(5)*(sin(e3)/(e3 + 0.001))*e2 - k3*e3;
     end
+    %se lo voglio lineare
+    u2 = -k2*e2 - k3*e3;
     
-    v = near_node(5)*cos(e3) - u1;
-    w = near_node(6) - u2;
+    v = near_node(5)*cos(e3) - u1
+    w = near_node(6) - u2
+    
+    %if(isnan(v))
+    %    disp("stop")
+    %end
     
 
     
@@ -105,7 +117,7 @@ for d = 2:size_path(1)-1
     u1_io = k1*0.5*(near_node(1) - state_robot(1)) + x_vel;
     u2_io = k1*0.5*(near_node(2) - state_robot(2)) + y_vel;
     v = cos(state_robot(3))*u1_io + sin(state_robot(3))*u2_io;
-    w = -sin(state_robot(3))*u1_io/0.1 + cos(state_robot(3))*u2_io/0.1;
+    w = -sin(state_robot(3))*u1_io/0.01 + cos(state_robot(3))*u2_io/0.01;
     
     
     %integration
