@@ -9,7 +9,8 @@ image = imread('coppeliasim_simple.pgm');
 imageNorm = double(image)/255;
 imageOccupancy = 1 - imageNorm;
 map = occupancyMap(imageOccupancy,20);
-
+resolution = 0.05;
+scale = 1/resolution;
 %N.B 0.0039 è free, sopra tutto occupato o incerto
 
 %LQR for input-output planning (if used)
@@ -31,26 +32,28 @@ R = 10;
 %RRT = RRT_primitives(state_robot,dt,[20,20],[10,4],image);
 
 
-RRT = RRT_input_output_deltaInput(state_robot,dt,[3,3],[2,2],image);
+% RRT = RRT_input_output_deltaInput(state_robot,dt,[3,3],[2,2],image,resolution);
+% 
+% %RRT loop
+% for j = 1:100000
+%     j
+%     desired_node = RRT.sample();
+%     near_index = RRT.find_nearest(desired_node);
+%     new_node = RRT.choose_primitives(near_index,desired_node);
+%     %%check collision
+%     good = RRT.check_collision(new_node);
+%     if(good == 1)
+%         RRT.add_nodes(new_node);
+%     end
+%     finish = RRT.check_goal(new_node);
+%     
+%     if(finish == 1)
+%         path = RRT.take_path(new_node(4));
+%         break;
+%     end
+% end
 
-%RRT loop
-for j = 1:100000
-    j
-    desired_node = RRT.sample();
-    near_index = RRT.find_nearest(desired_node);
-    new_node = RRT.choose_primitives(near_index,desired_node);
-    %%check collision
-    good = RRT.check_collision(new_node);
-    if(good == 1)
-        RRT.add_nodes(new_node);
-    end
-    finish = RRT.check_goal(new_node);
-    
-    if(finish == 1)
-        path = RRT.take_path(new_node(4));
-        break;
-    end
-end
+path = planning_fun(state_robot,dt,[3,3],[2,2],image,resolution,1000)
 
 
 
@@ -133,10 +136,10 @@ for d = 2:size_path(1)-1
     %y = state_robot(2);
     radius = 0.15;
     
-    rgbImage = insertShape(rgbImage,'circle',[int16(near_node(2)*20) int16(near_node(1)*20) radius],'LineWidth',2, 'Color', 'blue');
-    rgbImage(int16(x*20),int16(y*20),1) = 255;
-    rgbImage(int16(x*20),int16(y*20),2) = 0;
-    rgbImage(int16(x*20),int16(y*20),3) = 0;
+    rgbImage = insertShape(rgbImage,'circle',[int16(near_node(2)*scale) int16(near_node(1)*scale) radius],'LineWidth',2, 'Color', 'blue');
+    rgbImage(int16(x*scale),int16(y*scale),1) = 255;
+    rgbImage(int16(x*scale),int16(y*scale),2) = 0;
+    rgbImage(int16(x*scale),int16(y*scale),3) = 0;
     
     
     
