@@ -15,6 +15,7 @@
 #include "planning_fun_initialize.h"
 #include "coder_array.h"
 
+#include <iostream>
 // Function Definitions
 //
 // Arguments    : const double state_robot[6]
@@ -55,19 +56,25 @@ void planning_fun(const double state_robot[6], double dt, const double limit[2],
   // RRT loop
   j = 0;
   exitg1 = false;
+
   while ((!exitg1) && (j <= static_cast<int>(maxIter) - 1)) {
+
     double near_index;
     RRT.sample(desired_node);
+
     near_index = RRT.find_nearest(desired_node);
     RRT.choose_primitives(near_index, desired_node, new_node);
 
     // check collision
     near_index = RRT.check_collision(new_node);
+
     if (near_index == 1.0) {
       RRT.add_nodes(new_node);
     }
-
+  
     near_index = RRT.check_goal(new_node);
+
+
     if (near_index == 1.0) {
       RRT.take_path(new_node[3], path, (&size_path));
       exitg1 = true;

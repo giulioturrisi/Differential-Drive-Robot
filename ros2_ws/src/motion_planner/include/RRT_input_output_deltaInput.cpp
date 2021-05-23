@@ -157,9 +157,9 @@ double RRT_input_output_deltaInput::check_goal(const double new_node[6]) const
   double a;
   double finish;
   a = new_node[0] - this->goal[0];
-  if (a * a < 0.2) {
+  if (a * a < 0.05) {
     a = new_node[1] - this->goal[1];
-    if (a * a < 0.2) {
+    if (a * a < 0.05) {
       finish = 1.0;
     } else {
       finish = 0.0;

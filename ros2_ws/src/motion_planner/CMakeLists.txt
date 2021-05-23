@@ -21,6 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2_msgs REQUIRED)
 
 
 if(BUILD_TESTING)
@@ -35,12 +36,15 @@ if(BUILD_TESTING)
 endif()
 
 include_directories(include)
+include_directories(include/read_pgm)
+
 set(SOURCES include/planning_fun_data.cpp include/planning_fun_initialize.cpp)
 set(SOURCES2 include/planning_fun_terminate.cpp include/planning_fun.cpp include/rand.cpp include/eml_rand_mt19937ar_stateful.cpp)
 set(SOURCES3 include/RRT_input_output_deltaInput.cpp)
+set(SOURCES4 include/read_pgm/pgm.cpp)
 
-add_executable(RRT_input_output_smooth src/RRT_input_output_smooth.cpp ${SOURCES} ${SOURCES2} ${SOURCES3})
-ament_target_dependencies(RRT_input_output_smooth rclcpp std_msgs geometry_msgs nav_msgs)
+add_executable(RRT_input_output_smooth src/RRT_input_output_smooth.cpp ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+ament_target_dependencies(RRT_input_output_smooth rclcpp std_msgs geometry_msgs nav_msgs tf2_msgs)
 
 install(TARGETS
   RRT_input_output_smooth

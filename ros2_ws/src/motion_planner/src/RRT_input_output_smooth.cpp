@@ -6,6 +6,12 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "nav_msgs/msg/path.hpp"
+
+#include "tf2_msgs/msg/tf_message.hpp"
+
+#include "pgm.hpp"
+
+
 using std::placeholders::_1;
 
 
@@ -61,13 +67,14 @@ static void argInit_1x6_real_T(double result[6])
 // Arguments    : void
 // Return Type  : coder::array<unsigned char, 2U>
 //
-static coder::array<unsigned char, 2U> argInit_UnboundedxUnbounded_uint8_T()
+static coder::array<unsigned char, 2U> argInit_UnboundedxUnbounded_uint8_T(int rows, int colums, table image_loaded)
 {
   coder::array<unsigned char, 2U> result;
 
   // Set the size of the array.
   // Change this size to the value that the application requires.
-  result.set_size(60, 60);
+  //result.set_size(width,height);
+  result.set_size(rows,colums);
 
   // Loop over the array to initialize each element.
   for (int idx0 = 0; idx0 < result.size(0); idx0++) {
@@ -75,7 +82,19 @@ static coder::array<unsigned char, 2U> argInit_UnboundedxUnbounded_uint8_T()
       // Set the value of the array element.
       // Change this value to the value that the application requires.
       //result[idx0 + result.size(0) * idx1] = argInit_uint8_T();
-      result[idx0 + result.size(0) * idx1] = 250;
+      //result[idx0 + result.size(0) * idx1] = 250;
+      if(idx0 < 10 && idx1 < 10) {
+      std::cout << "rows" << idx0;
+      std::cout << " colums " << idx1 << std::endl;
+      std::cout << "data" << image_loaded.data[idx0][idx1] << std::endl;
+      std::cout << "data opposite" << image_loaded.data[idx1][idx0] << std::endl;
+      }
+      //RCLCPP_INFO( "read '%i'",idx0);
+      //RCLCPP_INFO("read '%i'",idx1);
+      //RCLCPP_INFO("read '%i'",image_loaded.data[idx0][idx1]);
+
+      //[colonne][righe] per accesso
+      result[idx0 + result.size(0) * idx1] = image_loaded.data[idx1][idx0];
     }
   }
 
@@ -108,13 +127,18 @@ class MinimalSubscriber : public rclcpp::Node
 {
   public:
     MinimalSubscriber()
-    : Node("minimal_subscriber")
+    : Node("planner")
     {
       subscription_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
       "goal_pose", 1, std::bind(&MinimalSubscriber::topic_callback, this, _1));
-      RCLCPP_INFO(this->get_logger(), "Node started");
+
+      //subscription_TF = this->create_subscription<tf2_msgs::msg::TFMessage>(
+      //"tf", 1, std::bind(&MinimalSubscriber::topic_callback, this, _1));
+      
 
       publisher_ = this->create_publisher<nav_msgs::msg::Path>("path", 1);
+
+      RCLCPP_INFO(this->get_logger(), "Node started");
     }
 
   private:
@@ -140,7 +164,7 @@ class MinimalSubscriber : public rclcpp::Node
       //dt_tmp = argInit_real_T();
       dt_tmp = 0.1;
 
-      maxIter = 1000;
+      maxIter = 10000;
 
       resolution = 0.05;
 
@@ -151,20 +175,41 @@ class MinimalSubscriber : public rclcpp::Node
 
       // Initialize function input argument 'goal'.
       //argInit_1x2_real_T(goal_tmp);
-      //goal_tmp[0] = msg->pose.position.x;
-      //goal_tmp[1] = msg->pose.position.y;
-      goal_tmp[0] = 2;
-      goal_tmp[1] = 2;
+      goal_tmp[0] = msg->pose.position.x;
+      goal_tmp[1] = msg->pose.position.y;
+
+      goal_tmp[0] = goal_tmp[0] + 1.03;
+      goal_tmp[1] = goal_tmp[1] + 1.46;
+      //goal_tmp[0] = 2;
+      //goal_tmp[1] = 2;
+      if(goal_tmp[0] > limit_tmp[0])
+        goal_tmp[0] = limit_tmp[0];
+      if(goal_tmp[0] < 0)
+        goal_tmp[0] = 0;
+      if(goal_tmp[1] > limit_tmp[1])
+        goal_tmp[1] = limit_tmp[1];
+      if(goal_tmp[1] < 0)
+        goal_tmp[1] = 0;
+
+
+
+      RCLCPP_INFO(this->get_logger(), "Goal modified x: '%f'", goal_tmp[0]);
+      RCLCPP_INFO(this->get_logger(), "Goal modified y: '%f'", goal_tmp[1]);
+      
 
 
       // Initialize function input argument 'image'.
-      image = argInit_UnboundedxUnbounded_uint8_T();
+      struct table image_pgm = pgm_imread("/mnt/c/Users/giuli/Desktop/git/differential_drive/ros2_ws/coppeliasim_simple_inflated.pgm");
+      image = argInit_UnboundedxUnbounded_uint8_T(image_pgm.rows,image_pgm.cols,image_pgm);
+
+      RCLCPP_INFO(this->get_logger(), "rows: '%i'", image_pgm.rows);
+      RCLCPP_INFO(this->get_logger(), "colums: '%i'", image_pgm.cols);
 
       // Call the entry-point 'planning_fun'.
       //argInit_1x6_real_T(dv);
       // Initialize function input argument 'state_robot'.
-      dv[0] = 0;
-      dv[1] = 0;
+      dv[0] = 0 + 1.03;
+      dv[1] = 0 + 1.46;
       dv[2] = 0;
       dv[3] = 0;
       dv[4] = 0;
@@ -188,15 +233,15 @@ class MinimalSubscriber : public rclcpp::Node
 
 
       for(int j = 0; j < size_path/6; j++) {
-        RCLCPP_INFO(this->get_logger(), "#########");
+        //RCLCPP_INFO(this->get_logger(), "#########");
         //double value = final_path.at(j);
-        RCLCPP_INFO(this->get_logger(), "X: '%f'", final_path[j]);
-        RCLCPP_INFO(this->get_logger(), "Y: '%f'", final_path[(size_path/6) + j]);
+        //RCLCPP_INFO(this->get_logger(), "X: '%f'", final_path[j]);
+        //RCLCPP_INFO(this->get_logger(), "Y: '%f'", final_path[(size_path/6) + j]);
         //RCLCPP_INFO(this->get_logger(), "Y: '%f'", final_path[j]);
 
         //to plot path
-        poseStamped.pose.position.x = final_path[j];
-        poseStamped.pose.position.y = final_path[(size_path/6) + j];
+        poseStamped.pose.position.x = final_path[j] - 1.03;
+        poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.46;
         poseStamped.header.frame_id = "odom";
 
         gui_path.poses[j] = poseStamped;
@@ -206,11 +251,15 @@ class MinimalSubscriber : public rclcpp::Node
 
       publisher_->publish(gui_path);
 
+      planning_fun_terminate();
+
 
 
 
     }
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr subscription_;
+    //rclcpp::Subscription<tf2_msgs::msg::PoseStamped>::SharedPtr subscription_TF;
+    
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr publisher_;
 };
 
