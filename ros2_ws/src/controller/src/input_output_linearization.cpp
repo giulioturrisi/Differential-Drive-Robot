@@ -91,15 +91,17 @@ class MinimalSubscriber : public rclcpp::Node
             RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
             
             double dt = 0.1;
-            double k1 = 10;
+            double k1 = 1;
 
             //input-output lin
             //double x_vel = (near_node(1) - path(d - 1,1))/dt;
             //double y_vel = (near_node(2) - path(d - 1,2))/dt;
-            //double u1_io = k1*(reference.x - state.x);// + x_vel;
-            double u1_io = k1*(1 - state.x);
-            //double u2_io = k1*(reference.y - state.y);// + y_vel;
-            double u2_io = k1*(0 - state.y);// + y_vel;
+            double u1_io = k1*(reference.x - state.x);// + x_vel;
+            //double u1_io = k1*(1 - state.x);
+            double u2_io = k1*(reference.y - state.y);// + y_vel;
+            RCLCPP_INFO(this->get_logger(), "u1 '%f'", u1_io);
+            RCLCPP_INFO(this->get_logger(), "u2 '%f'", u2_io);
+            //double u2_io = k1*(0 - state.y);// + y_vel;
             double v = cos(yaw)*u1_io + sin(yaw)*u2_io;
             double w = -sin(yaw)*u1_io/0.01 + cos(yaw)*u2_io/0.01;
 

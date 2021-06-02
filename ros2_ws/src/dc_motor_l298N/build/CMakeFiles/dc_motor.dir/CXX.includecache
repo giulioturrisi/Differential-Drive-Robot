@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ubuntu/Desktop/dc_motor_l298N/rotary_encoder.cpp
+iostream
+-
+pigpio.h
+-
+rotary_encoder.hpp
+/home/ubuntu/Desktop/dc_motor_l298N/rotary_encoder.hpp
+
+/home/ubuntu/Desktop/dc_motor_l298N/rotary_encoder.hpp
+stdint.h
+-
+
+/home/ubuntu/Desktop/dc_motor_l298N/test.cpp
+iostream
+-
+sstream
+-
+fstream
+-
+vector
+-
+pigpio.h
+-
+rotary_encoder.hpp
+/home/ubuntu/Desktop/dc_motor_l298N/rotary_encoder.hpp
+chrono
+-
+unistd.h
+-
+cmath
+-
+
