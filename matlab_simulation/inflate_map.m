@@ -39,4 +39,4 @@ for i = 1:size_image(1)
 
 end
 
-imwrite(image,'coppeliasim_simple_inflated.pgm','pgm')
+imwrite(image,'coppeliasim_simple_inflated2.pgm','pgm','Encoding','ASCII')

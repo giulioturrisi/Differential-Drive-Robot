@@ -22,6 +22,7 @@ for j = 1:maxIter
         break;
     end
 end
+%if not finish, i should take the nearest point
 
 final_path = path(1:size_path+1,:);
 end

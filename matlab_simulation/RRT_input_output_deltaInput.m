@@ -50,7 +50,7 @@ classdef RRT_input_output_deltaInput < handle
             %   Detailed explanation goes here
             x = new_node(1);
             y = new_node(2);
-            if((x - obj.goal(1))^2 < 0.2 & (y - obj.goal(2))^2 < 0.2)
+            if((x - obj.goal(1))^2 < 0.01 & (y - obj.goal(2))^2 < 0.01)
                 finish = 1;
             else
                 finish = 0;

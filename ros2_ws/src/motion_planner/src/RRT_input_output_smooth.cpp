@@ -178,8 +178,23 @@ class MinimalSubscriber : public rclcpp::Node
       goal_tmp[0] = msg->pose.position.x;
       goal_tmp[1] = msg->pose.position.y;
 
-      goal_tmp[0] = goal_tmp[0] + 1.03;
-      goal_tmp[1] = goal_tmp[1] + 1.46;
+      //goal_tmp[0] = goal_tmp[0] + 1.03;
+      //goal_tmp[1] = goal_tmp[1] + 1.46;
+      
+      //goal_tmp[1] = goal_tmp[1] - 1.46;
+
+      double temp_x = goal_tmp[0];
+      double temp_y = goal_tmp[1];
+
+      goal_tmp[0] = -temp_y;
+      goal_tmp[1] = temp_x;
+      
+      //goal_tmp[0] = goal_tmp[0] + 1.03;
+      //goal_tmp[1] = goal_tmp[1] + 1.46;
+
+      goal_tmp[0] = goal_tmp[0] + 1.46;
+      goal_tmp[1] = goal_tmp[1] + 1.03;
+
       //goal_tmp[0] = 2;
       //goal_tmp[1] = 2;
       if(goal_tmp[0] > limit_tmp[0])
@@ -199,7 +214,7 @@ class MinimalSubscriber : public rclcpp::Node
 
 
       // Initialize function input argument 'image'.
-      struct table image_pgm = pgm_imread("/mnt/c/Users/giuli/Desktop/git/differential_drive/ros2_ws/coppeliasim_simple_inflated.pgm");
+      struct table image_pgm = pgm_imread("/mnt/c/Users/giuli/Desktop/git/differential_drive/ros2_ws/coppeliasim_simple_inflated2.pgm");
       image = argInit_UnboundedxUnbounded_uint8_T(image_pgm.rows,image_pgm.cols,image_pgm);
 
       RCLCPP_INFO(this->get_logger(), "rows: '%i'", image_pgm.rows);
@@ -208,8 +223,11 @@ class MinimalSubscriber : public rclcpp::Node
       // Call the entry-point 'planning_fun'.
       //argInit_1x6_real_T(dv);
       // Initialize function input argument 'state_robot'.
-      dv[0] = 0 + 1.03;
-      dv[1] = 0 + 1.46;
+      //dv[0] = 0 + 1.03;
+      //dv[1] = 0 + 1.46;
+
+      dv[0] = 0 + 1.46;
+      dv[1] = 0 + 1.03;
       dv[2] = 0;
       dv[3] = 0;
       dv[4] = 0;
@@ -240,8 +258,23 @@ class MinimalSubscriber : public rclcpp::Node
         //RCLCPP_INFO(this->get_logger(), "Y: '%f'", final_path[j]);
 
         //to plot path
-        poseStamped.pose.position.x = final_path[j] - 1.03;
-        poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.46;
+        //poseStamped.pose.position.x = final_path[j] - 1.03;
+        //poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.46;
+
+        poseStamped.pose.position.x = final_path[j] - 1.46;
+        poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.03;
+
+        //to rotate!
+        temp_x = poseStamped.pose.position.x;
+        temp_y = poseStamped.pose.position.y;
+
+        poseStamped.pose.position.x = temp_y;
+        poseStamped.pose.position.y = -temp_x;
+
+        RCLCPP_INFO(this->get_logger(), "X: '%f'", poseStamped.pose.position.x);
+        RCLCPP_INFO(this->get_logger(), "Y: '%f'", poseStamped.pose.position.y);
+
+
         poseStamped.header.frame_id = "odom";
 
         gui_path.poses[j] = poseStamped;

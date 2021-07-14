@@ -5,7 +5,7 @@ state_robot = [1 1 0 0 0 0];
 dt = 0.1;
 
 %image = imread('map.pgm');
-image = imread('coppeliasim_simple.pgm');
+image = imread('coppeliasim_simple_inflated.pgm');
 imageNorm = double(image)/255;
 imageOccupancy = 1 - imageNorm;
 map = occupancyMap(imageOccupancy,20);
@@ -52,8 +52,9 @@ R = 10;
 %         break;
 %     end
 % end
-
-path = planning_fun(state_robot,dt,[3,3],[2,2],image,resolution,1000)
+goal = [3.291794,0];
+goal = [1.5,0.5];
+path = planning_fun(state_robot,dt,[3,3],goal,image,resolution,1000)
 
 
 
@@ -82,6 +83,16 @@ size_path = size(path);
 %grey to rgb mab
 rgbImage = cat(3, image, image, image);
 
+%START
+rgbImage(int16(state_robot(1)*scale),int16(state_robot(2)*scale),1) = 0;
+rgbImage(int16(state_robot(1)*scale),int16(state_robot(2)*scale),2) = 255;
+rgbImage(int16(state_robot(1)*scale),int16(state_robot(2)*scale),3) = 0;
+
+%GOAL
+rgbImage(int16(goal(1)*scale),int16(goal(2)*scale),1) = 255;
+rgbImage(int16(goal(1)*scale),int16(goal(2)*scale),2) = 0;
+rgbImage(int16(goal(1)*scale),int16(goal(2)*scale),3) = 0;
+
 %main loop control
 for d = 2:size_path(1)-1
     if(d == size_path(1))
@@ -105,8 +116,8 @@ for d = 2:size_path(1)-1
     %se lo voglio lineare
     u2 = -k2*e2 - k3*e3;
     
-    v = near_node(5)*cos(e3) - u1
-    w = near_node(6) - u2
+    v = near_node(5)*cos(e3) - u1;
+    w = near_node(6) - u2;
     
     %if(isnan(v))
     %    disp("stop")
@@ -122,6 +133,8 @@ for d = 2:size_path(1)-1
     v = cos(state_robot(3))*u1_io + sin(state_robot(3))*u2_io;
     w = -sin(state_robot(3))*u1_io/0.01 + cos(state_robot(3))*u2_io/0.01;
     
+
+    
     
     %integration
     state_robot(1) = state_robot(1) + v*cos(state_robot(3))*dt;
@@ -136,10 +149,10 @@ for d = 2:size_path(1)-1
     %y = state_robot(2);
     radius = 0.15;
     
-    rgbImage = insertShape(rgbImage,'circle',[int16(near_node(2)*scale) int16(near_node(1)*scale) radius],'LineWidth',2, 'Color', 'blue');
-    rgbImage(int16(x*scale),int16(y*scale),1) = 255;
+    %rgbImage = insertShape(rgbImage,'circle',[int16(near_node(2)*scale) int16(near_node(1)*scale) radius],'LineWidth',1, 'Color', 'blue');
+    rgbImage(int16(x*scale),int16(y*scale),1) = 0;
     rgbImage(int16(x*scale),int16(y*scale),2) = 0;
-    rgbImage(int16(x*scale),int16(y*scale),3) = 0;
+    rgbImage(int16(x*scale),int16(y*scale),3) = 255;
     
     
     
@@ -151,5 +164,6 @@ plot(path(:,1),path(:,2));
 hold on;
 plot(real_robot(:,1),real_robot(:,2))
 
+figure();
 J = imrotate(rgbImage,90);
 imshow(J);

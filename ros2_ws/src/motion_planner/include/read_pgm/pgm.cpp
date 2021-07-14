@@ -42,6 +42,7 @@ table pgm_imread(char *argv)			//reads pgm image
 	while (infile.peek()=='#')
         	infile.getline(line,80); 	//read all the comments and oomit them.
 	infile >> cols >> rows >> maxintensity;	//read the no of coloumns rows and pixel intensity
+	cout << "n col: " << cols << " m row: " << rows << " max intensity: "<< maxintensity << endl;
 	data = new int* [cols];		//memory allocation
 	if (!data)
 		{
@@ -64,17 +65,20 @@ table pgm_imread(char *argv)			//reads pgm image
 			{
          	        infile>>p5read;
 			data[i][j] = (int)p5read;
+			cout << "reading: " << (int)p5read << " at col: " << i << " and row: "<< j << endl;
 			}
 	        }
 	else if(imagetype == 2)			//ASCII image mode
 		{
-		buffer << infile.rdbuf();
+		//buffer << infile.rdbuf();
 		for (int i=0;i<cols;i++)
        			{
        			 for (int j=0;j<rows;j++)
 				{
-       			        buffer>>p2read;
+       			//buffer>>p2read;
+				infile >> p2read;
 				data[i][j] = p2read;
+				cout << "reading: " << p2read << " at col: " << i << " and row: "<< j << endl;
 				}
        			 }
 		}
