@@ -1,13 +1,16 @@
 - to compile:
 
-move the folder driver_motor dc_motor_l298N outside momentaneously*
-*they are only for usage with the Raspberry/real robot
+1) move the folder driver_motor dc_motor_l298N outside, they are only for usage with the Raspberry/real robot
 
-rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
-export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
-ulimit -s unlimited #otherwise compilation might freeze/crash
-colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+2) add geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in simExtROS2/meta/interfaces.txt 
 
+3) rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
+
+4) export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
+
+5) ulimit -s unlimited #otherwise compilation might freeze/crash
+
+6) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 
 - to run:
