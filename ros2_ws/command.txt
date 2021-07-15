@@ -1,11 +1,16 @@
-to compile:
+- to compile:
+
+move the folder driver_motor dc_motor_l298N outside momentaneously*
+*they are only for usage with the Raspberry/real robot
 
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro <ros2-distro>
 export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
 ulimit -s unlimited #otherwise compilation might freeze/crash
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
-to run:
+
+
+- to run:
 
 ros2 run rviz2 rviz2
 
