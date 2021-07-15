@@ -1,3 +1,12 @@
+to compile:
+
+rosdep install -y -r -q --from-paths src --ignore-src --rosdistro <ros2-distro>
+export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
+ulimit -s unlimited #otherwise compilation might freeze/crash
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+to run:
+
 ros2 run rviz2 rviz2
 
 ros2 launch slam_toolbox online_sync_launch.py
