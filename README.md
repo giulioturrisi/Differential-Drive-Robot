@@ -4,17 +4,17 @@
 # Overview
 This repo contains the code for controlling both a real and a simulated differential drive robot via Ros2. It includes the following packages:
 
-1. matlab_simulation contains: ```inflate_map.m``` to inflate an existing map with the size of the robot, ```RRT_input_output_deltaInput.m``` to generate a path for a single integrator within this map, ```RRT_primitives.m``` to generate a path considering the kinematic of the differential drive, ```main.m``` to test the planners and controllers.
+1. matlab_simulation contains: ```inflate_map.m``` to inflate an existing map with the size of the robot, ```RRT_input_output_deltaInput.m``` to generate a path for a simple integrator, ```RRT_primitives.m``` to generate a path considering the kinematic of the differential drive, ```main.m``` to test the planners and controllers.
  
 2. coppeliasim_simulation contains the scenes used for simulating the robot (dynamically enabled or not)
 
-3. ros2_ws contains: ```teleop_tools``` to teleoperate the robot via the keyboard, ```motion_planner``` that generates a path to an user specified goal, ```controller``` to make the robot follow the given path, ```slam_toolbox``` to generate a map using [slam](https://github.com/SteveMacenski/slam_toolbox), ```navigation2``` which contains some dependencies for slam [nav](https://github.com/ros-planning/navigation2), ```simExtROS2``` and ```ros2_bubble_rob``` which are used to use Ros2 in CoppeliaSim.
+3. ros2_ws contains: ```teleop_tools``` to teleoperate the robot via the keyboard, ```motion_planner``` that generates a path to a goal, ```controller``` to make the robot follow the given path, ```slam_toolbox``` to generate a map ([slam](https://github.com/SteveMacenski/slam_toolbox)), ```navigation2``` which contains some dependencies for slam ([nav](https://github.com/ros-planning/navigation2)), ```simExtROS2``` and ```ros2_bubble_rob``` which are used to use Ros2 in CoppeliaSim.
 
  
 ## Dependencies
-1. *ROS2:* Build and install ROS2 Foxy [Ros2](https://docs.ros.org/en/foxy/index.html)
+1. [Ros2](https://docs.ros.org/en/foxy/Installation.html) Foxy
 
-2. *CoppeliaSim:* For simulations [CoppeliaSim](https://www.coppeliarobotics.com/downloads)
+2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations
 
 It is necessary to add the following corresponding `Env` variables in the `.bashrc` or `.bash_profile` the following line:
 ```sh
@@ -25,7 +25,7 @@ export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
 See how to edit system `Env` variables in `Windows` [here](https://appuals.com/how-to-edit-environment-variables-in-windows-10) 
 
 
-## Linux
+## Build
 1. 
 ```sh
 git clone --recurse-submodules https://github.com/giulioturrisi/differential_drive.git
