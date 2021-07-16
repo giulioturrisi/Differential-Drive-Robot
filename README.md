@@ -22,10 +22,7 @@ export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
 ```
 
 
-See how to edit system `Env` variables in `Windows` [here](https://appuals.com/how-to-edit-environment-variables-in-windows-10) 
-
-
-## Build
+## Build on Linux
 1. 
 ```sh
 git clone --recurse-submodules https://github.com/giulioturrisi/differential_drive.git
@@ -48,9 +45,6 @@ ulimit -s unlimited
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
-
-## Windows
-Under construction
 
 ## How to run the simulation
 1. 
