@@ -1,6 +1,3 @@
-# Differential Drive
-
-
 ## Overview
 This repo contains the code for controlling both a real and a simulated differential drive robot via Ros2. It includes the following packages:
 
@@ -12,7 +9,7 @@ This repo contains the code for controlling both a real and a simulated differen
 
  
 ## Dependencies
-1. [Ros2](https://docs.ros.org/en/foxy/Installation.html) Foxy
+1. [ROS2](https://docs.ros.org/en/foxy/Installation.html) Foxy
 
 2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations
 
@@ -47,18 +44,15 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 
 ## How to run the simulation
-1. 
-Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation
+1. Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation
 
-2.  
-open a new terminals 
+2. open a new terminals 
 ```sh
 run ros2 run rviz2 rviz2 
 ros2 run motion_planner RRT_input_output_smooth
 ros2 run controller input_output_linearization
 ```
 
-3. 
-you can choose a goal pose in Rviz2 clicking 2D Goal Pose
+3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
 
 
