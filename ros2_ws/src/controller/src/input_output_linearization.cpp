@@ -34,7 +34,7 @@ class MinimalSubscriber : public rclcpp::Node
       "tf", 1, std::bind(&MinimalSubscriber::controller_callback, this, _1));
       
       publisher_command = this->create_publisher<geometry_msgs::msg::Twist>(
-      "key_vel", 1);
+      "cmd_vel", 1);
 
       RCLCPP_INFO(this->get_logger(), "Node started");
       
