@@ -5,6 +5,7 @@ RRT = RRT_input_output_deltaInput(state_robot,dt,limit,goal,image,resolution,max
 path = state_robot;
 size_path = 1;
 %RRT loop
+finish = 0;
 for j = 1:maxIter
     j;
     desired_node = RRT.sample();
@@ -23,7 +24,10 @@ for j = 1:maxIter
     end
 end
 %if not finish, i should take the nearest point
-
+if(finish == 0)
+    near_index = RRT.find_nearest([goal 0 0 0 0])
+    [path,size_path] = RRT.take_path(near_index);
+end
 final_path = path(1:size_path+1,:);
 end
 

@@ -4,3 +4,7 @@ ros2_ws/build/
 ros2_ws/install/
 
 ros2_ws/log/
+
+matlab_simulation/codegen/
+
+matlab_simulation/planning_fun.prj

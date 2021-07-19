@@ -5,7 +5,7 @@
 // File: planning_fun.h
 //
 // MATLAB Coder version            : 5.1
-// C/C++ source code generated on  : 22-May-2021 11:59:19
+// C/C++ source code generated on  : 19-Jul-2021 23:22:17
 //
 #ifndef PLANNING_FUN_H
 #define PLANNING_FUN_H
@@ -18,8 +18,8 @@
 
 // Function Declarations
 extern void planning_fun(const double state_robot[6], double dt, const double
-  limit[2], const double goal[2], const coder::array<unsigned char, 2U> &image,
-  double resolution, double maxIter, coder::array<double, 2U> &final_path);
+  limit[2], const double goal[2], const coder::array<double, 2U> &image, double
+  resolution, double maxIter, coder::array<double, 2U> &final_path);
 
 #endif
 

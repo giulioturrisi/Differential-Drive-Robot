@@ -5,7 +5,7 @@
 // File: RRT_input_output_deltaInput.cpp
 //
 // MATLAB Coder version            : 5.1
-// C/C++ source code generated on  : 22-May-2021 11:59:19
+// C/C++ source code generated on  : 19-Jul-2021 23:22:17
 //
 
 // Include Files
@@ -13,6 +13,7 @@
 #include "rand.h"
 #include "coder_array.h"
 #include <cmath>
+#include <iostream>
 
 // Function Declarations
 static double rt_roundd_snf(double u);
@@ -61,6 +62,44 @@ void RRT_input_output_deltaInput::add_nodes(const double new_node[6])
 //
 // METHOD1 Summary of this method goes here
 //    Detailed explanation goes here
+// Arguments    : const double new_node[6]
+// Return Type  : double
+//
+double RRT_input_output_deltaInput::b_find_nearest(const double new_node[6])
+  const
+{
+  double node[6];
+  double best_distance;
+  double near_index;
+  int i;
+
+  // number_of_nodes = size(obj.nodes);
+  // number_of_nodes = number_of_nodes(1);
+  near_index = 1.0;
+  best_distance = 10000.0;
+  i = static_cast<int>(this->numberIter);
+  for (int b_k = 0; b_k < i; b_k++) {
+    double distance;
+    for (int i1 = 0; i1 < 6; i1++) {
+      node[i1] = this->nodes[b_k + this->nodes.size(0) * i1];
+    }
+
+    double a;
+    distance = node[0] - new_node[0];
+    a = node[1] - new_node[1];
+    distance = std::sqrt((distance * distance + a * a) + 0.0 * (node[2] * node[2]));
+    if (distance < best_distance) {
+      best_distance = distance;
+      near_index = static_cast<double>(b_k) + 1.0;
+    }
+  }
+
+  return near_index;
+}
+
+//
+// METHOD1 Summary of this method goes here
+//    Detailed explanation goes here
 // Arguments    : const double node_to_check[6]
 // Return Type  : double
 //
@@ -68,10 +107,23 @@ double RRT_input_output_deltaInput::check_collision(const double node_to_check[6
   const
 {
   double d;
-  double good;
   double scale;
   short i;
+  short i1;
   scale = 1.0 / this->resolution;
+
+  // top = [int16(x*scale), int16((y + radius)*scale)];
+  // bottom = [int16(x*scale), int16((y - radius)*scale)];
+  // left = [int16((x - radius)*scale), int16(y*scale)];
+  // right = [int16((x + radius)*scale), int16(y*scale)];
+  // if(int16(x*scale) < 1 | int16(y*scale) < 1)
+  //     good = 0;
+  // elseif(abs(x) > (obj.map_limit(1)*scale - 5) | abs(y) > (obj.map_limit(2)*scale - 5)) 
+  //     good = 0;
+  // elseif(obj.map(top(1),top(2)) < 250 | obj.map(bottom(1),bottom(2)) < 250 | obj.map(left(1),left(2)) < 250 | obj.map(right(1),right(2)) < 250) 
+  //     good = 0;
+  // elseif(obj.map(int16(x*scale),int16(y*scale)) < 250)
+
   d = rt_roundd_snf(node_to_check[0] * scale);
   if (d < 32768.0) {
     if (d >= -32768.0) {
@@ -85,65 +137,30 @@ double RRT_input_output_deltaInput::check_collision(const double node_to_check[6
     i = 0;
   }
 
-  if (i < 1) {
-    good = 0.0;
+  //std::cout << "i am checking x " << node_to_check[0] <<  "and y " << node_to_check[1] << std::endl;
+  d = rt_roundd_snf(node_to_check[1] * scale);
+  if (d < 32768.0) {
+    if (d >= -32768.0) {
+      i1 = static_cast<short>(d);
+    } else {
+      i1 = MIN_int16_T;
+    }
+  } else if (d >= 32768.0) {
+    i1 = MAX_int16_T;
   } else {
-    double d1;
-    d1 = rt_roundd_snf(node_to_check[1] * scale);
-    if (d1 < 32768.0) {
-      if (d1 >= -32768.0) {
-        i = static_cast<short>(d1);
-      } else {
-        i = MIN_int16_T;
-      }
-    } else if (d1 >= 32768.0) {
-      i = MAX_int16_T;
-    } else {
-      i = 0;
-    }
-
-    if (i < 1) {
-      good = 0.0;
-    } else if ((std::abs(node_to_check[0]) > this->map_limit[0] * scale - 5.0) ||
-               (std::abs(node_to_check[1]) > this->map_limit[1] * scale - 5.0))
-    {
-      good = 0.0;
-
-      // elseif(obj.map(top(1),top(2)) < 250 | obj.map(bottom(1),bottom(2)) < 250 | obj.map(left(1),left(2)) < 250 | obj.map(right(1),right(2)) < 250) 
-      //     good = 0;
-    } else {
-      short i1;
-      if (d < 32768.0) {
-        if (d >= -32768.0) {
-          i = static_cast<short>(d);
-        } else {
-          i = MIN_int16_T;
-        }
-      } else if (d >= 32768.0) {
-        i = MAX_int16_T;
-      } else {
-        i = 0;
-      }
-
-      if (d1 < 32768.0) {
-        if (d1 >= -32768.0) {
-          i1 = static_cast<short>(d1);
-        } else {
-          i1 = MIN_int16_T;
-        }
-      } else if (d1 >= 32768.0) {
-        i1 = MAX_int16_T;
-      } else {
-        i1 = 0;
-      }
-
-      good = (this->map[(i + this->map.size(0) * (i1 - 1)) - 1] >= 250);
-    }
+    i1 = 0;
   }
+  //std::cout << "la cui conversione è x " << i <<  "and y " << i1 << std::endl;
+
+  //std::cout << "is good " << (this->map[(i + this->map.size(0) * (i1 - 1)) - 1] > 90) << "with value " << this->map[(i + this->map.size(0) * (i1 - 1)) - 1] << std::endl;
+  if(this->map[(i + this->map.size(0) * (i1 - 1)) - 1] > 90 )
+    return 1;
+  else
+    return 0;
+  //return !(this->map[(i + this->map.size(0) * (i1 - 1)) - 1] < 250.0);
 
   // end methods
   // end class
-  return good;
 }
 
 //
@@ -157,9 +174,9 @@ double RRT_input_output_deltaInput::check_goal(const double new_node[6]) const
   double a;
   double finish;
   a = new_node[0] - this->goal[0];
-  if (a * a < 0.05) {
+  if (a * a < 0.01) {
     a = new_node[1] - this->goal[1];
-    if (a * a < 0.05) {
+    if (a * a < 0.01) {
       finish = 1.0;
     } else {
       finish = 0.0;
@@ -253,15 +270,15 @@ double RRT_input_output_deltaInput::find_nearest(const double new_node[3]) const
 //                double sampling_time
 //                const double limit[2]
 //                const double b_goal[2]
-//                const coder::array<unsigned char, 2U> &b_map
+//                const coder::array<double, 2U> &b_map
 //                double b_resolution
 //                double b_maxIter
 // Return Type  : RRT_input_output_deltaInput *
 //
 RRT_input_output_deltaInput *RRT_input_output_deltaInput::init(const double
   initial_state[6], double sampling_time, const double limit[2], const double
-  b_goal[2], const coder::array<unsigned char, 2U> &b_map, double b_resolution,
-  double b_maxIter)
+  b_goal[2], const coder::array<double, 2U> &b_map, double b_resolution, double
+  b_maxIter)
 {
   RRT_input_output_deltaInput *obj;
   int i;
@@ -282,6 +299,7 @@ RRT_input_output_deltaInput *RRT_input_output_deltaInput::init(const double
   loop_ub = b_map.size(0) * b_map.size(1);
   for (i = 0; i < loop_ub; i++) {
     obj->map[i] = b_map[i];
+    //std::cout << "loading file " << obj->map[i] << std::endl;
   }
 
   obj->k[0] = 0.477;
@@ -349,6 +367,13 @@ void RRT_input_output_deltaInput::take_path(double b_index, coder::array<double,
       - 1];
   }
 
+  double scale = 1.0 / this->resolution;
+  double d = rt_roundd_snf(parent[0] * scale);
+  double d1 = rt_roundd_snf(parent[1] * scale);
+  std::cout << "node at " << parent[0] << " " << parent[1] << "the final value is " << this->map[(d + this->map.size(0) * (d1 - 1)) - 1] << std::endl;
+  
+  
+
   path.set_size((static_cast<int>(this->maxIter)), 6);
   loop_ub = static_cast<int>(this->maxIter) * 6;
   for (i = 0; i < loop_ub; i++) {
@@ -375,6 +400,11 @@ void RRT_input_output_deltaInput::take_path(double b_index, coder::array<double,
       parent[i] = d;
       path[loop_ub + path.size(0) * i] = d;
     }
+
+    d = rt_roundd_snf(parent[0] * scale);
+    d1 = rt_roundd_snf(parent[1] * scale);
+    std::cout << "node at " << parent[0] << " " << parent[1] << "the final value is " << this->map[(d + this->map.size(0) * (d1 - 1)) - 1] << std::endl;
+  
 
     (*size_path)++;
     loop_ub++;

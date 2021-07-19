@@ -5,7 +5,7 @@ state_robot = [1 1 0 0 0 0];
 dt = 0.1;
 
 %image = imread('map.pgm');
-image = imread('coppeliasim_simple_inflated.pgm');
+image = imread('coppeliasim_simple.pgm');
 imageNorm = double(image)/255;
 imageOccupancy = 1 - imageNorm;
 map = occupancyMap(imageOccupancy,20);
@@ -54,7 +54,9 @@ R = 10;
 % end
 goal = [3.291794,0];
 goal = [1.5,0.5];
-path = planning_fun(state_robot,dt,[3,3],goal,image,resolution,1000)
+map_limit = [3,3];
+max_iteration = 1000;
+path = planning_fun(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 
 
 

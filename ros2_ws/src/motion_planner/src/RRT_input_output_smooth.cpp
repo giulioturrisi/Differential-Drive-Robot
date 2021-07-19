@@ -127,7 +127,7 @@ static unsigned char argInit_uint8_T()
 
 
 //global stuff to save a map receviced from the topic /map
-coder::array<unsigned char, 2U> image;
+coder::array<double, 2U> image;
 
 class MinimalSubscriber : public rclcpp::Node
 {
@@ -171,7 +171,7 @@ class MinimalSubscriber : public rclcpp::Node
       //dt_tmp = argInit_real_T();
       
       dt_tmp = 0.1;
-      maxIter = 10000;
+      maxIter = 100000;
       resolution = 0.05;
 
       // Initialize function input argument 'limit'.
@@ -239,6 +239,7 @@ class MinimalSubscriber : public rclcpp::Node
       
       auto poseStamped = geometry_msgs::msg::PoseStamped();
       for(int j = 0; j < size_path/6; j++) {
+        std::cout << "path X: " << final_path[j] << " Y: " << final_path[(size_path/6) + j] << std::endl;
         poseStamped.pose.position.x = final_path[j] - 1.46;
         poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.03;
 
@@ -248,8 +249,10 @@ class MinimalSubscriber : public rclcpp::Node
         poseStamped.pose.position.x = temp_y;
         poseStamped.pose.position.y = -temp_x;
 
-        RCLCPP_INFO(this->get_logger(), "X: '%f'", poseStamped.pose.position.x);
-        RCLCPP_INFO(this->get_logger(), "Y: '%f'", poseStamped.pose.position.y);
+        //std::cout << "path X: " << poseStamped.pose.position.x << " Y: " << poseStamped.pose.position.y << std::endl;
+
+        //RCLCPP_INFO(this->get_logger(), "X: '%f'", poseStamped.pose.position.x);
+        //RCLCPP_INFO(this->get_logger(), "Y: '%f'", poseStamped.pose.position.y);
 
         poseStamped.header.frame_id = "odom";
         gui_path.poses[j] = poseStamped;   
@@ -268,11 +271,17 @@ class MinimalSubscriber : public rclcpp::Node
       int rows = msg->info.height;
       int cols = msg->info.width;
       image.set_size(1,rows*cols);
-
+      int d = 0;
       for (int i = 0; i < rows*cols; i++) {
-        //std::cout << "reading from MAP " << (int) msg->data[i] << std::endl;
-        image[i] = (unsigned char) msg->data[i];
-        //std::cout << "reading MATLAB " <<  (int) image[i] << std::endl;
+        //for(int j = 0; j < cols;j++) {
+          //std::cout << "reading MAP " <<  (int) msg->data[i] << std::endl;
+          if((int) msg->data[i] < 0)
+            image[i] = (double) 91.0;
+          else
+            image[i] = (double) msg->data[i];
+          d++;
+          //std::cout << "reading MATLAB " <<  image[i] << std::endl;
+        //}
       }
   
     }

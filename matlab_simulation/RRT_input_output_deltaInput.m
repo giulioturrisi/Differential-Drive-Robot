@@ -163,17 +163,18 @@ classdef RRT_input_output_deltaInput < handle
 
             scale = 1/obj.resolution;
             
-            top = [int16(x*scale), int16((y + radius)*scale)];
-            bottom = [int16(x*scale), int16((y - radius)*scale)];
-            left = [int16((x - radius)*scale), int16(y*scale)];
-            right = [int16((x + radius)*scale), int16(y*scale)];
-            if(int16(x*scale) < 1 | int16(y*scale) < 1)
-                good = 0;
-            elseif(abs(x) > (obj.map_limit(1)*scale - 5) | abs(y) > (obj.map_limit(2)*scale - 5))
-                good = 0;
+            %top = [int16(x*scale), int16((y + radius)*scale)];
+            %bottom = [int16(x*scale), int16((y - radius)*scale)];
+            %left = [int16((x - radius)*scale), int16(y*scale)];
+            %right = [int16((x + radius)*scale), int16(y*scale)];
+            %if(int16(x*scale) < 1 | int16(y*scale) < 1)
+            %    good = 0;
+            %elseif(abs(x) > (obj.map_limit(1)*scale - 5) | abs(y) > (obj.map_limit(2)*scale - 5))
+            %    good = 0;
             %elseif(obj.map(top(1),top(2)) < 250 | obj.map(bottom(1),bottom(2)) < 250 | obj.map(left(1),left(2)) < 250 | obj.map(right(1),right(2)) < 250)
             %    good = 0;
-            elseif(obj.map(int16(x*scale),int16(y*scale)) < 250)
+            %elseif(obj.map(int16(x*scale),int16(y*scale)) < 250)
+            if(obj.map(int16(x*scale),int16(y*scale)) < 250)
                 good = 0;
             else
                 good = 1;

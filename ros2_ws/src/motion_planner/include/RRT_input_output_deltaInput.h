@@ -5,7 +5,7 @@
 // File: RRT_input_output_deltaInput.h
 //
 // MATLAB Coder version            : 5.1
-// C/C++ source code generated on  : 22-May-2021 11:59:19
+// C/C++ source code generated on  : 19-Jul-2021 23:22:17
 //
 #ifndef RRT_INPUT_OUTPUT_DELTAINPUT_H
 #define RRT_INPUT_OUTPUT_DELTAINPUT_H
@@ -22,7 +22,7 @@ class RRT_input_output_deltaInput
  public:
   RRT_input_output_deltaInput *init(const double initial_state[6], double
     sampling_time, const double limit[2], const double b_goal[2], const coder::
-    array<unsigned char, 2U> &b_map, double b_resolution, double b_maxIter);
+    array<double, 2U> &b_map, double b_resolution, double b_maxIter);
   void sample(double desired_node[3]) const;
   double find_nearest(const double new_node[3]) const;
   void choose_primitives(double near_index, const double desired_node[3], double
@@ -32,11 +32,12 @@ class RRT_input_output_deltaInput
   double check_goal(const double new_node[6]) const;
   void take_path(double b_index, coder::array<double, 2U> &path, double
                  *size_path) const;
+  double b_find_nearest(const double new_node[6]) const;
   coder::array<double, 2U> nodes;
   double dt;
   double map_limit[2];
   double goal[2];
-  coder::array<unsigned char, 2U> map;
+  coder::array<double, 2U> map;
   double k[2];
   double resolution;
   double maxIter;
