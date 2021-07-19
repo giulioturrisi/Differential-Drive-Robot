@@ -24,7 +24,6 @@ export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
 ```sh
 git clone --recurse-submodules https://github.com/giulioturrisi/differential_drive.git
 cd differential_drive/ros2_ws/src
-mv dc_motor_l298N ./../
 mv driver_motor ./../
 ```
 
@@ -48,6 +47,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 2. open a new terminals 
 ```sh
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
 run ros2 run rviz2 rviz2 
 ros2 run motion_planner RRT_input_output_smooth
 ros2 run controller input_output_linearization
