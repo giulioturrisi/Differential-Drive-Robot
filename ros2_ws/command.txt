@@ -20,3 +20,9 @@ ros2 run rviz2 rviz2
 ros2 launch slam_toolbox online_sync_launch.py
 
 ros2 run key_teleop key_teleop
+
+- to save a map
+ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name:
+  data: 'map'"
+
+ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph

@@ -47,11 +47,14 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 2. open a new terminals 
 ```sh
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
-run ros2 run rviz2 rviz2 
-ros2 run motion_planner RRT_input_output_smooth
-ros2 run controller input_output_linearization
+ros2 run teleop_twist_keyboard teleop_twist_keyboard   (if you want to use the keyboard)
+run ros2 run rviz2 rviz2                               (visualization)
+ros2 run motion_planner RRT_input_output_smooth        (planning)
+ros2 run controller input_output_linearization         (control)
+ros2 launch slam_toolbox localization_launch.py        (localization)
 ```
+in slam_toolbox/congif/mapper_params_localization you should put in map_file_name: simple_walls_map
+
 
 3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
 
