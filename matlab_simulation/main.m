@@ -4,8 +4,8 @@ clear all;
 state_robot = [1 1 0 0 0 0];
 dt = 0.1;
 
-%image = imread('map.pgm');
-image = imread('coppeliasim_simple.pgm');
+image = imread('simple_walls_map.pgm');
+%image = imread('coppeliasim_simple.pgm');
 imageNorm = double(image)/255;
 imageOccupancy = 1 - imageNorm;
 map = occupancyMap(imageOccupancy,20);
@@ -53,7 +53,7 @@ R = 10;
 %     end
 % end
 goal = [3.291794,0];
-goal = [1.5,0.5];
+goal = [1,0];
 map_limit = [3,3];
 max_iteration = 1000;
 path = planning_fun(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
@@ -86,14 +86,14 @@ size_path = size(path);
 rgbImage = cat(3, image, image, image);
 
 %START
-rgbImage(int16(state_robot(1)*scale),int16(state_robot(2)*scale),1) = 0;
-rgbImage(int16(state_robot(1)*scale),int16(state_robot(2)*scale),2) = 255;
-rgbImage(int16(state_robot(1)*scale),int16(state_robot(2)*scale),3) = 0;
+rgbImage(int16(state_robot(1)*scale)+1,int16(state_robot(2)*scale+1),1) = 0;
+rgbImage(int16(state_robot(1)*scale)+1,int16(state_robot(2)*scale+1),2) = 255;
+rgbImage(int16(state_robot(1)*scale)+1,int16(state_robot(2)*scale+1),3) = 0;
 
 %GOAL
-rgbImage(int16(goal(1)*scale),int16(goal(2)*scale),1) = 255;
-rgbImage(int16(goal(1)*scale),int16(goal(2)*scale),2) = 0;
-rgbImage(int16(goal(1)*scale),int16(goal(2)*scale),3) = 0;
+rgbImage(int16(goal(1)*scale)+1,int16(goal(2)*scale+1),1) = 255;
+rgbImage(int16(goal(1)*scale)+1,int16(goal(2)*scale+1),2) = 0;
+rgbImage(int16(goal(1)*scale)+1,int16(goal(2)*scale+1),3) = 0;
 
 %main loop control
 for d = 2:size_path(1)-1
@@ -152,9 +152,9 @@ for d = 2:size_path(1)-1
     radius = 0.15;
     
     %rgbImage = insertShape(rgbImage,'circle',[int16(near_node(2)*scale) int16(near_node(1)*scale) radius],'LineWidth',1, 'Color', 'blue');
-    rgbImage(int16(x*scale),int16(y*scale),1) = 0;
-    rgbImage(int16(x*scale),int16(y*scale),2) = 0;
-    rgbImage(int16(x*scale),int16(y*scale),3) = 255;
+    rgbImage(int16(x*scale)+1,int16(y*scale)+1,1) = 0;
+    rgbImage(int16(x*scale)+1,int16(y*scale)+1,2) = 0;
+    rgbImage(int16(x*scale)+1,int16(y*scale)+1,3) = 255;
     
     
     

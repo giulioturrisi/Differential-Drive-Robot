@@ -123,6 +123,24 @@ static unsigned char argInit_uint8_T()
 }
 
 
+static double rt_roundd_snf(double u)
+{
+  double y;
+  if (std::abs(u) < 4.503599627370496E+15) {
+    if (u >= 0.5) {
+      y = std::floor(u + 0.5);
+    } else if (u > -0.5) {
+      y = u * 0.0;
+    } else {
+      y = std::ceil(u - 0.5);
+    }
+  } else {
+    y = u;
+  }
+
+  return y;
+}
+
 
 
 
@@ -187,10 +205,14 @@ class MinimalSubscriber : public rclcpp::Node
       double temp_y = goal_tmp[1];
       
       //rotation and translation
-      goal_tmp[0] = -temp_y;
-      goal_tmp[1] = temp_x;
-      goal_tmp[0] = goal_tmp[0] + 1.46;
-      goal_tmp[1] = goal_tmp[1] + 1.03;
+      //goal_tmp[0] = -temp_y;
+      //goal_tmp[1] = temp_x;
+      //goal_tmp[0] = goal_tmp[0] + 1.46;
+      //goal_tmp[1] = goal_tmp[1] + 1.03;
+
+
+      goal_tmp[0] = goal_tmp[0] + 1.03;
+      goal_tmp[1] = goal_tmp[1] + 1.46;
 
       //check if inside map limit!
       if(goal_tmp[0] > limit_tmp[0])
@@ -217,12 +239,22 @@ class MinimalSubscriber : public rclcpp::Node
 
 
       //start - to be readed somewhere
-      dv[0] = 0 + 1.46;
-      dv[1] = 0 + 1.03;
+      //dv[0] = 0 + 1.46;
+      //dv[1] = 0 + 1.03;
+
+      dv[0] = 0 + 1.03;
+      dv[1] = 0 + 1.46;
       dv[2] = 0;
       dv[3] = 0;
       dv[4] = 0;
       dv[5] = 0;
+
+      //double scale = 1.0 / resolution;
+      //double d = rt_roundd_snf(goal_tmp[0] * scale);
+      //double d1 = rt_roundd_snf(goal_tmp[1] * scale);
+      //std::cout << "size map lungo x " << image.size(0) << std::endl;
+      //std::cout << "node at " << goal_tmp[0] << " " << goal_tmp[1] << "the final value is " << image[(d + 56 * (d1 - 1*0)) - 1*0] << std::endl;
+      //std::cout << "la cui conversione è x " << d <<  "and y " << d1 << std::endl;
       
       //planning
       planning_fun(dv, dt_tmp, limit_tmp, goal_tmp, image, resolution, maxIter,final_path);
@@ -240,16 +272,21 @@ class MinimalSubscriber : public rclcpp::Node
       auto poseStamped = geometry_msgs::msg::PoseStamped();
       for(int j = 0; j < size_path/6; j++) {
         std::cout << "path X: " << final_path[j] << " Y: " << final_path[(size_path/6) + j] << std::endl;
-        poseStamped.pose.position.x = final_path[j] - 1.46;
-        poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.03;
+        //poseStamped.pose.position.x = final_path[j] - 1.46;
+        //poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.03;
 
         //to rotate!
-        temp_x = poseStamped.pose.position.x;
-        temp_y = poseStamped.pose.position.y;
-        poseStamped.pose.position.x = temp_y;
-        poseStamped.pose.position.y = -temp_x;
+        //temp_x = poseStamped.pose.position.x;
+        //temp_y = poseStamped.pose.position.y;
+        //poseStamped.pose.position.x = temp_y;
+        //poseStamped.pose.position.y = -temp_x;
 
-        //std::cout << "path X: " << poseStamped.pose.position.x << " Y: " << poseStamped.pose.position.y << std::endl;
+        poseStamped.pose.position.x = final_path[j] - 1.03;
+        poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.46;
+
+
+
+        std::cout << "path translated X: " << poseStamped.pose.position.x << " Y: " << poseStamped.pose.position.y << std::endl;
 
         //RCLCPP_INFO(this->get_logger(), "X: '%f'", poseStamped.pose.position.x);
         //RCLCPP_INFO(this->get_logger(), "Y: '%f'", poseStamped.pose.position.y);

@@ -137,7 +137,7 @@ double RRT_input_output_deltaInput::check_collision(const double node_to_check[6
     i = 0;
   }
 
-  //std::cout << "i am checking x " << node_to_check[0] <<  "and y " << node_to_check[1] << std::endl;
+  
   d = rt_roundd_snf(node_to_check[1] * scale);
   if (d < 32768.0) {
     if (d >= -32768.0) {
@@ -150,10 +150,14 @@ double RRT_input_output_deltaInput::check_collision(const double node_to_check[6
   } else {
     i1 = 0;
   }
-  //std::cout << "la cui conversione è x " << i <<  "and y " << i1 << std::endl;
 
+  //std::cout << "i am checking x " << node_to_check[0] <<  "and y " << node_to_check[1] << std::endl;  
+  //std::cout << "la cui conversione è x " << i <<  "and y " << i1 << std::endl;
   //std::cout << "is good " << (this->map[(i + this->map.size(0) * (i1 - 1)) - 1] > 90) << "with value " << this->map[(i + this->map.size(0) * (i1 - 1)) - 1] << std::endl;
-  if(this->map[(i + this->map.size(0) * (i1 - 1)) - 1] > 90 )
+  
+  //giulio-added
+  //if(this->map[(i + this->map.size(0) * (i1 - 1)) - 1] < 10 )
+  if(this->map[(i + 56 * (i1))] < 10 )
     return 1;
   else
     return 0;
@@ -370,7 +374,7 @@ void RRT_input_output_deltaInput::take_path(double b_index, coder::array<double,
   double scale = 1.0 / this->resolution;
   double d = rt_roundd_snf(parent[0] * scale);
   double d1 = rt_roundd_snf(parent[1] * scale);
-  std::cout << "node at " << parent[0] << " " << parent[1] << "the final value is " << this->map[(d + this->map.size(0) * (d1 - 1)) - 1] << std::endl;
+  //std::cout << "node at " << parent[0] << " " << parent[1] << "the final value is " << this->map[(d + this->map.size(0) * (d1 - 1)) - 1] << std::endl;
   
   
 
@@ -401,9 +405,9 @@ void RRT_input_output_deltaInput::take_path(double b_index, coder::array<double,
       path[loop_ub + path.size(0) * i] = d;
     }
 
-    d = rt_roundd_snf(parent[0] * scale);
-    d1 = rt_roundd_snf(parent[1] * scale);
-    std::cout << "node at " << parent[0] << " " << parent[1] << "the final value is " << this->map[(d + this->map.size(0) * (d1 - 1)) - 1] << std::endl;
+    //d = rt_roundd_snf(parent[0] * scale);
+    //d1 = rt_roundd_snf(parent[1] * scale);
+    //std::cout << "node at " << parent[0] << " " << parent[1] << "the final value is " << this->map[(d + this->map.size(0) * (d1 - 1)) - 1] << std::endl;
   
 
     (*size_path)++;
