@@ -156,8 +156,9 @@ double RRT_input_output_deltaInput::check_collision(const double node_to_check[6
   //std::cout << "is good " << (this->map[(i + this->map.size(0) * (i1 - 1)) - 1] > 90) << "with value " << this->map[(i + this->map.size(0) * (i1 - 1)) - 1] << std::endl;
   
   //giulio-added
-  //if(this->map[(i + this->map.size(0) * (i1 - 1)) - 1] < 10 )
-  if(this->map[(i + 56 * (i1))] < 10 )
+  //std::cout << "map size " << this->map.size(0) << std::endl;
+  if(this->map[(i + this->map.size(0) * (i1))] < 10 )
+  //if(this->map[(i + 56 * (i1))] < 10 )
     return 1;
   else
     return 0;

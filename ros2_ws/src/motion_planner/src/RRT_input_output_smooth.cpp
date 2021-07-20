@@ -189,7 +189,7 @@ class MinimalSubscriber : public rclcpp::Node
       //dt_tmp = argInit_real_T();
       
       dt_tmp = 0.1;
-      maxIter = 100000;
+      maxIter = 10000;
       resolution = 0.05;
 
       // Initialize function input argument 'limit'.
@@ -307,7 +307,12 @@ class MinimalSubscriber : public rclcpp::Node
     {
       int rows = msg->info.height;
       int cols = msg->info.width;
-      image.set_size(1,rows*cols);
+
+      //probably should be put in matrix form!!!
+      image.set_size(cols,rows);
+      //and filled accordingly 
+
+      //image.set_size(1,rows*cols);
       int d = 0;
       for (int i = 0; i < rows*cols; i++) {
         //for(int j = 0; j < cols;j++) {
