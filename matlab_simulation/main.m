@@ -1,8 +1,5 @@
 clear all;
-%x y theta x_dot y_dot theta_dot
-%state_robot = [4 10 0 0 0 0];
-state_robot = [1 1 0 0 0 0];
-dt = 0.1;
+close all;
 
 image = imread('simple_walls_map.pgm');
 %image = imread('coppeliasim_simple.pgm');
@@ -12,6 +9,14 @@ map = occupancyMap(imageOccupancy,20);
 resolution = 0.05;
 scale = 1/resolution;
 %N.B 0.0039 è free, sopra tutto occupato o incerto
+
+%x y theta x_dot y_dot theta_dot
+state_robot = [1 1 0 0 0 0];
+dt = 0.1;
+goal = [2,0];
+map_limit = [3,3];
+max_iteration = 1000;
+
 
 %LQR for input-output planning (if used)
 %A = ;
@@ -27,36 +32,14 @@ R = 10;
 [K,S,e] = dlqr(A,B,Q,R);
 
 %RRT choice
+%to check collision between nodes!
 %RRT = RRT_input_output(state_robot,dt,[20,20],[9,5],image);
 %RRT = RRT_input_output_deltaInput(state_robot,dt,[20,20],[9,5],image);
 %RRT = RRT_primitives(state_robot,dt,[20,20],[10,4],image);
 
 
-% RRT = RRT_input_output_deltaInput(state_robot,dt,[3,3],[2,2],image,resolution);
-% 
-% %RRT loop
-% for j = 1:100000
-%     j
-%     desired_node = RRT.sample();
-%     near_index = RRT.find_nearest(desired_node);
-%     new_node = RRT.choose_primitives(near_index,desired_node);
-%     %%check collision
-%     good = RRT.check_collision(new_node);
-%     if(good == 1)
-%         RRT.add_nodes(new_node);
-%     end
-%     finish = RRT.check_goal(new_node);
-%     
-%     if(finish == 1)
-%         path = RRT.take_path(new_node(4));
-%         break;
-%     end
-% end
-goal = [3.291794,0];
-goal = [1,0];
-map_limit = [3,3];
-max_iteration = 1000;
-path = planning_fun(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
+%path = planning_fun(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
+path = planning_fun_star(state_robot,dt,[3,3],goal,image,resolution,max_iteration*2)
 
 
 
@@ -69,13 +52,23 @@ state_robot(2) = state_robot(2);% - 0.1;
 state_robot(3) = state_robot(3);% + 0.8;
 real_robot = [state_robot(1),state_robot(2),state_robot(3)];
 
-%augment path for bigger control_dt
+%save path before spline
+path_x = fliplr(path(:,1)');
+path_y = fliplr(path(:,2)');
+path_theta = fliplr(path(:,3)');
+path_v = fliplr(path(:,5)');
+path_w = fliplr(path(:,6)');
+old_path = [path_x' path_y' path_theta' path_theta' path_v' path_w'];
+%old_path = path;
+size_path = size(old_path);
+
+%spline
 size_path = size(path);
-control_dt = 0.01;
+control_dt = 0.1;
 xq = 0:control_dt:size_path(1);
-path_x = fliplr(interp1(path(:,1),xq,'spline'));
-path_y = fliplr(interp1(path(:,2),xq,'spline'));
-path_theta = fliplr(interp1(path(:,3),xq,'spline'));
+path_x = fliplr(interp1(path(:,1),xq,'linear'));
+path_y = fliplr(interp1(path(:,2),xq,'linear'));
+path_theta = fliplr(interp1(path(:,3),xq,'linear'));
 path_v = fliplr(interp1(path(:,5),xq,'linear'));
 path_w = fliplr(interp1(path(:,6),xq,'linear'));
 path = [path_x' path_y' path_theta' path_theta' path_v' path_w'];
@@ -84,12 +77,10 @@ size_path = size(path);
 
 %grey to rgb mab
 rgbImage = cat(3, image, image, image);
-
 %START
 rgbImage(int16(state_robot(1)*scale)+1,int16(state_robot(2)*scale+1),1) = 0;
 rgbImage(int16(state_robot(1)*scale)+1,int16(state_robot(2)*scale+1),2) = 255;
 rgbImage(int16(state_robot(1)*scale)+1,int16(state_robot(2)*scale+1),3) = 0;
-
 %GOAL
 rgbImage(int16(goal(1)*scale)+1,int16(goal(2)*scale+1),1) = 255;
 rgbImage(int16(goal(1)*scale)+1,int16(goal(2)*scale+1),2) = 0;
@@ -133,7 +124,7 @@ for d = 2:size_path(1)-1
     u1_io = k1*0.5*(near_node(1) - state_robot(1)) + x_vel;
     u2_io = k1*0.5*(near_node(2) - state_robot(2)) + y_vel;
     v = cos(state_robot(3))*u1_io + sin(state_robot(3))*u2_io;
-    w = -sin(state_robot(3))*u1_io/0.01 + cos(state_robot(3))*u2_io/0.01;
+    w = -sin(state_robot(3))*u1_io/0.02 + cos(state_robot(3))*u2_io/0.02;
     
 
     
@@ -155,8 +146,6 @@ for d = 2:size_path(1)-1
     rgbImage(int16(x*scale)+1,int16(y*scale)+1,1) = 0;
     rgbImage(int16(x*scale)+1,int16(y*scale)+1,2) = 0;
     rgbImage(int16(x*scale)+1,int16(y*scale)+1,3) = 255;
-    
-    
     
     real_robot = vertcat(real_robot,[state_robot(1),state_robot(2),state_robot(3)]);
 end
