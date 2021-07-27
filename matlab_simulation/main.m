@@ -51,7 +51,7 @@ size_path = size(old_path);
 
 %interpolation (linear, makima, spline, etc)
 size_path = size(path);
-interpolation_dt = 0.1; %it will generate 10 new points every 1 original point
+interpolation_dt = 1; %it will generate 10 new points every 1 original point
 xq = 0:interpolation_dt:size_path(1);
 path_x = fliplr(interp1(path(:,1),xq,'makima'));
 path_y = fliplr(interp1(path(:,2),xq,'makima'));
@@ -64,9 +64,9 @@ size_path = size(path);
 
 
 %controller choice - you can also use as sampling time dt*interpolation_dt
-[rgbImage,real_robot] = input_output_linearization(image,state_robot,path,scale,goal,dt)
+%[rgbImage,real_robot] = input_output_linearization(image,state_robot,path,scale,goal,dt)
 %[rgbImage,real_robot] = approximate_linearization_linear(image,state_robot,path,scale,goal,dt)
-%[rgbImage,real_robot] = approximate_linearization_nonlinear(image,state_robot,path,scale,goal,dt)
+[rgbImage,real_robot] = nonlinear_lyapunov(image,state_robot,path,scale,goal,dt)
 
 %plotting
 plot(path(:,1),path(:,2)); hold on; plot(real_robot(:,1),real_robot(:,2))

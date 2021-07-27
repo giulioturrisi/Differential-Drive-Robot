@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = approximate_linearization_nonlinear(image,state_robot,path,scale,goal,dt)
+function [outputArg1,outputArg2] = nonlinear_lyapunov(image,state_robot,path,scale,goal,dt)
 %grey to rgb mab
 rgbImage = cat(3, image, image, image);
 %START
@@ -37,6 +37,8 @@ for d = 2:size_path(1)-1
     
     v = near_node(5)*cos(e3) - u1;
     w = near_node(6) - u2;
+    
+
 
     
     
