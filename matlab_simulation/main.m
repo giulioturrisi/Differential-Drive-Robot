@@ -33,14 +33,11 @@ path = planning_fun_RRT_lqr(state_robot,dt,[3,3],goal,image,resolution,max_itera
 
 
 
-%parameters needed for control loop
-k1 = 10;
-k2 = 10;
-k3 = 5;
+%initial state control
 state_robot(1) = state_robot(1);% + 0.1;
 state_robot(2) = state_robot(2);% - 0.1;
 state_robot(3) = state_robot(3);% + 0.8;
-real_robot = [state_robot(1),state_robot(2),state_robot(3)];
+
 
 %save path before spline
 path_x = fliplr(path(:,1)');
@@ -52,10 +49,10 @@ old_path = [path_x' path_y' path_theta' path_theta' path_v' path_w'];
 %old_path = path;
 size_path = size(old_path);
 
-%interpolation - linear, makima, spline, etc
+%interpolation (linear, makima, spline, etc)
 size_path = size(path);
-control_dt = 0.1;
-xq = 0:control_dt:size_path(1);
+interpolation_dt = 0.1; %it will generate 10 new points every 1 original point
+xq = 0:interpolation_dt:size_path(1);
 path_x = fliplr(interp1(path(:,1),xq,'makima'));
 path_y = fliplr(interp1(path(:,2),xq,'makima'));
 path_theta = fliplr(interp1(path(:,3),xq,'makima'));
@@ -66,16 +63,11 @@ size_path = size(path);
 
 
 
-%controller choice
+%controller choice - you can also use as sampling time dt*interpolation_dt
 [rgbImage,real_robot] = input_output_linearization(image,state_robot,path,scale,goal,dt)
 %[rgbImage,real_robot] = approximate_linearization_linear(image,state_robot,path,scale,goal,dt)
 %[rgbImage,real_robot] = approximate_linearization_nonlinear(image,state_robot,path,scale,goal,dt)
 
 %plotting
-plot(path(:,1),path(:,2));
-hold on;
-plot(real_robot(:,1),real_robot(:,2))
-
-figure();
-J = imrotate(rgbImage,90);
-imshow(J);
+plot(path(:,1),path(:,2)); hold on; plot(real_robot(:,1),real_robot(:,2))
+figure(); J = imrotate(rgbImage,90); imshow(J);
