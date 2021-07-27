@@ -12,3 +12,5 @@ matlab_simulation/planning_fun.prj
 ros2_ws/src/.vscode/
 
 .vscode/
+
+log/

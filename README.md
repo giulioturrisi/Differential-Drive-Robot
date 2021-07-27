@@ -1,7 +1,7 @@
 ## Overview
 This repo contains the code for controlling both a real and a simulated differential drive robot via Ros2. It includes the following packages:
 
-1. matlab_simulation contains ```inflate_map.m``` to inflate an existing map with the size of the robot, ```RRT_input_output_deltaInput.m``` to generate a path for a simple integrator, ```RRT_primitives.m``` to generate a path considering the kinematic of the differential drive, ```main.m``` to test the planners and controllers.
+1. matlab_simulation contains ```inflate_map.m``` to inflate an existing map with the size of the robot, ```RRT_*.m``` to generate an obstacle-free path with different RRT methods, ```main.m``` to test the planners and controllers.
  
 2. coppeliasim_simulation contains the scenes used for simulating the robot (dynamically enabled or not)
 
