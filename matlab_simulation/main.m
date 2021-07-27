@@ -1,8 +1,8 @@
-clear all;
-close all;
+clear all; close all;
+addpath(genpath('./planners'))
+addpath(genpath('./maps'))
 
 image = imread('simple_walls_map.pgm');
-%image = imread('coppeliasim_simple.pgm');
 imageNorm = double(image)/255;
 imageOccupancy = 1 - imageNorm;
 map = occupancyMap(imageOccupancy,20);
@@ -17,14 +17,7 @@ goal = [2,0];
 map_limit = [3,3];
 max_iteration = 1000;
 
-
-%LQR for input-output planning (if used)
-%A = ;
-%B = [1];
-%Q = [10];
-%R = 100;
-%[K,S,e] = lqr(A,B,Q,R);
-
+%LQR if needed
 A = [1 dt; 0 1];
 B = [dt;1];
 Q = eye(2)*5;
@@ -32,14 +25,10 @@ R = 10;
 [K,S,e] = dlqr(A,B,Q,R);
 
 %RRT choice
-%to check collision between nodes!
-%RRT = RRT_input_output(state_robot,dt,[20,20],[9,5],image);
-%RRT = RRT_input_output_deltaInput(state_robot,dt,[20,20],[9,5],image);
-%RRT = RRT_primitives(state_robot,dt,[20,20],[10,4],image);
-
-
-%path = planning_fun(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
-path = planning_fun_star(state_robot,dt,[3,3],goal,image,resolution,max_iteration*2)
+%path = planning_fun_RRT_lqr(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
+%path = planning_fun_RRT_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
+%path = planning_fun_RRT_primitives(state_robot,dt,[3,3],goal,image,resolution,max_iteration*5)
+path = planning_fun_RRT_star_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 
 
 
@@ -93,8 +82,6 @@ for d = 2:size_path(1)-1
     end
     near_node = path(d,:);
 
-    
-    
     %nonlinear control
     e1 = cos(state_robot(3))*(near_node(1) - state_robot(1)) + sin(state_robot(3))*(near_node(2) - state_robot(2));
     e2 = -sin(state_robot(3))*(near_node(1) - state_robot(1)) + cos(state_robot(3))*(near_node(2) - state_robot(2));
@@ -149,6 +136,7 @@ for d = 2:size_path(1)-1
     
     real_robot = vertcat(real_robot,[state_robot(1),state_robot(2),state_robot(3)]);
 end
+
 
 %plotting
 plot(path(:,1),path(:,2));

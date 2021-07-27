@@ -1,13 +1,13 @@
-function [final_path] = planning_fun(state_robot,dt,limit,goal,image,resolution,maxIter)
+function [final_path] = planning_fun_RRT_primitives(state_robot,dt,limit,goal,image,resolution,maxIter)
 
-RRT = RRT_input_output_deltaInput(state_robot,dt,limit,goal,image,resolution,maxIter);
+RRT = RRT_primitives(state_robot,dt,limit,goal,image,resolution,maxIter);
 
 path = state_robot;
 size_path = 1;
 %RRT loop
 finish = 0;
 for j = 1:maxIter
-    j;
+    j
     desired_node = RRT.sample();
     near_index = RRT.find_nearest(desired_node);
     new_node = RRT.choose_primitives(near_index,desired_node);

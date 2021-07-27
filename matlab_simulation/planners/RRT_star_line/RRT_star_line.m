@@ -1,4 +1,4 @@
-classdef RRT_star_input_output < handle
+classdef RRT_star_line < handle
     %RRT_PRIMITIVES Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -16,7 +16,7 @@ classdef RRT_star_input_output < handle
     end
     
     methods
-        function obj = RRT_star_input_output(initial_state,sampling_time,limit,goal,map,resolution,maxIter)
+        function obj = RRT_star_line(initial_state,sampling_time,limit,goal,map,resolution,maxIter)
             %RRT_PRIMITIVES Construct an instance of this class
             %   Detailed explanation goes here
             
@@ -286,23 +286,13 @@ classdef RRT_star_input_output < handle
             x = node_to_check(1);
             y = node_to_check(2);
             theta = node_to_check(3);
-            
-            
-            radius = 0.3;
 
             scale = 1/obj.resolution;
             
-            %top = [int16(x*scale), int16((y + radius)*scale)];
-            %bottom = [int16(x*scale), int16((y - radius)*scale)];
-            %left = [int16((x - radius)*scale), int16(y*scale)];
-            %right = [int16((x + radius)*scale), int16(y*scale)];
-            %if(int16(x*scale) < 1 | int16(y*scale) < 1)
-            %    good = 0;
-            %elseif(abs(x) > (obj.map_limit(1)*scale - 5) | abs(y) > (obj.map_limit(2)*scale - 5))
-            %    good = 0;
-            %elseif(obj.map(top(1),top(2)) < 250 | obj.map(bottom(1),bottom(2)) < 250 | obj.map(left(1),left(2)) < 250 | obj.map(right(1),right(2)) < 250)
-            %    good = 0;
-            %elseif(obj.map(int16(x*scale),int16(y*scale)) < 250)
+            if(x < 0 | y < 0)
+                good = 0;
+                return;
+            end
             
             if(int16(x*scale)+1 > size(obj.map,1))
                 good = 0;

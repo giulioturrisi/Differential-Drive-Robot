@@ -1,4 +1,4 @@
-classdef RRT_input_output_deltaInput < handle
+classdef RRT_primitives < handle
     %RRT_PRIMITIVES Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -8,15 +8,15 @@ classdef RRT_input_output_deltaInput < handle
         map_limit
         goal
         map
-        k
         resolution
         maxIter
         numberIter
+        primitives
      
     end
     
     methods
-        function obj = RRT_input_output_deltaInput(initial_state,sampling_time,limit,goal,map,resolution,maxIter)
+        function obj = RRT_primitives(initial_state,sampling_time,limit,goal,map,resolution,maxIter)
             %RRT_PRIMITIVES Construct an instance of this class
             %   Detailed explanation goes here
             %obj.nodes = [initial_state(1) initial_state(2) initial_state(3) 0 0 0];
@@ -24,7 +24,6 @@ classdef RRT_input_output_deltaInput < handle
             obj.map_limit = limit;
             obj.goal = goal;
             obj.map = map;
-            obj.k = [0.4770    0.5449];
             obj.resolution = resolution;
             obj.maxIter = maxIter;
             
@@ -32,6 +31,26 @@ classdef RRT_input_output_deltaInput < handle
             size_state = size(initial_state);
             obj.nodes = zeros(maxIter,size_state(2));
             obj.nodes(1,:) = [initial_state(1) initial_state(2) initial_state(3) 0 0 0];
+            
+            %primitives v, w
+            forward = [1,0];
+            %backward = [-1*0,0];
+            turn_left = [0, -1];
+            turn_right = [0, 1];
+            arc_left_forward = [1, -1];
+            arc_right_forward = [1, 1];
+            arc_left_min_forward = [1, -0.5];
+            arc_right_min_forward = [1, 0.5];
+            arc_left_forward_min = [0.5, -0.5];
+            arc_right_forward_min = [0.5, 0.5];
+            %arc_left_backward = [-1*0, -1*0.3];
+            %arc_right_backward = [-1*0, 1*0.3];
+            %arc_left_backward_min = [-1*0, -0.5*0.3];
+            %arc_right_backward_min = [-1*0, 0.5*0.3];
+
+            obj.primitives = [forward;turn_left;turn_right;arc_left_forward;arc_right_forward;
+                          arc_left_forward_min;arc_right_forward_min;
+                          arc_left_min_forward;arc_right_min_forward];
             
  
         end
@@ -105,26 +124,36 @@ classdef RRT_input_output_deltaInput < handle
             best_index = 1;
             best_distance = 10000;
             best_node = [0 0 0];
-            %best_control = [obj.k obj.k];
-            %best_control = [0 0];
+
             
-            %to add dynamic
-            b = 0.05;
-            u1 = obj.k(1)*(desired_node(1) - near_node(1)) + obj.k(2)*(-near_node(5));
-            u2 = obj.k(2)*(desired_node(2) - near_node(2)) + obj.k(2)*(-near_node(6));
-            
-            u1 = u1 + near_node(5);
-            u2 = u2 + near_node(6);
-            best_control = [u1 u2];
-            
-            x_new = near_node(1) + u1*obj.dt;
-            y_new = near_node(2) + u2*obj.dt;
-            theta_new = near_node(3) + (u2*cos(near_node(3)) - u1*sin(near_node(3)))*obj.dt/b;% + w*obj.dt;
-            
-            best_node = [x_new y_new theta_new]
-       
-            
-            new_node = [best_node near_index best_control];
+           best_control = [];
+           v_w = obj.primitives();
+           for i = 1:length(obj.primitives)
+               for d = 1:80
+                   if(d < 40)
+                       v = v_w(i,1)*d*0.1;
+                       w = v_w(i,2)*d*0.1;
+                   else
+                       v = v_w(i,1)*rand();
+                       w = v_w(i,2)*rand();
+                   end
+
+                x_new = near_node(1) + v*cos(near_node(3))*obj.dt;
+                y_new = near_node(2) + v*sin(near_node(3))*obj.dt;
+                theta_new = near_node(3) + w*obj.dt;
+
+                distance = sqrt((x_new-desired_node(1))^2 + (y_new-desired_node(2))^2 + 0*(theta_new-desired_node(3))^2);
+                if(distance < best_distance & obj.check_collision([x_new y_new theta_new]))
+                %if(distance < best_distance)    
+                    best_distance = distance;
+                    best_index = i;
+                    best_node = [x_new y_new theta_new];
+                    best_control = [v w];
+                end
+               end
+           end
+        
+           new_node = [best_node near_index best_control];
         end
         
         
@@ -158,23 +187,23 @@ classdef RRT_input_output_deltaInput < handle
             y = node_to_check(2);
             theta = node_to_check(3);
             
-            
-            radius = 0.3;
-
+          
             scale = 1/obj.resolution;
-            
-            %top = [int16(x*scale), int16((y + radius)*scale)];
-            %bottom = [int16(x*scale), int16((y - radius)*scale)];
-            %left = [int16((x - radius)*scale), int16(y*scale)];
-            %right = [int16((x + radius)*scale), int16(y*scale)];
-            %if(int16(x*scale) < 1 | int16(y*scale) < 1)
-            %    good = 0;
-            %elseif(abs(x) > (obj.map_limit(1)*scale - 5) | abs(y) > (obj.map_limit(2)*scale - 5))
-            %    good = 0;
-            %elseif(obj.map(top(1),top(2)) < 250 | obj.map(bottom(1),bottom(2)) < 250 | obj.map(left(1),left(2)) < 250 | obj.map(right(1),right(2)) < 250)
-            %    good = 0;
-            %elseif(obj.map(int16(x*scale),int16(y*scale)) < 250)
-            if(obj.map(int16(x*scale),int16(y*scale)) < 250)
+
+            if(x < 0 | y < 0)
+                good = 0;
+                return;
+            end
+            if(int16(x*scale)+1 > size(obj.map,1))
+                good = 0;
+                return;
+            end
+            if(int16(y*scale)+1 > size(obj.map,2))
+                good = 0;
+                return;
+            end       
+     
+            if(obj.map(int16(x*scale)+1,int16(y*scale)+1) < 250)
                 good = 0;
             else
                 good = 1;
