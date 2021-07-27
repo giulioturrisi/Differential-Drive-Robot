@@ -65,7 +65,7 @@ size_path = size(path);
 
 %controller choice - you can also use as sampling time dt*interpolation_dt
 %[rgbImage,real_robot] = input_output_linearization(image,state_robot,path,scale,goal,dt)
-%[rgbImage,real_robot] = approximate_linearization_linear(image,state_robot,path,scale,goal,dt)
+%[rgbImage,real_robot] = approximate_linearization (image,state_robot,path,scale,goal,dt)
 [rgbImage,real_robot] = nonlinear_lyapunov(image,state_robot,path,scale,goal,dt)
 
 %plotting

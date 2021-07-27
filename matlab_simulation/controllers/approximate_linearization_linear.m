@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = approximate_linearization_linear(image,state_robot,path,scale,goal,dt)
+function [outputArg1,outputArg2] = approximate_linearization(image,state_robot,path,scale,goal,dt)
 %grey to rgb mab
 rgbImage = cat(3, image, image, image);
 %START
