@@ -26,8 +26,8 @@ for d = 2:size_path(1)-1
     %input-output lin
     x_vel = (near_node(1) - path(d - 1,1))/dt;
     y_vel = (near_node(2) - path(d - 1,2))/dt;
-    u1_io = k1*0.5*(near_node(1) - state_robot(1)) + x_vel;
-    u2_io = k1*0.5*(near_node(2) - state_robot(2)) + y_vel;
+    u1_io = k1*(near_node(1) - state_robot(1)) + x_vel;
+    u2_io = k1*(near_node(2) - state_robot(2)) + y_vel;
     v = cos(state_robot(3))*u1_io + sin(state_robot(3))*u2_io;
     w = -sin(state_robot(3))*u1_io/0.02 + cos(state_robot(3))*u2_io/0.02;
     

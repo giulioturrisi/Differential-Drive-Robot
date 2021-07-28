@@ -111,7 +111,7 @@ classdef RRT_lqr < handle
             %to add dynamic
             b = 0.05;
             u1 = obj.k(1)*(desired_node(1) - near_node(1)) + obj.k(2)*(-near_node(5));
-            u2 = obj.k(2)*(desired_node(2) - near_node(2)) + obj.k(2)*(-near_node(6));
+            u2 = obj.k(1)*(desired_node(2) - near_node(2)) + obj.k(2)*(-near_node(6));
             
             u1 = u1 + near_node(5);
             u2 = u2 + near_node(6);
