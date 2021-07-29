@@ -34,9 +34,9 @@ classdef RRT_primitives < handle
             
             %primitives v, w
             forward = [1,0];
-            backward = [-1,0];
-            turn_left = [0, -1];
-            turn_right = [0, 1];
+            %backward = [-1*0,0];
+            %turn_left = [0.5, -1];
+            %turn_right = [0.5, 1];
             arc_left_forward = [1, -1];
             arc_right_forward = [1, 1];
             arc_left_min_forward = [1, -0.5];
@@ -54,8 +54,7 @@ classdef RRT_primitives < handle
                       
             obj.primitives = [forward;arc_left_forward;arc_right_forward;
                           arc_left_min_forward;arc_right_min_forward;
-                          arc_left_backward;arc_right_backward;arc_left_min_backward;arc_right_min_backward;
-                          backward;turn_left;turn_right;];
+                          arc_left_backward;arc_right_backward;arc_left_min_backward;arc_right_min_backward];
             
  
         end
@@ -74,7 +73,7 @@ classdef RRT_primitives < handle
             %   Detailed explanation goes here
             x = new_node(1);
             y = new_node(2);
-            if((x - obj.goal(1))^2 < 0.05 & (y - obj.goal(2))^2 < 0.05)
+            if((x - obj.goal(1))^2 < 0.01 & (y - obj.goal(2))^2 < 0.01)
                 finish = 1;
             else
                 finish = 0;
@@ -122,14 +121,15 @@ classdef RRT_primitives < handle
         end
         
         
-        function [new_node,maneuvers] = choose_primitives(obj,near_index, desired_node)
+        function new_node = choose_primitives(obj,near_index, desired_node)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             near_node = obj.nodes(near_index,:);
             best_index = 1;
             best_distance = 10000;
             best_node = [0 0 0];
-            maneuvers = zeros(3,3);
+            maneuvers = obj.nodes(1,:) 
+
             
            best_control = [];
            v_w = obj.primitives();
@@ -143,35 +143,30 @@ classdef RRT_primitives < handle
                %        v = v_w(i,1)*rand();
                %        w = v_w(i,2)*rand();
                %    end
-                    x_new1 = near_node(1) + v*cos(near_node(3))*obj.dt/3.;
-                    y_new1 = near_node(2) + v*sin(near_node(3))*obj.dt/3.;
-                    theta_new1 = near_node(3) + w*obj.dt/3.;
-                    collision_1 = obj.check_collision([x_new1 y_new1 theta_new1]);
+                    x_new = near_node(1) + v*cos(near_node(3))*obj.dt/3.;
+                    y_new = near_node(2) + v*sin(near_node(3))*obj.dt/3.;
+                    theta_new = near_node(3) + w*obj.dt/3.;
+                    collision_1 = obj.check_collision([x_new y_new theta_new]);
     
-                    x_new2 = x_new1 + v*cos(theta_new1)*obj.dt/3.;
-                    y_new2 = y_new1 + v*sin(theta_new1)*obj.dt/3.;
-                    theta_new2 = theta_new1 + w*obj.dt/3.;
-                    collision_2 = obj.check_collision([x_new2 y_new2 theta_new2]);
-
+                    x_new = x_new + v*cos(theta_new)*obj.dt/3.;
+                    y_new = y_new + v*sin(theta_new)*obj.dt/3.;
+                    theta_new = theta_new + w*obj.dt/3.;
+                    collision_2 = obj.check_collision([x_new y_new theta_new])
                     
-                    x_new = x_new2 + v*cos(theta_new2)*obj.dt/3.;
-                    y_new = y_new2 + v*sin(theta_new2)*obj.dt/3.;
-                    theta_new = theta_new2 + w*obj.dt/3.;
-                    collision = obj.check_collision([x_new y_new theta_new]);
-                    
+                    x_new = x_new + v*cos(theta_new)*obj.dt/3.;
+                    y_new = y_new + v*sin(theta_new)*obj.dt/3.;
+                    theta_new = theta_new + w*obj.dt/3.;
+                    collision_3 = obj.check_collision([x_new y_new theta_new])
                     
                                        
                     distance = sqrt((x_new-desired_node(1))^2 + (y_new-desired_node(2))^2 + 0.*(theta_new-desired_node(3))^2);
                     
                     %fprintf('The primitives %d generate a distance of ',i); distance
-                    if(distance < best_distance & collision_1 & collision_2 & collision)
+                    if(distance < best_distance & collision_1 & collision_2 & collision_3)
                         best_distance = distance;
                         best_index = i;
                         best_node = [x_new y_new theta_new];
                         best_control = [v w];
-                        maneuvers(1,:) = [x_new1,y_new1,theta_new1];
-                        maneuvers(2,:) = [x_new2,y_new2,theta_new2];
-                        maneuvers(3,:) = [x_new,y_new,theta_new];
                     end
                end
            end

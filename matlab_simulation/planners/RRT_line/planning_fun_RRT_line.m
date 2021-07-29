@@ -21,11 +21,17 @@ for j = 1:maxIter
         RRT.add_nodes(new_node);
     end
     finish = RRT.check_goal(new_node);
+   
     
     if(finish == 1)
         [path,size_path] = RRT.take_path(new_node(4));
         break;
     end
+    
+    %plot
+    plot(goal(1),goal(2),'-o','Color','r'); hold on; plot(state_robot(1),state_robot(2),'-o','Color','b'); axis([0 3 0 3]);
+    hold on;
+    plot([RRT.nodes(near_index,1),new_node(1)],[RRT.nodes(near_index,2),new_node(2)]);
 end
 %if not finish, i should take the nearest point
 if(finish == 0)

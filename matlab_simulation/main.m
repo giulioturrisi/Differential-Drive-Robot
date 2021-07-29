@@ -27,10 +27,10 @@ Q = eye(2)*5;
 R = 10;
 [K,S,e] = dlqr(A,B,Q,R);
 
-%RRT choice
+%RRT choice 
 %path = planning_fun_RRT_lqr(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 path = planning_fun_RRT_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
-%path = planning_fun_RRT_primitives(state_robot,dt,[3,3],goal,image,resolution,max_iteration*5)
+%path = planning_fun_RRT_primitives(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 %path = planning_fun_RRT_star_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 
 %Grid search choice
@@ -76,5 +76,5 @@ size_path = size(path);
 %[rgbImage,real_robot] = nonlinear_lyapunov(image,state_robot,path,scale,goal,dt)
 
 %plotting
-plot(path(:,1),path(:,2)); hold on; plot(real_robot(:,1),real_robot(:,2))
+figure(); plot(path(:,1),path(:,2)); hold on; plot(real_robot(:,1),real_robot(:,2))
 figure(); J = imrotate(rgbImage,90);  J = imresize( J , 5); imshow(J);
