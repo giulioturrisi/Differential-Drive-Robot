@@ -11,7 +11,7 @@ rgbImage(int16(goal(1)*scale)+1,int16(goal(2)*scale+1),2) = 0;
 rgbImage(int16(goal(1)*scale)+1,int16(goal(2)*scale+1),3) = 0;
 
 
-real_robot = [state_robot(1),state_robot(2),state_robot(3)];
+real_robot = [state_robot(1),state_robot(2),state_robot(3),0,0];
 k1 = 10;
 k2 = 10;
 k3 = 5;
@@ -58,7 +58,7 @@ for d = 2:size_path(1)-1
     rgbImage(int16(x*scale)+1,int16(y*scale)+1,2) = 0;
     rgbImage(int16(x*scale)+1,int16(y*scale)+1,3) = 255;
     
-    real_robot = vertcat(real_robot,[state_robot(1),state_robot(2),state_robot(3)]);
+    real_robot = vertcat(real_robot,[state_robot(1),state_robot(2),state_robot(3),v,w]);
 
 outputArg1 = rgbImage;
 outputArg2 = real_robot;

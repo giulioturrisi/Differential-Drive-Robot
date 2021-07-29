@@ -19,6 +19,8 @@ dt = 0.1;
 goal = [0.5,2.5];
 map_limit = [3,3];
 max_iteration = 1000;
+v_max = 10;
+w_max = 10;
 
 %LQR if needed
 A = [1 dt; 0 1];
@@ -27,7 +29,7 @@ Q = eye(2)*5;
 R = 10;
 [K,S,e] = dlqr(A,B,Q,R);
 
-%RRT choice 
+%RRT choice - to do, set a maximum velocity for everyone!!
 %path = planning_fun_RRT_lqr(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 path = planning_fun_RRT_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 %path = planning_fun_RRT_primitives(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
