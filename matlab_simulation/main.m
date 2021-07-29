@@ -15,7 +15,8 @@ scale = 1/resolution;
 %x y theta x_dot y_dot theta_dot
 state_robot = [1 1 0 0 0 0];
 dt = 0.1;
-goal = [2,1];
+%goal = [2,1];
+goal = [0.5,2];
 map_limit = [3,3];
 max_iteration = 1000;
 
@@ -33,7 +34,9 @@ R = 10;
 %path = planning_fun_RRT_star_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 
 %Grid search choice
-path = planning_fun_A_star(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
+%path = planning_fun_A_star(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
+path = planning_fun_Greedy_best_first(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
+%path = planning_fun_Dijkstra(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
 
 
 
@@ -74,4 +77,4 @@ size_path = size(path);
 
 %plotting
 plot(path(:,1),path(:,2)); hold on; plot(real_robot(:,1),real_robot(:,2))
-figure(); J = imrotate(rgbImage,90); imshow(J);
+figure(); J = imrotate(rgbImage,90);  J = imresize( J , 5); imshow(J);

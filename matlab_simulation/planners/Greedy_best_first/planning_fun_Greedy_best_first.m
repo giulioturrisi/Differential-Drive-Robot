@@ -1,6 +1,6 @@
-function [final_path] = planning_fun_A_star(state_robot,dt,limit,goal,image,resolution,maxIter)
+function [final_path] = planning_fun_Greedy_best_first(state_robot,dt,limit,goal,image,resolution,maxIter)
 
-grid_search = A_star(state_robot,dt,limit,goal,image,resolution,maxIter);
+grid_search = Greedy_best_first(state_robot,dt,limit,goal,image,resolution,maxIter);
 finish = 0;
 while(finish == 0)
    next_cell = grid_search.find_next_cell();
