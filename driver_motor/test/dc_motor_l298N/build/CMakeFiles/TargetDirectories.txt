@@ -1,3 +1,0 @@
-/home/ubuntu/Desktop/dc_motor_l298N/build/CMakeFiles/rebuild_cache.dir
-/home/ubuntu/Desktop/dc_motor_l298N/build/CMakeFiles/dc_motor.dir
-/home/ubuntu/Desktop/dc_motor_l298N/build/CMakeFiles/edit_cache.dir
