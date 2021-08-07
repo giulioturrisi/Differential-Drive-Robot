@@ -17,6 +17,10 @@ struct Point {
     float y;
 };
 
+float b = 0.005;
+float x_vel = 0;
+float y_vel = 0;
+
 std::vector<Point> path;
 bool path_ready = false;
 
@@ -66,6 +70,10 @@ class MinimalSubscriber : public rclcpp::Node
     void controller_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg) const
     {
         if(path_ready == true) {
+          if(msg->transforms[0].child_frame_id !="base_footprint")
+           { std::cout << "message not base_footprint" << std::endl;
+              return ;
+           }
             tf2::Quaternion q(
                 msg->transforms[0].transform.rotation.x,
                 msg->transforms[0].transform.rotation.y,
@@ -77,33 +85,28 @@ class MinimalSubscriber : public rclcpp::Node
 
             struct Point state;
             struct Point reference;
-            state.x = msg->transforms[0].transform.translation.x;
-            state.y = msg->transforms[0].transform.translation.y;
+            state.x = msg->transforms[0].transform.translation.x + b*cos(yaw);
+            state.y = msg->transforms[0].transform.translation.y + b*sin(yaw);
 
-            RCLCPP_INFO(this->get_logger(), "state x'%f'", msg->transforms[0].transform.translation.x);
-            RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
-            RCLCPP_INFO(this->get_logger(), "state theta'%f'", yaw);
+            std::cout << "q0: "   << msg->transforms[0].transform.rotation.x << "q1: "   << msg->transforms[0].transform.rotation.y << "q2: "   << msg->transforms[0].transform.rotation.z << "q3: "   << msg->transforms[0].transform.rotation.w <<  std::endl;
+            std::cout << "roll: "   << roll << "pitch : " << pitch  << "yaw  : "  << yaw << std::endl;
+            std::cout << "state x: " << msg->transforms[0].transform.translation.x << " state  y: " << msg->transforms[0].transform.translation.y << " state  z: " <<  roll << std::endl;
             
 
             reference = path.back();
 
-            RCLCPP_INFO(this->get_logger(), "reference x'%f'", reference.x);
-            RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
+            std::cout << "ref x: " << reference.x << " ref  y: " << reference.y << std::endl;
             
-            double dt = 0.1;
-            double k1 = 1;
+            double dt = 0.05;
+            double k1 = 2;
+            double k2 = 1;
 
-            //input-output lin
-            //double x_vel = (near_node(1) - path(d - 1,1))/dt;
-            //double y_vel = (near_node(2) - path(d - 1,2))/dt;
-            double u1_io = k1*(reference.x - state.x);// + x_vel;
-            //double u1_io = k1*(1 - state.x);
-            double u2_io = k1*(reference.y - state.y);// + y_vel;
+            double u1_io = k1*(reference.x - state.x) - k2*x_vel;
+            double u2_io = k1*(reference.y - state.y) - k2*y_vel;
             RCLCPP_INFO(this->get_logger(), "u1 '%f'", u1_io);
             RCLCPP_INFO(this->get_logger(), "u2 '%f'", u2_io);
-            //double u2_io = k1*(0 - state.y);// + y_vel;
             double v = cos(yaw)*u1_io + sin(yaw)*u2_io;
-            double w = -sin(yaw)*u1_io/0.01 + cos(yaw)*u2_io/0.01;
+            double w = -sin(yaw)*u1_io/b + cos(yaw)*u2_io/b;
 
             RCLCPP_INFO(this->get_logger(), "v: '%f'", v);
             RCLCPP_INFO(this->get_logger(), "w: '%f'", w);
@@ -111,14 +114,20 @@ class MinimalSubscriber : public rclcpp::Node
             auto commanded_vel = geometry_msgs::msg::Twist();
             commanded_vel.linear.x = v;
             commanded_vel.angular.z = w;
-
             publisher_command->publish(commanded_vel);
+            x_vel = v*cos(yaw);
+            y_vel = v*sin(yaw); 
 
-
+            // check for path empty
 
             path.pop_back();
-            if(path.empty())
+            if(path.empty()){
                 path_ready = false;
+                commanded_vel.linear.x = 0;
+                commanded_vel.angular.z = 0;
+                publisher_command ->publish(commanded_vel);
+                std::cout << "[Debug] : Path end reached" << std::endl;
+            }
         }
     }
 

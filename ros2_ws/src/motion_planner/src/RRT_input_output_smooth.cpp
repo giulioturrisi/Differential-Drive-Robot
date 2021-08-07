@@ -31,8 +31,6 @@ static coder::array<unsigned char, 2U> argInit_UnboundedxUnbounded_uint8_T();
 static double argInit_real_T();
 static unsigned char argInit_uint8_T();
 static void main_planning_fun();
-
-
 // Function Definitions 
 
 // LIMIT MAP
@@ -188,7 +186,7 @@ class MinimalSubscriber : public rclcpp::Node
       // Initialize function input argument 'dt'.
       //dt_tmp = argInit_real_T();
       
-      dt_tmp = 0.1;
+      dt_tmp = 0.001;
       maxIter = 10000;
       resolution = 0.05;
 
@@ -244,6 +242,7 @@ class MinimalSubscriber : public rclcpp::Node
 
       dv[0] = 0 + 1.03;
       dv[1] = 0 + 1.46;
+    
       dv[2] = 0;
       dv[3] = 0;
       dv[4] = 0;
@@ -271,7 +270,7 @@ class MinimalSubscriber : public rclcpp::Node
       
       auto poseStamped = geometry_msgs::msg::PoseStamped();
       for(int j = 0; j < size_path/6; j++) {
-        std::cout << "path X: " << final_path[j] << " Y: " << final_path[(size_path/6) + j] << std::endl;
+        //std::cout << "path X: " << final_path[j] << " Y: " << final_path[(size_path/6) + j] << std::endl;
         //poseStamped.pose.position.x = final_path[j] - 1.46;
         //poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.03;
 
