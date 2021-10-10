@@ -1,6 +1,7 @@
 clear all; close all;
 addpath(genpath('./planners'))
 addpath(genpath('./controllers'))
+addpath(genpath('./controllers/nonlinear_mpc'))
 addpath(genpath('./maps'))
 addpath('./planners/A_star')
 
@@ -31,12 +32,12 @@ R = 10;
 
 %RRT choice - to do, set a maximum velocity for everyone!!
 %path = planning_fun_RRT_lqr(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
-path = planning_fun_RRT_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
+%path = planning_fun_RRT_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 %path = planning_fun_RRT_primitives(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 %path = planning_fun_RRT_star_line(state_robot,dt,[3,3],goal,image,resolution,max_iteration)
 
 %Grid search choice
-%path = planning_fun_A_star(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
+path = planning_fun_A_star(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
 %path = planning_fun_Greedy_best_first(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
 %path = planning_fun_Dijkstra(state_robot,dt,[3,3],goal,image,resolution,max_iteration);
 
@@ -73,7 +74,8 @@ size_path = size(path);
 
 
 %controller choice - you can also use as sampling time dt*interpolation_dt
-[rgbImage,real_robot] = input_output_linearization(image,state_robot,path,scale,goal,dt);
+[rgbImage,real_robot] = nonlinear_mpc(image,state_robot,path,scale,goal,dt);
+%[rgbImage,real_robot] = input_output_linearization(image,state_robot,path,scale,goal,dt);
 %[rgbImage,real_robot] = approximate_linearization (image,state_robot,path,scale,goal,dt)
 %[rgbImage,real_robot] = nonlinear_lyapunov(image,state_robot,path,scale,goal,dt)
 
