@@ -1,17 +1,19 @@
 ## Overview
 This repo contains the code for controlling both a real and a simulated differential drive robot via ROS2. It includes the following packages:
 
-1. matlab_simulation contains the folders ```maps``` which containt a script to inflate an existing map with the size of the robot, ```planners``` to generate an obstacle-free path with different methods and ```controllers``` to move the robot. Matlab is also used to easily generate the c++ code for ROS2.
+1. matlab_simulation contains the folders ```maps``` with scripts to modify an existing map (e.g. inflate), ```planners``` to generate an obstacle-free path with different methods and ```controllers``` to move the robot. Matlab is also used to easily generate the c++ code for ROS2.
  
 2. coppeliasim_simulation contains the scenes used for simulating the robot (dynamically enabled or not)
 
-3. ros2_ws contains, in additions to the same named folder in 1., ```slam_toolbox``` to generate a map ([slam](https://github.com/SteveMacenski/slam_toolbox)), ```navigation2``` which contains some dependencies for slam ([nav](https://github.com/ros-planning/navigation2)), ```simExtROS2``` and ```ros2_bubble_rob``` which are used to use ROS2 in CoppeliaSim.
+3. ros2_ws contains, in additions to the same named folder in 1, ```slam_toolbox``` to generate a map ([slam](https://github.com/SteveMacenski/slam_toolbox)), ```navigation2``` which contains some dependencies for slam ([nav](https://github.com/ros-planning/navigation2)), ```simExtROS2``` and ```ros2_bubble_rob``` which are used to use ROS2 in CoppeliaSim.
 
  
 ## Dependencies
 1. [ROS2](https://docs.ros.org/en/foxy/Installation.html) Foxy
 
-2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations
+2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
+
+2. [Acados](https://github.com/acados/acados) for one of the controllers (not mandatory)
 
 It is necessary to add the following corresponding `Env` variables in the `.bashrc` or `.bash_profile` the following line:
 ```sh
