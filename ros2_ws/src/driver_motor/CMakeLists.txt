@@ -21,6 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
@@ -32,7 +33,7 @@ add_executable(dc_motor ${SOURCES})
 
 set (PROJECT_LINK_LIBS /usr/local/lib/libpigpio.so)
 target_link_libraries(dc_motor ${PROJECT_LINK_LIBS})
-ament_target_dependencies(dc_motor rclcpp tf2_msgs tf2 std_msgs)
+ament_target_dependencies(dc_motor rclcpp tf2_msgs tf2 std_msgs tf2_ros)
 
 install(TARGETS
   dc_motor

@@ -8,29 +8,51 @@
 #include "rotary_encoder.hpp"
 #include <chrono>
 #include <unistd.h>
-
 #include <cmath>
-
 #include <memory>
-#include <cmath>
+
 
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 #include "std_msgs/msg/bool.hpp"
 
+#include <tf2_ros/transform_broadcaster.h>
 #include "geometry_msgs/msg/twist.hpp"
 
 #include "tf2/utils.h"
 
 
+
 //TO RUN sudo -s, then . install/setup.bash 
 
-
+using namespace std::literals;
 using std::placeholders::_1;
 
 int tickLeft = 0;
 int tickRight = 0;
+float odom_x = 0;
+float odom_y = 0;
+float odom_theta = 0;
+float angleRight_sum = 0;
+float angleLeft_sum = 0;
+float delta_s = 0;
+float delta_theta = 0;
+
+float Ts = 0.01;
+float r = 0.45;
+float d = 0.2;
+
+float speed_Right_outside = 0;
+float speed_Left_outside = 0;
+
+
+float Ts_innerLoop = 0.001;
+float Ts_innerLoop_nanosecond = Ts_innerLoop*1000000;
+float step = 100;
+
+//float error_vel_integral_Left = 0;
+//float error_vel_integral_Right = 0;
 
 class MotorController : public rclcpp::Node{
   public:
@@ -38,6 +60,9 @@ class MotorController : public rclcpp::Node{
 
   
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_motors_commands;
+    rclcpp::TimerBase::SharedPtr timer_;
+    std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+    
 
 
     MotorController()
@@ -47,6 +72,8 @@ class MotorController : public rclcpp::Node{
 
         subscription_motors_commands = this->create_subscription<geometry_msgs::msg::Twist>(
       "cmd_vel", 1, std::bind(&MotorController::controller_callback, this, _1));
+        tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+        timer_ = this->create_wall_timer(10ms,std::bind(&MotorController::timer_callback, this));
 
         gpioInitialise();
         //left
@@ -70,33 +97,18 @@ class MotorController : public rclcpp::Node{
         gpioSetPWMfrequency(12,50);
         gpioSetPWMrange(12,255);
         
-        
-
         //re_decoder left(27, 17, update_leftEncoder);
 
         //re_decoder right(22, 23, update_rightEncoder);
-
-
-        
-
-
-
-
     }
 
   private:
 
     static void update_leftEncoder(const int way){
-        
         tickLeft += way;
-        
     }
     static void update_rightEncoder(const int way){
-        
-        tickRight += way;
-
-        
-        
+        tickRight += way;       
     }
 
 
@@ -136,34 +148,79 @@ class MotorController : public rclcpp::Node{
             gpioPWM(12,(int)duty_cycle_back);
             gpioWrite(5,0);
             gpioWrite(6,1);
-
         }
     }
 
+    
+    void timer_callback() {
+        
+
+        // euler to quat
+        float roll = 0;
+        float pitch = 0;
+        float yaw = odom_theta;
+        double cy = cos(yaw * 0.5);
+        double sy = sin(yaw * 0.5);
+        double cp = cos(pitch * 0.5);
+        double sp = sin(pitch * 0.5);
+        double cr = cos(roll * 0.5);
+        double sr = sin(roll * 0.5);
+
+        //Quaternion q;
+        //q.w = cr * cp * cy + sr * sp * sy;
+        //q.x = sr * cp * cy - cr * sp * sy;
+        //q.y = cr * sp * cy + sr * cp * sy;
+        //q.z = cr * cp * sy - sr * sp * cy;
+
+
+
+        //i should publish something
+        geometry_msgs::msg::TransformStamped transform_stamped; 
+        transform_stamped.header.stamp = rclcpp::Time();
+        transform_stamped.header.frame_id = "odom";
+        //transform_stamped.child_frame_id = "base_link";
+        transform_stamped.child_frame_id = "base_footprint";
+        transform_stamped.transform.translation.x = odom_x;
+        transform_stamped.transform.translation.y = odom_y;
+        transform_stamped.transform.translation.z = 0.0;
+        transform_stamped.transform.rotation.w = cr * cp * cy + sr * sp * sy;
+        transform_stamped.transform.rotation.x = sr * cp * cy - cr * sp * sy;
+        transform_stamped.transform.rotation.y = cr * sp * cy + sr * cp * sy;
+        transform_stamped.transform.rotation.z = cr * cp * sy - sr * sp * cy;
+         
+        tf_broadcaster_->sendTransform(transform_stamped);
+
+        //std::cout << "x: " << odom_x << " y: " << odom_y << " theta: " << odom_theta << std::endl;
+
+      
+
+    }
     
     void controller_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
 
         re_decoder right(22, 23, update_rightEncoder);
         re_decoder left(27, 17, update_leftEncoder);
-        //re_decoder right(22, 23, update_rightEncoder);
         
-        int W = 1;
+        int W = 10;
 
-        //RCLCPP_INFO(this->get_logger(), "boh '%f'", 0.0);
+        //calculate velocity of each wheel
+        float v = msg->linear.x*2;
+        float w = msg->angular.z*2;
+
         
-        double duty_cycle_Left =  0;
-        double vel_d_Left = msg->linear.x*10;
 
-        //RCLCPP_INFO(this->get_logger(), "VEL DESIRED '%f'", vel_d_Left);
+        double vel_d_Left = (2*v - w*d)/(2*r);
+        double vel_d_Right = -(2*v + w*d)/(2*r);
 
+        //std::cout << "velocity linear " << v << " angular " << w << std::endl;
+        std::cout << "vel_d_Left " << vel_d_Left << " vel_d_Right " << vel_d_Right << std::endl;
+        //LEFT WHEEL
+        double duty_cycle_Left =  0;     
 
-        //RCLCPP_INFO(this->get_logger(), "tickLeft '%i'", tickLeft);
-        //RCLCPP_INFO(this->get_logger(), "tickRight '%i'", tickRight);
-        
-        
 
         float speed_Left = 0;
-        float speed_last_Left = 0;
+        //float speed_last_Left = 0;
+        float speed_last_Left = speed_Left_outside;
         float speed_filtered_Left = 0;
 
         float error_vel_Left = 0;
@@ -173,29 +230,32 @@ class MotorController : public rclcpp::Node{
         float angle_rad_Left = 0;
         float old_angle_rad_Left = 0;
 
-
+        //RIGHT WHEEL
         float duty_cycle_Right = 0;
-        float vel_d_Right = -msg->linear.x*10;
 
         float speed_Right = 0;
-        float speed_last_Right = 0;
+        //float speed_last_Right = 0;
+        float speed_last_Right = speed_Right_outside;
         float speed_filtered_Right = 0;
 
         float error_vel_Right = 0;
         float error_acc_Right = 0;
         float error_vel_integral_Right = 0;
-        //RCLCPP_INFO(this->get_logger(), "error_vel_integral_Right beginning '%f'", error_vel_integral_Right);
         
 
         float angle_rad_Right = 0;
         float old_angle_rad_Right = 0;
 
+
+
         tickRight = 0;
         tickLeft = 0;
+        speed_Right_outside = 0;
+        speed_Left_outside = 0;
         
-        //RCLCPP_INFO(this->get_logger(), "vel_d_Right '%f'", vel_d_Right);
-
-        for(int i = 0; i < 50; i++) {
+        
+        //inner control loop
+        for(int i = 0; i < step; i++) {
 
             auto start = std::chrono::high_resolution_clock::now();
 
@@ -204,21 +264,21 @@ class MotorController : public rclcpp::Node{
             angle_rad_Left = (tickLeft*0.20)*3.14159/180;
 
             //calculation speed
-            speed_Left = (angle_rad_Left - old_angle_rad_Left)/0.002;
+            speed_Left = (angle_rad_Left - old_angle_rad_Left)/Ts_innerLoop;
             speed_filtered_Left = (speed_last_Left + speed_Left)/2;
             speed_last_Left = speed_Left;
+            speed_Left_outside = speed_Left_outside + speed_Left;
             
 
             //calculation errors
             error_vel_Left = vel_d_Left - speed_filtered_Left;
-            error_acc_Left = (speed_last_Left + speed_filtered_Left)/0.002;
+            error_acc_Left = (speed_last_Left + speed_filtered_Left)/Ts_innerLoop;
             error_vel_integral_Left += error_vel_Left;
             
 
             //calculation duty cycle
-            duty_cycle_Left = W*(30*error_vel_Left + 0.5*error_vel_integral_Left - 0*error_acc_Left);
-            RCLCPP_INFO(this->get_logger(), "Desired '%f'", vel_d_Left);
-            RCLCPP_INFO(this->get_logger(), "Actual '%f'", speed_filtered_Left);
+            duty_cycle_Left = W*(30*error_vel_Left + 2.5*error_vel_integral_Left - 0.*error_acc_Left);
+
 
             //move
             if(vel_d_Left > 0)
@@ -241,24 +301,24 @@ class MotorController : public rclcpp::Node{
 
             //RIGHT
             old_angle_rad_Right = angle_rad_Right;
-            angle_rad_Right = (tickRight*0.11)*3.14159/180;
+            //angle_rad_Right = (tickRight*0.11)*3.14159/180;
+            angle_rad_Right = (tickRight*0.20)*3.14159/180;
 
             //calculation speed
-            speed_Right = (angle_rad_Right - old_angle_rad_Right)/0.002;
+            speed_Right = (angle_rad_Right - old_angle_rad_Right)/Ts_innerLoop;
             speed_filtered_Right = (speed_last_Right + speed_Right)/2;
             speed_last_Right = speed_Right;
+            speed_Right_outside = speed_Right_outside + speed_Right;
             
             //calculation errors
             error_vel_Right = vel_d_Right - speed_filtered_Right;
-            error_acc_Right = (speed_last_Right + speed_filtered_Right)/0.002;
+            error_acc_Right = (speed_last_Right + speed_filtered_Right)/Ts_innerLoop;
             error_vel_integral_Right += error_vel_Right;
 
-            //RCLCPP_INFO(this->get_logger(), "error_vel_integral_Right '%f'", 0.1*error_vel_integral_Right);
-
-            //RCLCPP_INFO(this->get_logger(), "error_vel_Right '%f'", error_vel_Right);
-
             //calculation duty cycle
-            duty_cycle_Right = W*(30*error_vel_Right + 0.5*error_vel_integral_Right - 2*error_acc_Right*0);
+            duty_cycle_Right = W*(30*error_vel_Right + 2.5*error_vel_integral_Right - 0.*error_acc_Right);
+            
+            
             
             //move
             if(vel_d_Right > 0)
@@ -281,19 +341,15 @@ class MotorController : public rclcpp::Node{
                 auto finish = std::chrono::high_resolution_clock::now();
                 auto time = std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count();
                 
-                if(time > 1999)
+                if(time > Ts_innerLoop_nanosecond)
                     break;
             }
             
             auto finish_total = std::chrono::high_resolution_clock::now();
 	        auto time_total = std::chrono::duration_cast<std::chrono::microseconds>(finish_total - start).count();
             Ts_fake = (float)time_total / 1e6;
-            //RCLCPP_INFO(this->get_logger(), "time '%f'", time);
             //RCLCPP_INFO(this->get_logger(), "Ts_fake '%f'", Ts_fake);
-            //RCLCPP_INFO(this->get_logger(), "Desired '%f'", vel_d_Right);
-            //RCLCPP_INFO(this->get_logger(), "Actual '%f'", speed_filtered_Right);
-            //RCLCPP_INFO(this->get_logger(), "vel left '%f'", speed_filtered_Left);
-            //RCLCPP_INFO(this->get_logger(), "index '%i'", i);
+
 
         }
 
@@ -302,8 +358,27 @@ class MotorController : public rclcpp::Node{
 
         //left.re_cancel();
         //right.re_cancel();
-        //forward(0,0);
-        //forward(1,0);
+        
+        //maybe to eliminate
+        forward(0,0);
+        forward(1,0);
+
+        angleRight_sum = angle_rad_Right + angleRight_sum;
+        angleLeft_sum = angle_rad_Left + angleLeft_sum;
+        
+        delta_s = (r/2.)*(angleRight_sum + angleLeft_sum) - delta_s;
+        delta_theta = (r/d)*(angleRight_sum - angleLeft_sum) - delta_theta;
+        float v_reconstructed = delta_s/Ts;
+        float w_reconstructed = delta_theta/Ts;
+
+        odom_x = odom_x + v_reconstructed*Ts*cos(odom_theta);
+        odom_y = odom_y + v_reconstructed*Ts*sin(odom_theta);
+        odom_theta = odom_theta + w_reconstructed*Ts;
+        
+        std::cout << "speed left: " << speed_Left_outside/step << " speed Right: " << speed_Right_outside/step << std::endl;
+        std::cout << "x: " << odom_x << " y: " << odom_y << " theta: " << odom_theta << std::endl;
+        //speed_Left_outside = 0;
+        //speed_Right_outside = 0;
 
         RCLCPP_INFO(this->get_logger(), "###########");
     }    
