@@ -9,7 +9,7 @@ This repo contains the code for controlling both a real and a simulated differen
 
  
 ## Dependencies
-1. [ROS2](https://docs.ros.org/en/foxy/Installation.html) Foxy
+1. [ROS2](https://docs.ros.org/en/foxy/Installation.html) Hunble
 
 2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
 
@@ -23,21 +23,20 @@ This repo contains the code for controlling both a real and a simulated differen
 
 
 ## Build on Linux
-1. 
-clone the repo
+1. clone the repo
 ```sh
 git clone --recurse-submodules https://github.com/giulioturrisi/differential_drive.git
 ```
+and extract CoppeliaSim in Differential-Drive-Robot/coppeliasim_simulation
 
 2. 
-download CoppeliaSim and extract it in Differential-Drive-Robot/coppeliasim_simulation
+add the lines geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in interfaces.txt 
 ```sh
 cd Differential-Drive-Robot/ros2_ws/src/simExtROS2/meta
 ```
-add the lines geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in interfaces.txt 
 
 3.
-build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu
+build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
 ```sh
 docker build -t ros2_humble .
 ```
