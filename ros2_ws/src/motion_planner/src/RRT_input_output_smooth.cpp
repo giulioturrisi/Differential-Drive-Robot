@@ -8,6 +8,8 @@
 #include "nav_msgs/msg/path.hpp"
 #include "nav_msgs/msg/occupancy_grid.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
+#include "tf2/utils.h"
+
 
 //reading utility file map (if used)
 #include "pgm.hpp"
@@ -142,7 +144,10 @@ static double rt_roundd_snf(double u)
 }
 
 
-
+struct Point {
+    float x;
+    float y;
+};
 
 //global stuff to save a map receviced from the topic /map
 coder::array<double, 2U> image;
@@ -156,14 +161,16 @@ class MinimalSubscriber : public rclcpp::Node
       subscription_goal = this->create_subscription<geometry_msgs::msg::PoseStamped>(
       "goal_pose", 1, std::bind(&MinimalSubscriber::goal_callback, this, _1));
 
-      //subscription_TF = this->create_subscription<tf2_msgs::msg::TFMessage>(
-      //"tf", 1, std::bind(&MinimalSubscriber::topic_callback, this, _1));
+      subscription_state = this->create_subscription<tf2_msgs::msg::TFMessage>(
+      "tf", 1, std::bind(&MinimalSubscriber::state_callback, this, _1));
 
       subscription_map = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
       "map", 1, std::bind(&MinimalSubscriber::map_callback, this, _1));
       
 
       publisher_path = this->create_publisher<nav_msgs::msg::Path>("path", 1);
+
+      state = {0,0};
 
       RCLCPP_INFO(this->get_logger(), "Node started");
     }
@@ -242,8 +249,10 @@ class MinimalSubscriber : public rclcpp::Node
       //dv[0] = 0 + 1.46;
       //dv[1] = 0 + 1.03;
 
-      dv[0] = 0 + 1.03;
-      dv[1] = 0 + 1.46;
+      //dv[0] = 0 + 1.03;
+      //dv[1] = 0 + 1.46;
+      dv[0] = state.x;
+      dv[1] = state.y;
       dv[2] = 0;
       dv[3] = 0;
       dv[4] = 0;
@@ -281,8 +290,13 @@ class MinimalSubscriber : public rclcpp::Node
         //poseStamped.pose.position.x = temp_y;
         //poseStamped.pose.position.y = -temp_x;
 
-        poseStamped.pose.position.x = final_path[j] - 1.03;
-        poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.46;
+        //poseStamped.pose.position.x = final_path[j] - 1.03;
+        //poseStamped.pose.position.y = final_path[(size_path/6) + j] - 1.46;
+
+
+
+        poseStamped.pose.position.x = final_path[j];
+        poseStamped.pose.position.y = final_path[(size_path/6) + j];
 
 
 
@@ -329,12 +343,36 @@ class MinimalSubscriber : public rclcpp::Node
     }
 
 
+    void state_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg)
+    {
+        tf2::Quaternion q(
+            msg->transforms[0].transform.rotation.x,
+            msg->transforms[0].transform.rotation.y,
+            msg->transforms[0].transform.rotation.z,
+            msg->transforms[0].transform.rotation.w);
+        tf2::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+
+        //struct Point state;
+        if(msg->transforms[0].child_frame_id == "base_footprint") {
+          state.x = msg->transforms[0].transform.translation.x;
+          state.y = msg->transforms[0].transform.translation.y;
+          //RCLCPP_INFO(this->get_logger(), "state x'%f'", state.x);
+          //RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
+          //RCLCPP_INFO(this->get_logger(), "state theta'%f'", yaw);
+        }
+      
+    }
+
+
 
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr subscription_goal;
     rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr subscription_map;
-    //rclcpp::Subscription<tf2_msgs::msg::PoseStamped>::SharedPtr subscription_TF;
+    rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr subscription_state;
     
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr publisher_path;
+    Point state;
 };
 
 int main(int argc, char * argv[])
