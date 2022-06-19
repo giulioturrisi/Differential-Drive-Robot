@@ -70,7 +70,7 @@ ros2 run motion_planner RRT_input_output_smooth                    (planning)
 ros2 run controller input_output_linearization                     (control)
 ros2 launch slam_toolbox localization_launch.py                    (localization)
 ```
-in slam_toolbox/congif/mapper_params_localization you should put in map_file_name: simple_walls_map
+in slam_toolbox/congif/mapper_params_localization you should put in map_file_name: /home/ros2_ws/name_of_map
 
 
 3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
