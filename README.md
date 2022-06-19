@@ -44,7 +44,7 @@ docker build -t ros2_humble .
 ```sh
 cd 
 gedit .bashrc
-alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY  -e QT_X11_NO_MITSHM=1 --gpus all --name ddrive_foxy ros2_humble'  (if nvidia image for docker)
+alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY  -e QT_X11_NO_MITSHM=1 --gpus all --name ddrive_humble ros2_humble'  (if nvidia image for docker)
 alias ddrive='docker exec -it ddrive_humble bash'
 ```
 
@@ -59,7 +59,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 
 ## How to run the simulation
-1. Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation (or ./coppeliaSim.sh -h -s ../simple_walls_dynamics.ttt from terminal. You can add the flag -h to run CoppeliaSim wuthout the gui.)
+1. Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation (or ./coppeliaSim.sh -s ../simple_walls_dynamics.ttt from terminal. You can add the flag -h to run CoppeliaSim wuthout the gui.)
 
 2. open a new terminals 
 ```sh
