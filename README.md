@@ -15,29 +15,48 @@ This repo contains the code for controlling both a real and a simulated differen
 
 2. [Acados](https://github.com/acados/acados) for one of the controllers (not mandatory)
 
-It is necessary to add the following corresponding `Env` variables in the `.bashrc` or `.bash_profile` the following line:
-```sh
-export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
-```
+
+#It is necessary to add the following corresponding `Env` variables in the `.bashrc` or `.bash_profile` the following line:
+#```sh
+#export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
+#```
 
 
 ## Build on Linux
 1. 
+clone the repo
 ```sh
 git clone --recurse-submodules https://github.com/giulioturrisi/differential_drive.git
-cd differential_drive/ros2_ws/src
 ```
 
 2. 
+download CoppeliaSim and extract it in Differential-Drive-Robot/coppeliasim_simulation
 ```sh
-cd src/simExtROS2/meta
+cd Differential-Drive-Robot/ros2_ws/src/simExtROS2/meta
 ```
 add the lines geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in interfaces.txt 
 
-3. 
+3.
+build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu
 ```sh
-cd ../../../
-rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
+docker build -t ros2_humble .
+```
+
+4. 
+add some alias to start the docker
+```sh
+cd 
+gedit .bashrc
+alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY  -e QT_X11_NO_MITSHM=1 --gpus all --name ddrive_foxy ros2_humble'  (if nvidia image for docker)
+alias ddrive='docker exec -it ddrive_humble bash'
+```
+
+3. 
+start docker and build
+```sh
+ddrive_humble
+cd ros2_ws
+rosdep install -y -r -q --from-paths src --ignore-src --rosdistro humble
 ulimit -s unlimited
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
