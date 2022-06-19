@@ -29,20 +29,17 @@ git clone --recurse-submodules https://github.com/giulioturrisi/differential_dri
 ```
 and extract CoppeliaSim in Differential-Drive-Robot/coppeliasim_simulation
 
-2. 
-add the lines geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in interfaces.txt 
+2. add the lines geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in interfaces.txt 
 ```sh
 cd Differential-Drive-Robot/ros2_ws/src/simExtROS2/meta
 ```
 
-3.
-build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
+3. build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
 ```sh
 docker build -t ros2_humble .
 ```
 
-4. 
-add some alias to start the docker
+4. add alias to start the docker
 ```sh
 cd 
 gedit .bashrc
@@ -50,8 +47,7 @@ alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Diff
 alias ddrive='docker exec -it ddrive_humble bash'
 ```
 
-3. 
-start docker and build
+5. start docker and build
 ```sh
 ddrive_humble
 cd ros2_ws
