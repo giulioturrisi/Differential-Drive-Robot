@@ -30,6 +30,8 @@ RUN apt install -y xsltproc
 RUN apt-get install -y libmagick++-dev
 RUN apt install -y graphicsmagick-libmagick-dev-compat
 RUN apt install -y ros-humble-behaviortree-cpp-v3
+RUN apt install -y ros-humble-navigation2 
+RUN apt install -y ros-humble-nav2-bringup
 
 #CERES
 ## Install packages

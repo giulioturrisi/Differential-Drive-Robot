@@ -29,9 +29,10 @@ git clone --recurse-submodules https://github.com/giulioturrisi/differential_dri
 ```
 and extract CoppeliaSim in Differential-Drive-Robot/coppeliasim_simulation
 
-2. add the lines geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in interfaces.txt 
+2. add the following ls in ros2_ws/src/simExtROS2/meta/interfaces.txt 
 ```sh
-cd Differential-Drive-Robot/ros2_ws/src/simExtROS2/meta
+geometry_msgs/msg/Twist
+sensor_msgs/msg/LaserScan
 ```
 
 3. build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
@@ -58,7 +59,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 
 ## How to run the simulation
-1. Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation
+1. Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation (or ./coppeliaSim.sh -h -s ../simple_walls_dynamics.ttt from terminal. You can add the flag -h to run CoppeliaSim wuthout the gui.)
 
 2. open a new terminals 
 ```sh
