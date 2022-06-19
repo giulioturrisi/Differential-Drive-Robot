@@ -3,7 +3,7 @@ This repo contains the code for controlling both a real and a simulated differen
 
 1. ```matlab_simulation``` with subfolders: ```maps``` (utility to modify an existing map), ```planners``` (generate an obstacle-free path with different methods), ```controllers``` (move the robot). Matlab is also used to easily generate the c++ code for ROS2.
  
-2. ```coppeliasim_simulatio``` contains the scenes used for simulating the robot (dynamically enabled or not)
+2. ```coppeliasim_simulation``` contains the scenes used for simulating the robot (dynamically enabled or not)
 
 3. ```ros2_ws``` with subfolders: ```slam_toolbox``` (generate a map - [slam](https://github.com/SteveMacenski/slam_toolbox)), ```navigation2``` (dependencies for slam - [nav](https://github.com/ros-planning/navigation2)), ```simExtROS2``` and ```ros2_bubble_rob```(dependencies for CoppeliaSim).
 
@@ -61,7 +61,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ## How to run the simulation
 1. Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation (or ./coppeliaSim.sh -s ../simple_walls_dynamics.ttt from terminal. You can add the flag -h to run CoppeliaSim wuthout the gui.)
 
-2. open a new terminals 
+2. on a new terminal 
 ```sh
 ros2 run teleop_twist_keyboard teleop_twist_keyboard               (if you want to use the keyboard)
 ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'   (if you want to use the joystick)
