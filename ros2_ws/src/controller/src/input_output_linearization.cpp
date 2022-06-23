@@ -9,17 +9,22 @@
 
 #include "tf2/utils.h"
 
+using namespace std::chrono_literals;
 using std::placeholders::_1;
 
 
 struct Point {
     float x;
     float y;
+    float yaw = 0;
 };
+
 
 std::vector<Point> path;
 bool path_ready = false;
-
+struct Point state;
+struct Point reference;
+float dt = 0.01;
 
 class MinimalSubscriber : public rclcpp::Node
 {
@@ -31,10 +36,13 @@ class MinimalSubscriber : public rclcpp::Node
       "path", 1, std::bind(&MinimalSubscriber::getPath_callback, this, _1));
       
       subscription_state = this->create_subscription<tf2_msgs::msg::TFMessage>(
-      "tf", 1, std::bind(&MinimalSubscriber::controller_callback, this, _1));
+      "tf", 1, std::bind(&MinimalSubscriber::state_callback, this, _1));
       
       publisher_command = this->create_publisher<geometry_msgs::msg::Twist>(
       "cmd_vel", 1);
+
+      controller = this->create_wall_timer(
+      10ms, std::bind(&MinimalSubscriber::controller_callback, this));
 
       RCLCPP_INFO(this->get_logger(), "Node started");
       
@@ -62,48 +70,25 @@ class MinimalSubscriber : public rclcpp::Node
       
     }
 
-
-    void controller_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg) const
+    void controller_callback()
     {
-        if(path_ready == true) {
-            tf2::Quaternion q(
-                msg->transforms[0].transform.rotation.x,
-                msg->transforms[0].transform.rotation.y,
-                msg->transforms[0].transform.rotation.z,
-                msg->transforms[0].transform.rotation.w);
-            tf2::Matrix3x3 m(q);
-            double roll, pitch, yaw;
-            m.getRPY(roll, pitch, yaw);
-
-            struct Point state;
-            struct Point reference;
-            state.x = msg->transforms[0].transform.translation.x;
-            state.y = msg->transforms[0].transform.translation.y;
-
-            RCLCPP_INFO(this->get_logger(), "state x'%f'", msg->transforms[0].transform.translation.x);
-            RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
-            RCLCPP_INFO(this->get_logger(), "state theta'%f'", yaw);
-            
-
+      if(path_ready == true) {
             reference = path.back();
 
             RCLCPP_INFO(this->get_logger(), "reference x'%f'", reference.x);
             RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
             
-            double dt = 0.1;
             double k1 = 1;
 
             //input-output lin
-            //double x_vel = (near_node(1) - path(d - 1,1))/dt;
-            //double y_vel = (near_node(2) - path(d - 1,2))/dt;
-            double u1_io = k1*(reference.x - state.x);// + x_vel;
-            //double u1_io = k1*(1 - state.x);
-            double u2_io = k1*(reference.y - state.y);// + y_vel;
+
+            double u1_io = k1*(reference.x - state.x);
+            double u2_io = k1*(reference.y - state.y);
             RCLCPP_INFO(this->get_logger(), "u1 '%f'", u1_io);
             RCLCPP_INFO(this->get_logger(), "u2 '%f'", u2_io);
-            //double u2_io = k1*(0 - state.y);// + y_vel;
-            double v = cos(yaw)*u1_io + sin(yaw)*u2_io;
-            double w = -sin(yaw)*u1_io/0.01 + cos(yaw)*u2_io/0.01;
+           
+            double v = cos(state.yaw)*u1_io + sin(state.yaw)*u2_io;
+            double w = -sin(state.yaw)*u1_io/0.01 + cos(state.yaw)*u2_io/0.01;
 
             RCLCPP_INFO(this->get_logger(), "v: '%f'", v);
             RCLCPP_INFO(this->get_logger(), "w: '%f'", w);
@@ -114,18 +99,44 @@ class MinimalSubscriber : public rclcpp::Node
 
             publisher_command->publish(commanded_vel);
 
-
-
             path.pop_back();
             if(path.empty())
                 path_ready = false;
+      }
+
+    }
+
+
+    void state_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg) const
+    {
+
+        tf2::Quaternion q(
+            msg->transforms[0].transform.rotation.x,
+            msg->transforms[0].transform.rotation.y,
+            msg->transforms[0].transform.rotation.z,
+            msg->transforms[0].transform.rotation.w);
+        tf2::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+
+        if(msg->transforms[0].child_frame_id == "base_footprint") {
+          state.x = msg->transforms[0].transform.translation.x;
+          state.y = msg->transforms[0].transform.translation.y;
+          state.yaw = yaw;
         }
+
+        RCLCPP_INFO(this->get_logger(), "state x'%f'", msg->transforms[0].transform.translation.x);
+        RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
+        RCLCPP_INFO(this->get_logger(), "state theta'%f'", state.yaw);
+        
+    
     }
 
 
     rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr subscription_path;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_command;
     rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr subscription_state;
+    rclcpp::TimerBase::SharedPtr controller;
 
 };
 
