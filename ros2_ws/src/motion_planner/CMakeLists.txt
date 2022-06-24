@@ -38,17 +38,32 @@ endif()
 
 include_directories(include)
 include_directories(include/read_pgm)
+include_directories(include/A_star)
+include_directories(include/A_star/interface)
 
-set(SOURCES include/planning_fun_data.cpp include/planning_fun_initialize.cpp)
-set(SOURCES2 include/planning_fun_terminate.cpp include/planning_fun.cpp include/rand.cpp include/eml_rand_mt19937ar_stateful.cpp)
-set(SOURCES3 include/RRT_input_output_deltaInput.cpp)
+#set(SOURCES include/planning_fun_data.cpp include/planning_fun_initialize.cpp)
+#set(SOURCES2 include/planning_fun_terminate.cpp include/planning_fun.cpp include/rand.cpp include/eml_rand_mt19937ar_stateful.cpp)
+#set(SOURCES3 include/RRT_input_output_deltaInput.cpp)
+
+set(SOURCES include/A_star/planning_fun_A_star_data.cpp include/A_star/planning_fun_A_star_initialize.cpp)
+set(SOURCES2 include/A_star/planning_fun_A_star_terminate.cpp include/A_star/planning_fun_A_star.cpp)
+#set(SOURCES3 include/A_star/interface/_coder_planning_fun_A_star_api.cpp include/A_star/interface/_coder_planning_fun_A_star_info.cpp include/A_star/interface/_coder_planning_fun_A_star_mex.cpp)
+
 set(SOURCES4 include/read_pgm/pgm.cpp)
 
-add_executable(RRT_input_output_smooth src/RRT_input_output_smooth.cpp ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
-ament_target_dependencies(RRT_input_output_smooth rclcpp std_msgs geometry_msgs nav_msgs tf2_msgs tf2)
+#add_executable(RRT_input_output_smooth src/RRT_input_output_smooth.cpp ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+#ament_target_dependencies(RRT_input_output_smooth rclcpp std_msgs geometry_msgs nav_msgs tf2_msgs tf2)
+
+#install(TARGETS
+#  RRT_input_output_smooth
+#  DESTINATION lib/${PROJECT_NAME})
+
+
+add_executable(main_A_star src/main_A_star.cpp ${SOURCES} ${SOURCES2} ${SOURCES4})
+ament_target_dependencies(main_A_star rclcpp std_msgs geometry_msgs nav_msgs tf2_msgs tf2)
 
 install(TARGETS
-  RRT_input_output_smooth
+  main_A_star
   DESTINATION lib/${PROJECT_NAME})
 
 

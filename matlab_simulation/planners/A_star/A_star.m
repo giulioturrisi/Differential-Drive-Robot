@@ -21,8 +21,8 @@ classdef A_star < handle
 
             obj.map_limit = limit;
             obj.goal = int16(goal/resolution);
-            obj.start = [int16(initial_state(1)/resolution) int16(initial_state(2)/resolution)]
-            obj.resolution = resolution
+            obj.start = [int16(initial_state(1)/resolution) int16(initial_state(2)/resolution)];
+            obj.resolution = resolution;
             %obj.map = im2double(map);            
             %[x, y, g, h, open, parent id (the position in the array)]
             obj.map = zeros(size(map,1)*size(map,2),6);
@@ -121,7 +121,7 @@ classdef A_star < handle
             dimension_path = 0;
             for i=1:100
                 path(i,1:2) = obj.map(index,1:2)*obj.resolution; 
-                index = obj.map(index,6);
+                index = int16(obj.map(index,6));
                 dimension_path = dimension_path + 1;
                 if(index == 0)
                     break;
