@@ -25,6 +25,7 @@ bool path_ready = false;
 struct Point state;
 struct Point reference;
 float dt = 0.01;
+# define M_PI           3.14159265358979323846  /* pi */
 
 class MinimalSubscriber : public rclcpp::Node
 {
@@ -72,26 +73,32 @@ class MinimalSubscriber : public rclcpp::Node
 
     void controller_callback()
     {
-      if(path_ready == true) {
+      /*if(path_ready == true) {
             reference = path.back();
 
             RCLCPP_INFO(this->get_logger(), "reference x'%f'", reference.x);
             RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
-            
-            double k1 = 1;
+      */    
+            double k1 = 0.5;
+            double b = 0.1;
 
             //input-output lin
+            double theta_woffset = state.yaw + M_PI/2.;
+            double error_x = 0 - (state.x + b*cos(theta_woffset));
+            double error_y = 0 - (state.y + b*sin(theta_woffset));
 
-            double u1_io = k1*(reference.x - state.x);
-            double u2_io = k1*(reference.y - state.y);
-            RCLCPP_INFO(this->get_logger(), "u1 '%f'", u1_io);
-            RCLCPP_INFO(this->get_logger(), "u2 '%f'", u2_io);
-           
-            double v = cos(state.yaw)*u1_io + sin(state.yaw)*u2_io;
-            double w = -sin(state.yaw)*u1_io/0.01 + cos(state.yaw)*u2_io/0.01;
 
-            RCLCPP_INFO(this->get_logger(), "v: '%f'", v);
-            RCLCPP_INFO(this->get_logger(), "w: '%f'", w);
+            //double u1_io = k1*(reference.x - state.x);
+            double u1_io = k1*error_x;
+            //double u2_io = k1*(reference.y - state.y);
+            double u2_io = k1*error_y;
+            
+
+            double v = cos(theta_woffset)*u1_io + sin(theta_woffset)*u2_io;
+            double w = -sin(theta_woffset)*u1_io/b + cos(theta_woffset)*u2_io/b;
+
+            //RCLCPP_INFO(this->get_logger(), "v: '%f'", v);
+            //RCLCPP_INFO(this->get_logger(), "w: '%f'", w);
 
             auto commanded_vel = geometry_msgs::msg::Twist();
             commanded_vel.linear.x = v;
@@ -99,10 +106,11 @@ class MinimalSubscriber : public rclcpp::Node
 
             publisher_command->publish(commanded_vel);
 
-            path.pop_back();
+     /*       path.pop_back();
             if(path.empty())
                 path_ready = false;
       }
+    */
 
     }
 
@@ -124,7 +132,8 @@ class MinimalSubscriber : public rclcpp::Node
           state.y = msg->transforms[0].transform.translation.y;
           state.yaw = yaw;
         }
-
+        
+        RCLCPP_INFO(this->get_logger(), "#####################");
         RCLCPP_INFO(this->get_logger(), "state x'%f'", msg->transforms[0].transform.translation.x);
         RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
         RCLCPP_INFO(this->get_logger(), "state theta'%f'", state.yaw);

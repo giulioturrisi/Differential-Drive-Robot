@@ -218,8 +218,8 @@ class MinimalSubscriber : public rclcpp::Node
       //goal_tmp[1] = goal_tmp[1] + 1.03;
 
 
-      goal_tmp[0] = goal_tmp[0] + 1.03;
-      goal_tmp[1] = goal_tmp[1] + 1.46;
+      goal_tmp[0] = goal_tmp[0]; //+ 1.03;
+      goal_tmp[1] = goal_tmp[1]; //+ 1.46;
 
       //check if inside map limit!
       if(goal_tmp[0] > limit_tmp[0])
