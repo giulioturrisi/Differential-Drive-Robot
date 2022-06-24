@@ -14,21 +14,24 @@ while(finish == 0)
    end
    grid_search.open_sons_cell(next_cell);
   
-%     %for test/plot
-%     rgbImage = cat(3, image, image, image);
-%     rgbImage(int16(goal(1)/resolution)+1,int16(goal(2)/resolution)+1,1) = 255;
-%     rgbImage(int16(goal(1)/resolution)+1,int16(goal(2)/resolution)+1,2) = 0;
-%     rgbImage(int16(goal(1)/resolution)+1,int16(goal(2)/resolution)+1,3) = 0;
-%     for i = 1:size(image,1)
-%        for j = 1:size(image,2) 
-%               if(grid_search.cells_isopen(i +(j-1)*size(image,2),1) == 1)
-%                   rgbImage(i+1,j+1,1) = 0;
-%                   rgbImage(i+1,j+1,2) = 255;
-%                   rgbImage(i+1,j+1,3) = 0;
-%               end
-%        end
-%     end
-%    J = imrotate(rgbImage,90); J = imresize( J , 5); imshow(J);
+    %for test/plot
+    rgbImage = cat(3, image, image, image);
+    rgbImage(int16(goal(1)/resolution)+1,int16(goal(2)/resolution)+1,1) = 255;
+    rgbImage(int16(goal(1)/resolution)+1,int16(goal(2)/resolution)+1,2) = 0;
+    rgbImage(int16(goal(1)/resolution)+1,int16(goal(2)/resolution)+1,3) = 0;
+    rgbImage(int16(state_robot(1)/resolution)+1,int16(state_robot(2)/resolution)+1,1) = 0;
+    rgbImage(int16(state_robot(1)/resolution)+1,int16(state_robot(2)/resolution)+1,2) = 0;
+    rgbImage(int16(state_robot(1)/resolution)+1,int16(state_robot(2)/resolution)+1,3) = 255;
+    for i = 1:size(image,1)
+       for j = 1:size(image,2) 
+              if(grid_search.cells_isopen(i +(j-1)*size(image,2),1) == 1)
+                  rgbImage(i+1,j+1,1) = 0;
+                  rgbImage(i+1,j+1,2) = 255;
+                  rgbImage(i+1,j+1,3) = 0;
+              end
+       end
+    end
+   J = imrotate(rgbImage,90); J = imresize( J , 5); imshow(J);
 end
 final_path = grid_search.take_path();
 end

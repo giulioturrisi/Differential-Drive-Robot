@@ -8,7 +8,7 @@ addpath(genpath('./maps'))
 %addpath('./planners/A_star')
 
 %% load map and set resolution
-image = imread('simple_walls_map.pgm');
+image = imread('map.pgm');
 imageNorm = double(image)/255;
 imageOccupancy = 1 - imageNorm;
 map = occupancyMap(imageOccupancy,20);

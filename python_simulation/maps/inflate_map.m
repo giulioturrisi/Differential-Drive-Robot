@@ -1,4 +1,4 @@
-image = imread('simple_walls_map.pgm');
+image = imread('coppeliasim_simple.pgm');
 size_image = size(image)
 
 for i = 1:size_image(1)
@@ -39,4 +39,4 @@ for i = 1:size_image(1)
 
 end
 
-imwrite(image,'inflated.pgm','pgm','Encoding','ASCII')
+imwrite(image,'coppeliasim_simple_inflated2.pgm','pgm','Encoding','ASCII')

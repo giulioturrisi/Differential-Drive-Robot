@@ -56,7 +56,7 @@ classdef A_star < handle
             for i = 1:obj.size_x
                for j = 1:obj.size_y
                   index = i+(j-1)*obj.size_y;
-                  if(obj.cells_isopen(index,1) == 1 & obj.cells_isopen(index,2) <= best_cost)
+                  if(obj.cells_isopen(index,1) == 1 & obj.cells_isopen(index,2) < best_cost)
                      best_cost = obj.cells_isopen(index,2);
                      best_cell = index;
                   end
