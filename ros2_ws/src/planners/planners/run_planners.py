@@ -23,6 +23,8 @@ sys.path.append('/home/python_simulation/planners/Breadth_First_Search')
 from Breadth_First_Search import Breadth_First_Search
 sys.path.append('/home/python_simulation/planners/Djikstra')
 from Djikstra import Djikstra
+sys.path.append('/home/python_simulation/planners/')
+from path_utilities import interpolate_path, filter_map, draw_map
 
 
 import numpy as np
@@ -38,7 +40,6 @@ class Planners(Node):
         self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
         self.subscription_map = self.create_subscription(OccupancyGrid,'map',self.map_callback,1)
 
-
         self.state_robot = np.zeros(3)
         
         self.map_origin = np.zeros(2)
@@ -50,13 +51,12 @@ class Planners(Node):
         self.state_arrived = False
         self.map_arrived = False
 
+        self.dt = 0.1
+
     def goal_callback(self, msg):
         if(self.state_arrived == True and self.map_arrived == True):
             goal = np.array([msg.pose.position.x, msg.pose.position.y])
-            print("clicked point: ", goal)
-            print("state: ", self.state_robot)
             goal_shifted = np.zeros(2)
-            #goal_shifted[0] = np.shape(self.map)[1]*self.map_resolution - (goal[1] - self.map_origin[1])
             goal_shifted[0] = goal[0] - self.map_origin[0]
             goal_shifted[1] = goal[1] - self.map_origin[1]
 
@@ -64,45 +64,32 @@ class Planners(Node):
             state_shifted[0] = self.state_robot[0] - self.map_origin[0]
             state_shifted[1] = self.state_robot[1] - self.map_origin[1]
 
-
             print("Start: ", state_shifted)
             print("Goal: ", goal_shifted)
 
             state_shifted[0] = round(state_shifted[0],1)
             state_shifted[1] = round(state_shifted[1],1)
 
-
             goal_shifted[0] = round(goal_shifted[0],1)
             goal_shifted[1] = round(goal_shifted[1],1)
 
 
-
             #DRAW
-            #state_rotated = np.zeros(3)
-            #angle = math.pi/2
-            #state_rotated[1] = state_shifted[0]*math.cos(angle) - math.sin(angle)*state_shifted[1]
-            #state_rotated[0] = state_shifted[0]*math.sin(angle) + math.cos(angle)*state_shifted[1]
-            #rgb_image = np.stack([self.map]*3, axis=2)/255.
-            #rgb_image[int(state_shifted[0]/self.map_resolution)][int(state_shifted[1]/self.map_resolution)] = [1,0,0]
-            #rgb_image[int(goal_shifted[0]/self.map_resolution)][int(goal_shifted[1]/self.map_resolution)] = [0,0,1]
-            #f = plt.figure() 
-            #plt.imshow(rgb_image)
-            #plt.show()
-            #return
+            #draw_map(self.map, state_shifted, goal_shifted, self.map_resolution)
 
 
+            #PLAN
             planner = A_star(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
             path = planner.plan(self.max_iteration,self.visualize)
             
-            time = np.arange(0, len(path), 1)
-            spline = CubicSpline(time,np.array(path))
-            xs = np.arange(0, len(path), 0.1)
+
+            #SPLINE
+            spline, xs = interpolate_path(path, self.dt)
 
 
+            #PUBLISH
             path_msg = Path()
             path_msg.header.frame_id = "odom"
-
-
             for i in range(int(len(path)/0.1)):
                 temp = spline(xs[i])
                 poseStamped = PoseStamped()
@@ -111,7 +98,6 @@ class Planners(Node):
 
                 poseStamped.header.frame_id = "odom"
                 path_msg.poses.append(poseStamped)
-
 
             self.publisher_path.publish(path_msg)
 
@@ -129,23 +115,18 @@ class Planners(Node):
             self.state_arrived = True
 
 
-
-            
-
-
-
     def map_callback(self, msg):
         self.map = np.zeros((msg.info.height,msg.info.width))
         d = 0
         for i in range(msg.info.height):
             for j in range(msg.info.width):
                 self.map[i][j] = 254 if (msg.data[d] < 10 and msg.data[d] >= 0) else 0
-                #self.map[i][j] = 254
-                #self.map[i][j] = msg.data[d]
                 d = d+1
 
         self.map = np.flip(self.map, 0)
         self.map = np.rot90(self.map, axes=(1, 0))
+
+        #self.map = filter_map(self.map)
 
         self.map_origin[0] = msg.info.origin.position.x
         self.map_origin[1] = msg.info.origin.position.y
@@ -153,12 +134,14 @@ class Planners(Node):
 
         self.map_arrived = True
 
+
+
+
 def main(args=None):
     rclpy.init(args=args)
     print("###### Planner started ######")
 
     planner_node = Planners()
-
 
     rclpy.spin(planner_node)
     planner_node.destroy_node()
