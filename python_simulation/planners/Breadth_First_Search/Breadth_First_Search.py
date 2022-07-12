@@ -119,9 +119,8 @@ class Breadth_First_Search:
 
             if(visualize):
                 rgb_image[next_cell[0]][next_cell[1]] = [0,1,0]
-                f.figimage(rgb_image)
-                plt.draw()
-                plt.pause(0.001)
+                plt.imshow(rgb_image)
+                plt.pause(0.01)
                 rgb_image[next_cell[0]][next_cell[1]] = [1,0,0]
 
 

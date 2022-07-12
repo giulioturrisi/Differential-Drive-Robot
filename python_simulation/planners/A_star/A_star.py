@@ -28,7 +28,7 @@ class A_star:
         self.cost_so_far = np.ones((self.height,self.width,1),int)*1000;
         self.cost_so_far[self.start[0]][self.start[1]] = 0
 
-        self.graph_cost = 1
+        self.graph_cost = 0.1
         
 
         self.node_opened = []
@@ -55,7 +55,8 @@ class A_star:
         best_cost = 1000
         for i in range(len(self.node_opened)):
             temp = self.node_opened[i]
-            h = abs(self.goal[0]-(temp[0])) + abs(self.goal[1]-(temp[1]))
+            #h = abs(self.goal[0]-(temp[0])) + abs(self.goal[1]-(temp[1]))
+            h = np.sqrt(np.power(self.goal[0]-(temp[0]),2) + np.power(self.goal[1]-(temp[1]),2))
             if(h < best_cost):
                 best_cost = h
                 best_node = temp
@@ -77,7 +78,7 @@ class A_star:
                 x_new = x_parent + i
                 y_new = y_parent + j
 
-                print("parent", [x_parent, y_parent])
+                #print("parent", [x_parent, y_parent])
 
                 
 
@@ -85,12 +86,13 @@ class A_star:
                     if(self.map[x_new][y_new] != 254):
                         break
                     new_cost = self.cost_so_far[x_parent][y_parent] + self.graph_cost
-                    print("new node", [x_new, y_new])
-                    print("new cost", [new_cost])
+                    #print("new node", [x_new, y_new])
+                    #print("new cost", [new_cost])
                     if(np.array_equal(self.come_from[x_new][y_new],np.array([-1,-1])) or new_cost < self.cost_so_far[x_new][y_new]):
                         self.cost_so_far[x_new][y_new] = new_cost
                         
-                        h = abs(self.goal[0]-(x_new)) + abs(self.goal[1]-(y_new))
+                        #h = abs(self.goal[0]-(x_new)) + abs(self.goal[1]-(y_new))
+                        h = np.sqrt(np.power(self.goal[0]-(x_new),2) + np.power(self.goal[1]-(y_new),2))
                         new_cost = new_cost + h
                         self.frontiers.append([x_new, y_new, new_cost])     
                         self.come_from[x_new][y_new] = [x_parent,y_parent]  # where i come from!      
@@ -124,7 +126,7 @@ class A_star:
 
 
 
-        print("path",path)
+        #print("path",path)
         return path
 
    
@@ -154,9 +156,9 @@ class A_star:
 
             if(visualize):
                 rgb_image[next_cell[0]][next_cell[1]] = [0,1,0]
-                f.figimage(rgb_image)
-                plt.draw()
-                plt.pause(0.001)
+                plt.imshow(rgb_image)
+                #plt.draw()
+                plt.pause(0.01)
                 rgb_image[next_cell[0]][next_cell[1]] = [1,0,0]
 
 
