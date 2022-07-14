@@ -73,13 +73,17 @@ class MinimalSubscriber : public rclcpp::Node
 
     void controller_callback()
     {
-      /*if(path_ready == true) {
+      if(path_ready == true) {
             reference = path.back();
 
+            std::cout << "#############" << std::endl;
             RCLCPP_INFO(this->get_logger(), "reference x'%f'", reference.x);
             RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
-      */    
-            double k1 = 0.5;
+            RCLCPP_INFO(this->get_logger(), "state x'%f'", state.x);
+            RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
+
+        
+            double k1 = 1;
             double b = 0.1;
 
             //input-output lin
@@ -106,11 +110,11 @@ class MinimalSubscriber : public rclcpp::Node
 
             publisher_command->publish(commanded_vel);
 
-     /*       path.pop_back();
+           path.pop_back();
             if(path.empty())
                 path_ready = false;
       }
-    */
+    
 
     }
 
@@ -133,10 +137,10 @@ class MinimalSubscriber : public rclcpp::Node
           state.yaw = yaw;
         }
         
-        RCLCPP_INFO(this->get_logger(), "#####################");
-        RCLCPP_INFO(this->get_logger(), "state x'%f'", msg->transforms[0].transform.translation.x);
-        RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
-        RCLCPP_INFO(this->get_logger(), "state theta'%f'", state.yaw);
+        //RCLCPP_INFO(this->get_logger(), "#####################");
+        //RCLCPP_INFO(this->get_logger(), "state x'%f'", msg->transforms[0].transform.translation.x);
+        //RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
+        //RCLCPP_INFO(this->get_logger(), "state theta'%f'", state.yaw);
         
     
     }
