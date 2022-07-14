@@ -63,14 +63,18 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 
 ## How to run the simulation
-1. Open Coppeliasim and run the scene `simple_walls_dynamics.ttt` in the folder coppeliasim_simulation (or ./coppeliaSim.sh -s ../simple_walls_dynamics.ttt from terminal. You can add the flag -h to run CoppeliaSim wuthout the gui.)
+1. Open Coppeliasim and run the scene `medium_walls_dynamics.ttt` in the folder coppeliasim_simulation 
+```sh
+./coppeliaSim.sh -s ../simple_walls_dynamics.ttt -h
+```
+disable -h flag to run the gui!
 
 2. on a new terminal 
 ```sh
 ros2 run teleop_twist_keyboard teleop_twist_keyboard               (if you want to use the keyboard)
 ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'   (if you want to use the joystick)
 ros2 run rviz2 rviz2                                               (visualization)
-ros2 run motion_planner RRT_input_output_smooth                    (planning)
+ros2 run planners run_planners                                     (planning)
 ros2 run controller input_output_linearization                     (control)
 ros2 launch slam_toolbox localization_launch.py                    (localization)
 ```
