@@ -38,11 +38,11 @@ if(BUILD_TESTING)
 endif()
 
 
-add_executable(input_output_linearization src/input_output_linearization.cpp)
-ament_target_dependencies(input_output_linearization rclcpp std_msgs geometry_msgs nav_msgs tf2_msgs tf2)
+add_executable(io_linearization src/io_linearization.cpp)
+ament_target_dependencies(io_linearization rclcpp std_msgs geometry_msgs nav_msgs tf2_msgs tf2)
 
 install(TARGETS
-input_output_linearization
+  io_linearization
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

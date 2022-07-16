@@ -13,18 +13,6 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 
 
-struct Point {
-    float x;
-    float y;
-    float yaw = 0;
-};
-
-
-std::vector<Point> path;
-bool path_ready = false;
-struct Point state;
-struct Point reference;
-float dt = 0.01;
 # define M_PI           3.14159265358979323846  /* pi */
 
 class MinimalSubscriber : public rclcpp::Node
@@ -50,10 +38,8 @@ class MinimalSubscriber : public rclcpp::Node
     }
 
   private:
-    void getPath_callback(const nav_msgs::msg::Path::SharedPtr msg) const
+    void getPath_callback(const nav_msgs::msg::Path::SharedPtr msg)
     {
-        //RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
-
         float x,y;
         for(int i = 0; i < msg->poses.size() ; i++) {
             x = msg->poses[i].pose.position.x;
@@ -61,10 +47,11 @@ class MinimalSubscriber : public rclcpp::Node
             struct Point new_Point;
             new_Point.x = x;
             new_Point.y = y;
-            RCLCPP_INFO(this->get_logger(), "received x'%f'", new_Point.x);
-            RCLCPP_INFO(this->get_logger(), "received y'%f'", new_Point.y);
             path.push_back(new_Point);
         }
+
+        previous_reference.x = x;
+        previous_reference.y = y;
 
         path_ready = true;
         RCLCPP_INFO(this->get_logger(), "Path received");
@@ -76,27 +63,24 @@ class MinimalSubscriber : public rclcpp::Node
       if(path_ready == true) {
             reference = path.back();
 
-            std::cout << "#############" << std::endl;
-            RCLCPP_INFO(this->get_logger(), "reference x'%f'", reference.x);
-            RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
-            RCLCPP_INFO(this->get_logger(), "state x'%f'", state.x);
-            RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
+            //std::cout << "#############" << std::endl;
+            //RCLCPP_INFO(this->get_logger(), "reference x'%f'", reference.x);
+            //RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
+            //RCLCPP_INFO(this->get_logger(), "state x'%f'", state.x);
+            //RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
 
+            double ff_x = (reference.x - previous_reference.x)/dt;
+            double ff_y = (reference.y - previous_reference.y)/dt;
         
-            double k1 = 1;
+            double k1 = 5;
             double b = 0.1;
 
-            //input-output lin
             double theta_woffset = state.yaw + M_PI/2.;
             double error_x = 0 - (state.x + b*cos(theta_woffset));
             double error_y = 0 - (state.y + b*sin(theta_woffset));
 
-
-            //double u1_io = k1*(reference.x - state.x);
-            double u1_io = k1*error_x;
-            //double u2_io = k1*(reference.y - state.y);
-            double u2_io = k1*error_y;
-            
+            double u1_io = ff_x*2 + k1*(reference.x - state.x + b*cos(theta_woffset));
+            double u2_io = ff_y*2 + k1*(reference.y - state.y + b*sin(theta_woffset));
 
             double v = cos(theta_woffset)*u1_io + sin(theta_woffset)*u2_io;
             double w = -sin(theta_woffset)*u1_io/b + cos(theta_woffset)*u2_io/b;
@@ -110,16 +94,23 @@ class MinimalSubscriber : public rclcpp::Node
 
             publisher_command->publish(commanded_vel);
 
-           path.pop_back();
-            if(path.empty())
+            previous_reference.x = reference.x;
+            previous_reference.y = reference.y;
+
+            path.pop_back();
+            if(path.empty()) {
                 path_ready = false;
+                RCLCPP_INFO(this->get_logger(), "Controller stop");
+                RCLCPP_INFO(this->get_logger(), "error x'%f'", reference.x - state.x + b*cos(theta_woffset));
+                RCLCPP_INFO(this->get_logger(), "error y'%f'", reference.y - state.y + b*sin(theta_woffset));
+            }
       }
     
 
     }
 
 
-    void state_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg) const
+    void state_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg)
     {
 
         tf2::Quaternion q(
@@ -134,15 +125,9 @@ class MinimalSubscriber : public rclcpp::Node
         if(msg->transforms[0].child_frame_id == "base_footprint") {
           state.x = msg->transforms[0].transform.translation.x;
           state.y = msg->transforms[0].transform.translation.y;
-          state.yaw = yaw;
+          state.yaw = yaw;       
         }
         
-        //RCLCPP_INFO(this->get_logger(), "#####################");
-        //RCLCPP_INFO(this->get_logger(), "state x'%f'", msg->transforms[0].transform.translation.x);
-        //RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
-        //RCLCPP_INFO(this->get_logger(), "state theta'%f'", state.yaw);
-        
-    
     }
 
 
@@ -151,6 +136,19 @@ class MinimalSubscriber : public rclcpp::Node
     rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr subscription_state;
     rclcpp::TimerBase::SharedPtr controller;
 
+
+    struct Point {
+        float x;
+        float y;
+        float yaw = 0;
+    };
+    struct Point reference;
+    struct Point previous_reference;
+    struct Point state;
+    std::vector<Point> path;
+
+    bool path_ready = false;
+    float dt = 0.01;
 };
 
 int main(int argc, char * argv[])

@@ -35,6 +35,7 @@ class Planners(Node):
     def __init__(self):
         super().__init__('Planners')
         self.publisher_path = self.create_publisher(Path, 'path', 1)
+        self.publisher_map_filtered = self.create_publisher(OccupancyGrid,'map_filtered',1)
 
         self.subscription_goal = self.create_subscription(PoseStamped,'goal_pose',self.goal_callback,1)
         self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
@@ -52,6 +53,8 @@ class Planners(Node):
         self.map_arrived = False
 
         self.dt = 0.1
+        self.safety = 5
+        self.useFilteredMap = True
 
     def goal_callback(self, msg):
         if(self.state_arrived == True and self.map_arrived == True):
@@ -123,16 +126,34 @@ class Planners(Node):
                 self.map[i][j] = 254 if (msg.data[d] < 10 and msg.data[d] >= 0) else 0
                 d = d+1
 
+        if(self.useFilteredMap):
+            self.map_filtered = filter_map(self.map, self.safety)
+            self.publish_map_filter(msg)
+            self.map = self.map_filtered
+
+
         self.map = np.flip(self.map, 0)
         self.map = np.rot90(self.map, axes=(1, 0))
-
-        #self.map = filter_map(self.map)
 
         self.map_origin[0] = msg.info.origin.position.x
         self.map_origin[1] = msg.info.origin.position.y
         self.map_resolution = msg.info.resolution
 
+        
         self.map_arrived = True
+
+    
+    def publish_map_filter(self,msg):
+        d = 0
+        for i in range(msg.info.height):
+            for j in range(msg.info.width):
+                if (self.map_filtered[i][j] == 254):
+                    msg.data[d] = 0
+                else:
+                    msg.data[d] = 100      
+                d = d+1
+        self.publisher_map_filtered.publish(msg)
+
 
 
 
