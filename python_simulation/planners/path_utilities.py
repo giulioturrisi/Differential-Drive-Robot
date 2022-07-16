@@ -13,27 +13,18 @@ import matplotlib.pyplot as plt
 def map_filter_fn(values_ptr, len_values, result, user_data):
     # Get values from pointer
     values = carray(values_ptr, (len_values,), dtype=float64)
-
-    filter_out = True
-
-    for v in zip(values):
-        if not np.isnan(v):
-            if(v == 0):
-                filter_out = True
-                break
-
-
-    result[0] = filter_out
+    
+    filter = 254 
+    for v in values:
+        if(v == 0):
+            filter = 0
+            break
+    result[0] = filter
     return 1
 
 
 def filter_map(map, size):
-        map_filtered = scipy.ndimage.generic_filter(
-            map,
-            LowLevelCallable(map_filter_fn.ctypes),
-            footprint=np.ones((size,size)), mode='constant', cval=np.nan,
-        )
-        #slope_bools = edge <= self.inclination_threshold
+    return scipy.ndimage.generic_filter(map, LowLevelCallable(map_filter_fn.ctypes), footprint=np.ones((size, size)), mode='constant', cval=np.nan,)
 
 
 def interpolate_path(path, dt):
