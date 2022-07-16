@@ -22,6 +22,8 @@ RUN apt-get install -y ros-humble-tf-transformations
 RUN apt-get install -y python3-pip
 RUN pip install transforms3d
 RUN pip install pgm_reader
+RUN pip install casadi
+RUN pip install numba
 
 #PIGPIO
 RUN apt install -y python-setuptools python3-setuptools
@@ -34,6 +36,7 @@ RUN apt install -y xsltproc
 #FOR NAV2
 RUN apt-get install -y libmagick++-dev
 RUN apt install -y graphicsmagick-libmagick-dev-compat
+RUN apt-get update
 RUN apt install -y ros-humble-behaviortree-cpp-v3
 RUN apt install -y ros-humble-navigation2 
 RUN apt install -y ros-humble-nav2-bringup

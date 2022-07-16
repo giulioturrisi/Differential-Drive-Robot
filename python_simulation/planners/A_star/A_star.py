@@ -50,25 +50,36 @@ class A_star:
         return best_node
 
 
-    def find_nearest_cell_to_goal(self,):
+    def find_nearest_cell(self,desired_cell):
         best_node = []
         best_cost = 1000
         for i in range(len(self.node_opened)):
             temp = self.node_opened[i]
             #h = abs(self.goal[0]-(temp[0])) + abs(self.goal[1]-(temp[1]))
-            h = np.sqrt(np.power(self.goal[0]-(temp[0]),2) + np.power(self.goal[1]-(temp[1]),2))
+            h = np.sqrt(np.power(desired_cell[0]-(temp[0]),2) + np.power(desired_cell[1]-(temp[1]),2))
             if(h < best_cost):
                 best_cost = h
                 best_node = temp
         return best_node
 
 
+    def find_new_start(self,):
+        best_node = []
+        best_cost = 1000
+        for i in range(self.height):
+            for j in range(self.width):
+                temp = self.map[i][j]
+                #h = abs(self.goal[0]-(temp[0])) + abs(self.goal[1]-(temp[1]))
+                h = np.sqrt(np.power(self.start[0]-(temp[0]),2) + np.power(self.start[1]-(temp[1]),2))
+                if(h < best_cost):
+                    best_cost = h
+                    best_node = temp
+        return best_node
+
+
     def open_sons_cell(self ,parent):
         x_parent = parent[0];
         y_parent = parent[1];
-
-
-
 
         #need to check 8 sons!
         for i in range(-1,2):
@@ -106,12 +117,22 @@ class A_star:
         y = next_cell[1];
         return 1 if (x == self.goal[0] and y == self.goal[1]) else 0
 
+    def check_start(self):
+        #TODO
+        '''print("check",self.map[self.start[0]][self.start[1]])
+        if(self.map[self.start[0]][self.start[1]] != 254):
+            print("start unfeasible!")
+            new_start = self.find_new_start()
+            print("new start is: ", new_start)
+            self.start = new_start'''
+        return
+
 
     def take_path(self, finish):
         if(finish == 1):
             last_cell = [self.goal[0],self.goal[1]];
         else:
-            last_cell = self.find_nearest_cell_to_goal()
+            last_cell = self.find_nearest_cell(self.goal)
 
         path = [last_cell]
         last_cell = self.come_from[last_cell[0]][last_cell[1]]
@@ -123,9 +144,6 @@ class A_star:
             if(last_cell[0] == self.start[0] and last_cell[1] == self.start[1]):
                 break
             last_cell = self.come_from[last_cell[0]][last_cell[1]]
-
-
-
         #print("path",path)
         return path
 
@@ -137,6 +155,8 @@ class A_star:
     def plan(self, max_iteration, visualize=False):
         finish = 0
         iterator = 0
+
+        self.check_start()
 
         if(visualize):
             rgb_image = np.stack([self.map]*3, axis=2)/255.
