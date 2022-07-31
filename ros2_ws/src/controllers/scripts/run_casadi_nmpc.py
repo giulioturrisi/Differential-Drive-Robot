@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import math
 
 import sys
-sys.path.append('/home/python_simulation/controllers/casadi_nmpc')
+sys.path.append('/home/python_simulation/controllers')
 from casadi_nmpc import Casadi_nmpc
 
 import numpy as np
@@ -23,7 +23,7 @@ np.set_printoptions(threshold=sys.maxsize)
 import time
 
 
-class Casadi_NMPC(Node):
+class Controller(Node):
     def __init__(self):
         super().__init__('Casadi_NMPC')
         self.path = []
@@ -152,10 +152,10 @@ def main(args=None):
     rclpy.init(args=args)
     print("###### Controller started ######")
 
-    casadi_nmpc_node = Casadi_NMPC()
+    controller_node = Controller()
 
-    rclpy.spin(casadi_nmpc_node)
-    casadi_nmpc_node.destroy_node()
+    rclpy.spin(controller_node)
+    controller_node.destroy_node()
     rclpy.shutdown()
 
 

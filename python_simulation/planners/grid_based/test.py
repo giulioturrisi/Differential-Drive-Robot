@@ -1,7 +1,8 @@
-from Greedy_Best_First_Search import Greedy_Best_First_Search 
+from A_star import A_star
 import numpy as np
 import matplotlib.pyplot as plt
 from pgm_reader import Reader
+
 
 if __name__ == "__main__":
     f = './../../maps/map.pgm'
@@ -26,7 +27,7 @@ if __name__ == "__main__":
 
 
 
-    grid_search = Greedy_Best_First_Search(state_robot, goal, image, resolution)
+    grid_search = A_star(state_robot, goal, image, resolution)
     path = grid_search.plan(max_iteration, False)
 
 

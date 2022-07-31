@@ -15,15 +15,12 @@ from scipy.interpolate import CubicSpline
 
 
 import sys
-sys.path.append('/home/python_simulation/planners/A_star')
-from A_star import A_star
-sys.path.append('/home/python_simulation/planners/Greedy_Best_First_Search')
-from Greedy_Best_First_Search import Greedy_Best_First_Search
-sys.path.append('/home/python_simulation/planners/Breadth_First_Search')
-from Breadth_First_Search import Breadth_First_Search
-sys.path.append('/home/python_simulation/planners/Djikstra')
-from Djikstra import Djikstra
 sys.path.append('/home/python_simulation/planners/')
+from grid_based.A_star import A_star
+from grid_based.Greedy_Best_First_Search import Greedy_Best_First_Search
+from grid_based.Breadth_First_Search import Breadth_First_Search
+from grid_based.Djikstra import Djikstra
+
 from path_utilities import interpolate_path, filter_map, draw_map
 
 

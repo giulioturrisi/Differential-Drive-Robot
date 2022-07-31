@@ -53,7 +53,8 @@ install(TARGETS
 ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
-  controllers/run_casadi_nmpc.py
+  scripts/run_casadi_nmpc.py
+  scripts/run_io_linearization.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
