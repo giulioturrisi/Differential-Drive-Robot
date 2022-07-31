@@ -38,26 +38,6 @@ class MinimalSubscriber : public rclcpp::Node
     }
 
   private:
-    void getPath_callback(const nav_msgs::msg::Path::SharedPtr msg)
-    {
-        float x,y;
-        for(int i = 0; i < msg->poses.size() ; i++) {
-            x = msg->poses[i].pose.position.x;
-            y = msg->poses[i].pose.position.y;
-            struct Point new_Point;
-            new_Point.x = x;
-            new_Point.y = y;
-            path.push_back(new_Point);
-        }
-
-        previous_reference.x = x;
-        previous_reference.y = y;
-
-        path_ready = true;
-        RCLCPP_INFO(this->get_logger(), "Path received");
-      
-    }
-
     void controller_callback()
     {
       if(path_ready == true) {
@@ -73,14 +53,14 @@ class MinimalSubscriber : public rclcpp::Node
             double ff_y = (reference.y - previous_reference.y)/dt;
         
             double k1 = 5;
-            double b = 0.1;
+            double b = 0.05;
 
-            double theta_woffset = state.yaw + M_PI/2.;
+            double theta_woffset = state.yaw + 0*M_PI/2.;
             double error_x = 0 - (state.x + b*cos(theta_woffset));
             double error_y = 0 - (state.y + b*sin(theta_woffset));
 
-            double u1_io = ff_x*2 + k1*(reference.x - state.x + b*cos(theta_woffset));
-            double u2_io = ff_y*2 + k1*(reference.y - state.y + b*sin(theta_woffset));
+            double u1_io = ff_x + k1*(reference.x - state.x + b*cos(theta_woffset));
+            double u2_io = ff_y + k1*(reference.y - state.y + b*sin(theta_woffset));
 
             double v = cos(theta_woffset)*u1_io + sin(theta_woffset)*u2_io;
             double w = -sin(theta_woffset)*u1_io/b + cos(theta_woffset)*u2_io/b;
@@ -105,8 +85,36 @@ class MinimalSubscriber : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "error y'%f'", reference.y - state.y + b*sin(theta_woffset));
             }
       }
-    
+      else {
+          auto commanded_vel = geometry_msgs::msg::Twist();
+          commanded_vel.linear.x = 0;
+          commanded_vel.angular.z = 0;
 
+          publisher_command->publish(commanded_vel);
+
+          previous_reference.x = reference.x;
+          previous_reference.y = reference.y;
+      }
+    }
+  
+    void getPath_callback(const nav_msgs::msg::Path::SharedPtr msg)
+    {
+        float x,y;
+        for(int i = 0; i < msg->poses.size() ; i++) {
+            x = msg->poses[i].pose.position.x;
+            y = msg->poses[i].pose.position.y;
+            struct Point new_Point;
+            new_Point.x = x;
+            new_Point.y = y;
+            path.push_back(new_Point);
+        }
+
+        previous_reference.x = x;
+        previous_reference.y = y;
+
+        path_ready = true;
+        RCLCPP_INFO(this->get_logger(), "Path received");
+      
     }
 
 

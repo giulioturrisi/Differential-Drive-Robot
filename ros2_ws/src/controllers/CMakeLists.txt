@@ -17,7 +17,9 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -44,5 +46,16 @@ ament_target_dependencies(io_linearization rclcpp std_msgs geometry_msgs nav_msg
 install(TARGETS
   io_linearization
   DESTINATION lib/${PROJECT_NAME})
+
+
+
+
+ament_python_install_package(${PROJECT_NAME})
+# Install Python executables
+install(PROGRAMS
+  controllers/run_casadi_nmpc.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 
 ament_package()
