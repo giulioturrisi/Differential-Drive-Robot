@@ -1,28 +1,9 @@
-- to compile:
-
-1) move the folder driver_motor dc_motor_l298N outside, they are only for usage with the Raspberry/real robot
-
-2) add geometry_msgs/msg/Twist and sensor_msgs/msg/LaserScan in simExtROS2/meta/interfaces.txt 
-
-3) rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
-
-4) export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
-
-5) ulimit -s unlimited #otherwise compilation might freeze/crash
-
-6) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
-
-
-- to run:
-
-ros2 run rviz2 rviz2
-
-ros2 launch slam_toolbox online_sync_launch.py
-
-ros2 run key_teleop key_teleop
-
 - to save a map
 ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name:
   data: 'map'"
 
 ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph
+
+
+sudo chown -R $(whoami):$(whoami) Differential-Drive-Robot/
+
