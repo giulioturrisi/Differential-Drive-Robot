@@ -10,10 +10,7 @@ class IO_linearization:
         self.previous_reference = None
         self.dt = dt
     
-    def compute(self,initial_state, reference):
-        reference_x = reference[0] 
-        reference_y = reference[1]
-
+    def compute_control(self,initial_state, reference_x, reference_y):
         state_x = initial_state[0]
         state_y = initial_state[1]
         state_yaw = initial_state[2]
@@ -25,18 +22,21 @@ class IO_linearization:
             ff_x = (reference_x - previous_reference_x)/self.dt;
             ff_y = (reference_y - previous_reference_y)/self.dt;
             
-            self.previous_reference = reference 
+            self.previous_reference = [reference_x, reference_y] 
         else:
             ff_x = 0.0
             ff_y = 0.0
 
-        state_yaw = state_yaw + math.pi/2.;
+        ff_x = 0.0
+        ff_y = 0.0
+
+        state_yaw = state_yaw + 0*math.pi/2.;
         
-        u1_io = ff_x + self.k1*(reference.x - (state_x + self.b*math.cos(state_yaw)))
-        u2_io = ff_y + self.k2*(reference.y - (state_y + self.b*math.sin(state_yaw)))
+        u1_io = ff_x + self.k1*(reference_x - (state_x + self.b*math.cos(state_yaw)))
+        u2_io = ff_y + self.k2*(reference_y - (state_y + self.b*math.sin(state_yaw)))
 
         v = math.cos(state_yaw)*u1_io + math.sin(state_yaw)*u2_io;
-        w = -math.sin(state_yaw)*u1_io/self.b + math.cos(state_yaw)*u2_io/self.b;
+        w = (-math.sin(state_yaw)*u1_io/self.b) + (math.cos(state_yaw)*u2_io/self.b);
 
 
         return v, w

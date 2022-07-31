@@ -1,26 +1,23 @@
-import rclpy
-from rclpy.node import Node
+import rclpy # type: ignore 
+from rclpy.node import Node # type: ignore
 
-from std_msgs.msg import String, Bool
-from geometry_msgs.msg import PoseStamped, Twist
-from tf2_msgs.msg import TFMessage
-from nav_msgs.msg import OccupancyGrid, Path
-
-import tf_transformations
+from std_msgs.msg import String, Bool # type: ignore
+from geometry_msgs.msg import PoseStamped, Twist # type: ignore
+from tf2_msgs.msg import TFMessage # type: ignore
+from nav_msgs.msg import OccupancyGrid, Path # type: ignore
+import tf_transformations # type: ignore
 
 import copy
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt # type: ignore
 import math
-
+import time
 import sys
-sys.path.append('/home/python_simulation/controllers')
-from casadi_nmpc import Casadi_nmpc
-
-import numpy as np
+import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
+sys.path.append('/home/python_simulation/controllers')
+from casadi_nmpc import Casadi_nmpc # type: ignore
 
-import time
 
 
 class Controller(Node):
