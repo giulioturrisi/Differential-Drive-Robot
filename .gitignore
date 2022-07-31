@@ -14,3 +14,15 @@ ros2_ws/src/slam_toolbox/
 ros2_ws/src/.vscode/
 .vscode/
 
+
+*.log
+
+*.pot
+
+*.pyc
+
+*/*/*/__pycache__/
+
+*/*/__pycache__/
+
+*/__pycache__/
