@@ -83,6 +83,7 @@ RUN apt install -y ros-humble-nav2-bringup
 #SHELL COLOR
 SHELL ["/bin/bash", "-c"]
 RUN echo 'export PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;37m\]\u\[\033[00m\]@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] "'  >> /root/.bashrc
+RUN echo 'alias rviz2="ros2 run rviz2 rviz2 -d /home/ros2_ws/src/utilities/rviz_config/common.rviz"' >> /root/.bashrc
 RUN echo 'export COPPELIASIM_ROOT_DIR=/home/coppeliasim_simulation/CoppeliaSim' >> /root/.bashrc
 RUN echo '. /home/ros2_ws/install/setup.bash' >> /root/.bashrc
 
