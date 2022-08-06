@@ -1,15 +1,15 @@
 [submodule "ros2_ws/src/navigation2"]
     path = ros2_ws/src/navigation2
 	url = https://github.com/ros-planning/navigation2.git
-[submodule "ros2_ws/src/ros2_bubble_rob"]
-    path = ros2_ws/src/ros2_bubble_rob
+[submodule "ros2_ws/src/external/ros2_bubble_rob"]
+    path = ros2_ws/src/external/ros2_bubble_rob
 	url = https://github.com/CoppeliaRobotics/ros2_bubble_rob.git
-[submodule "ros2_ws/src/simExtROS2"]
-    path = ros2_ws/src/simExtROS2
+[submodule "ros2_ws/src/external/simExtROS2"]
+    path = ros2_ws/src/external/simExtROS2
 	url = https://github.com/CoppeliaRobotics/simExtROS2.git
-[submodule "ros2_ws/src/slam_toolbox"]
-	path = ros2_ws/src/slam_toolbox
+[submodule "ros2_ws/src/external/slam_toolbox"]
+	path = ros2_ws/src/external/slam_toolbox
 	url = https://github.com/SteveMacenski/slam_toolbox.git
-[submodule "ros2_ws/src/teleop_tools"]
-	path = ros2_ws/src/teleop_tools
+[submodule "ros2_ws/src/external/teleop_tools"]
+	path = ros2_ws/src/external/teleop_tools
 	url = https://github.com/ros-teleop/teleop_tools.git
