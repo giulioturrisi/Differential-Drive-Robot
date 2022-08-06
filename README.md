@@ -65,7 +65,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ## How to run the simulation
 1. Open Coppeliasim and run the scene `medium_walls_dynamics.ttt` in the folder coppeliasim_simulation 
 ```sh
-./coppeliaSim.sh -s ../simple_walls_dynamics.ttt -h
+./coppeliaSim.sh -s ../medium_walls_dynamics.ttt -h
 ```
 disable -h flag to run the gui!
 
