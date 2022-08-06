@@ -1,11 +1,11 @@
 ## Overview
 This repo contains the code for controlling both a real and a simulated differential drive robot via ROS2. It includes the following folders and subfolders:
 
-1. ```matlab_simulation``` with subfolders: ```maps``` (utility to modify an existing map), ```planners``` (generate an obstacle-free path with different methods), ```controllers``` (move the robot). Matlab is also used to easily generate the c++ code for ROS2.
+1. ```python_simulation```: most of the ROS2 nodes call some classes here
  
-2. ```coppeliasim_simulation``` contains the scenes used for simulating the robot (dynamically enabled or not)
+2. ```coppeliasim_simulation```: scenes used for simulating the robot (dynamically enabled or not)
 
-3. ```ros2_ws``` with subfolders: ```slam_toolbox``` (generate a map - [slam](https://github.com/SteveMacenski/slam_toolbox)), ```navigation2``` (dependencies for slam - [nav](https://github.com/ros-planning/navigation2)), ```simExtROS2``` and ```ros2_bubble_rob```(dependencies for CoppeliaSim).
+3. ```ros2_ws```: collection of ROS2 nodes for controlling the robot and some external folders such as ```slam_toolbox``` (generate a map - [slam](https://github.com/SteveMacenski/slam_toolbox)), ```simExtROS2``` and ```ros2_bubble_rob```(dependencies for CoppeliaSim)
 
  
 ## Dependencies
@@ -13,13 +13,10 @@ This repo contains the code for controlling both a real and a simulated differen
 
 2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
 
-2. [Acados](https://github.com/acados/acados) for one of the controllers (not mandatory)
+3. [Acados](https://github.com/acados/acados) for one of the controllers (not mandatory)
 
+4. [Casadi](https://github.com/acados/acados) for one of the controllers (not mandatory)
 
-#It is necessary to add the following corresponding `Env` variables in the `.bashrc` or `.bash_profile` the following line:
-#```sh
-#export COPPELIASIM_ROOT_DIR=~/path/to/coppeliaSim/folder
-#```
 
 
 ## Build on Linux
