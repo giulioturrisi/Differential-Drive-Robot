@@ -1,0 +1,1120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<?xml-stylesheet type="text/xsl" href="callbacks.xsl"?>
+
+<plugin name="ROS2" author="federico.ferri.it@gmail.com">
+    <description>This plugin provides an interface with the ROS2 API</description>
+    <command name="createSubscription">
+        <description>Create a subscription to a topic.</description>
+        <categories>
+            <category name="topic" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="topicName" type="string">
+                <description>topic name, e.g.: '/cmd_vel'</description>
+            </param>
+            <param name="topicType" type="string">
+                <description>topic type, e.g.: 'geometry_msgs/msg/Twist'</description>
+            </param>
+            <param name="topicCallback" type="string">
+                <description>name of the callback function, which will be called with a single argument of type table containing the message payload, e.g.: {linear={x=1.5, y=0.0, z=0.0}, angular={x=0.0, y=0.0, z=-2.3}}</description>
+            </param>
+            <param name="queueSize" type="int" default="1">
+                <description>(optional) queue size</description>
+            </param>
+        </params>
+        <return>
+            <param name="subscriptionHandle" type="string">
+                <description>a handle to the ROS subscription</description>
+            </param>
+        </return>
+    </command>
+    <command name="shutdownSubscription">
+        <description>Shutdown the subscription.</description>
+        <categories>
+            <category name="topic" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="subscriptionHandle" type="string">
+                <description>the subscription handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="subscriptionTreatUInt8ArrayAsString">
+        <description>After calling this function, this subscription will treat uint8 arrays as string. Using strings should be in general much faster that using int arrays in Lua.</description>
+        <categories>
+            <category name="topic" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="subscriptionHandle" type="string">
+                <description>the subscription handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="createPublisher">
+        <description>Create a topic publisher.</description>
+        <categories>
+            <category name="topic" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="topicName" type="string">
+                <description>topic name, e.g.: '/cmd_vel'</description>
+            </param>
+            <param name="topicType" type="string">
+                <description>topic type, e.g.: 'geometry_msgs/msg/Twist'</description>
+            </param>
+            <param name="queueSize" type="int" default="1">
+                <description>(optional) queue size</description>
+            </param>
+            <param name="latch" type="bool" default="false">
+                <description>(optional) latch topic</description>
+            </param>
+        </params>
+        <return>
+            <param name="publisherHandle" type="string">
+                <description>a handle to the ROS publisher</description>
+            </param>
+        </return>
+    </command>
+    <command name="shutdownPublisher">
+        <description>Shutdown the specified publisher.</description>
+        <categories>
+            <category name="topic" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="publisherHandle" type="string">
+                <description>the publisher handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="publisherTreatUInt8ArrayAsString">
+        <description>After calling this function, this publisher will treat uint8 arrays as string. Using strings should be in general much faster that using int arrays in Lua.</description>
+        <categories>
+            <category name="topic" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="publisherHandle" type="string">
+                <description>the publisher handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="publish">
+        <description>Publish a message on the topic associated with this publisher.</description>
+        <categories>
+            <category name="topic" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="publisherHandle" type="string">
+                <description>the publisher handle</description>
+            </param>
+            <param name="message" type="table" skip="true">
+                <description>the message to publish</description>
+            </param>
+            <!-- don't read 'message' param from stack, and don't clear stack
+                 after input param parsing, so that 'message' is still on stack
+                 when calling the C++ callback -->
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="createClient">
+        <description>Create a service client.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="serviceName" type="string">
+                <description>service name, e.g.: '/trigger'</description>
+            </param>
+            <param name="serviceType" type="string">
+                <description>service type, e.g.: 'std_srvs/srv/Trigger'</description>
+            </param>
+        </params>
+        <return>
+            <param name="clientHandle" type="string">
+                <description>a handle to the ROS service client</description>
+            </param>
+        </return>
+    </command>
+    <command name="shutdownClient">
+        <description>Shutdown the service client.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="clientHandle" type="string">
+                <description>the service client handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="clientTreatUInt8ArrayAsString">
+        <description>After calling this function, this service client will treat uint8 arrays as string. Using strings should be in general much faster that using int arrays in Lua.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="clientHandle" type="string">
+                <description>the service client handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="waitForService">
+        <description>Wait for the service associated with this service client.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="clientHandle" type="string">
+                <description>the service client handle</description>
+            </param>
+            <param name="timeout" type="float">
+                <description>the amount of time to wait in seconds</description>
+            </param>
+        </params>
+        <return>
+            <param name="result" type="bool">
+                <description>false if the service is not found after the specified timeout</description>
+            </param>
+        </return>
+    </command>
+    <command name="call">
+        <description>Call the service associated with this service client.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="clientHandle" type="string">
+                <description>the service client handle</description>
+            </param>
+            <param name="request" type="table" skip="true">
+                <description>the message to publish</description>
+            </param>
+            <!-- don't read 'request' param from stack, and don't clear stack
+                 after input param parsing, so that 'request' is still on stack
+                 when calling the C++ callback -->
+        </params>
+        <return>
+            <param name="result" type="table" skip="true">
+                <description>the response message, if the call succeeded</description>
+            </param>
+        </return>
+    </command>
+    <command name="createService">
+        <description>Create a service.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="serviceName" type="string">
+                <description>service name, e.g.: '/trigger'</description>
+            </param>
+            <param name="serviceType" type="string">
+                <description>service type, e.g.: 'std_srvs/srv/Trigger'</description>
+            </param>
+            <param name="serviceCallback" type="string">
+                <description>name of the callback function, which will be called with a single argument of type table containing the service request payload; it must return another table containing the response</description>
+            </param>
+        </params>
+        <return>
+            <param name="serviceHandle" type="string">
+                <description>a handle to the ROS service</description>
+            </param>
+        </return>
+    </command>
+    <command name="shutdownService">
+        <description>Shutdown the service.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="serviceHandle" type="string">
+                <description>the service handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="serviceTreatUInt8ArrayAsString">
+        <description>After calling this function, this service will treat uint8 arrays as string. Using strings should be in general much faster that using int arrays in Lua.</description>
+        <categories>
+            <category name="service" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="serviceHandle" type="string">
+                <description>the service handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="createActionClient">
+        <description>Create a action client.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionName" type="string">
+                <description>action name, e.g.: '/fibonacci'</description>
+            </param>
+            <param name="actionType" type="string">
+                <description>action type, e.g.: 'example_interfaces/action/Fibonacci'</description>
+            </param>
+            <param name="goalResponseCallback" type="string">
+                <description>the goal response callback, will be called with arguments (goal_id,accepted) where accepted is a boolean value</description>
+            </param>
+            <param name="feedbackCallback" type="string">
+                <description>the feedback callback, will be called with arguments (goal_id,feedback) where feedback is a table representing the Feedback message of the action type</description>
+            </param>
+            <param name="resultCallback" type="string">
+                <description>the result callback, will be called with arguments (goal_id,code,result) where code is a value from <enum-ref name="action_result_code" />, and result is a table representing the Result message of the action type</description>
+            </param>
+        </params>
+        <return>
+            <param name="actionClientHandle" type="string">
+                <description>a handle to the ROS action client</description>
+            </param>
+        </return>
+    </command>
+    <command name="shutdownActionClient">
+        <description>Shutdown the action client.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionClientHandle" type="string">
+                <description>the action client handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionClientTreatUInt8ArrayAsString">
+        <description>After calling this function, this action client will treat uint8 arrays as string. Using strings should be in general much faster that using int arrays in Lua.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionClientHandle" type="string">
+                <description>the action client handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="sendGoal">
+        <description>Send a goal using the specified action client.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionClientHandle" type="string">
+                <description>the action client handle</description>
+            </param>
+            <param name="goal" type="table" skip="true">
+                <description>the goal to send</description>
+            </param>
+            <!-- don't read 'goal' param from stack, and don't clear stack
+                 after input param parsing, so that 'goal' is still on stack
+                 when calling the C++ callback -->
+        </params>
+        <return>
+            <param name="success" type="bool">
+                <description>false if sending the goal to the action server has failed</description>
+            </param>
+        </return>
+    </command>
+    <command name="cancelLastGoal">
+        <description>Cancel last submitted goal on the specified action client.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionClientHandle" type="string">
+                <description>the action client handle</description>
+            </param>
+        </params>
+        <return>
+            <param name="success" type="bool">
+                <description>false if canceling the goal to the action server has failed</description>
+            </param>
+        </return>
+    </command>
+    <command name="createActionServer">
+        <description>Create an action server.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionName" type="string">
+                <description>action name, e.g.: '/fibonacci'</description>
+            </param>
+            <param name="actionType" type="string">
+                <description>action type, e.g.: 'example_interfaces/action/Fibonacci'</description>
+            </param>
+            <param name="handleGoalCallback" type="string">
+                <description>name of callback function, which will be called with arguments (goal_id, goal) where goal is a table representing the Goal message of the action type. the callback must return a valid <enum-ref name="goal_response" /></description>
+            </param>
+            <param name="handleCancelCallback" type="string">
+                <description>name of callback function, which will be called with arguments (goal_id, goal) where goal is a table representing the Goal message of the action type. the callback must return a valid <enum-ref name="cancel_response" /></description>
+            </param>
+            <param name="handleAcceptedCallback" type="string">
+                <description>name of callback function, which will be called with arguments (goal_id, goal) where goal is a table representing the Goal message of the action type. it will be called after the goal is accepted, and is responsible of executing the goal, but must return immediately.</description>
+            </param>
+        </params>
+        <return>
+            <param name="actionServerHandle" type="string">
+                <description>a handle to the action server</description>
+            </param>
+        </return>
+    </command>
+    <command name="shutdownActionServer">
+        <description>Shutdown the action server.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionServerTreatUInt8ArrayAsString">
+        <description>After calling this function, this action server will treat uint8 arrays as string. Using strings should be in general much faster that using int arrays in Lua.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionServerPublishFeedback">
+        <description>Send an update about the progress of this goal. This must be only called when the goal is executing. If execution of a goal is deferred then <command-ref name="actionServerActionExecute" /> must be called first.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+            <param name="feedback" type="table" skip="true">
+                <description>the feedback message</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionServerActionAbort">
+        <description>Indicate that a goal could not be reached and has been aborted. Only call this if the goal was executing but cannot be completed. This is a terminal state, no more methods should be called on a goal after this is called.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+            <param name="result" type="table" skip="true">
+                <description>the result message</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionServerActionSucceed">
+        <description>Indicate that a goal has succeeded. Only call this if the goal is executing and has reached the desired final state. This is a terminal state, no more methods should be called on a goal after this is called.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+            <param name="result" type="table" skip="true">
+                <description>the result message</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionServerActionCanceled">
+        <description>Indicate that a goal has been canceled. Only call this if the goal is executing or pending, but has been canceled. This is a terminal state, no more methods should be called on a goal after this is called.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+            <param name="result" type="table" skip="true">
+                <description>the result message</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionServerActionExecute">
+        <description>Indicate that the server is starting to execute a goal. Only call this if the goal is pending.</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="actionServerActionIsCanceling">
+        <description>Check if there is a cancel request</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+        </params>
+        <return>
+            <param name="result" type="bool">
+                <description>true if a cancelation request has been accepted for this goal</description>
+            </param>
+        </return>
+    </command>
+    <command name="actionServerActionIsActive">
+        <description>Check if goal is pending or executing</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+        </params>
+        <return>
+            <param name="result" type="bool">
+                <description>false if the goal has reached a terminal state</description>
+            </param>
+        </return>
+    </command>
+    <command name="actionServerActionIsExecuting">
+        <description>Check if the goal is executing</description>
+        <categories>
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="actionServerHandle" type="string">
+                <description>the action server handle</description>
+            </param>
+            <param name="goalUUID" type="string">
+                <description>the goal unique identifier</description>
+            </param>
+        </params>
+        <return>
+            <param name="result" type="bool">
+                <description>true if the goal is in an executing state</description>
+            </param>
+        </return>
+    </command>
+    <command name="sendTransform">
+        <description>Publish a TF transformation between frames.</description>
+        <categories>
+            <category name="topic" />
+            <category name="tf" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="transform" type="table" skip="true">
+                <description>the transformation expressed as a geometry_msgs/msg/TransformStamped message, i.e. {header={stamp=timeStamp, frame_id='...'}, child_frame_id='...', transform={translation={x=..., y=..., z=...}, rotation={x=..., y=..., z=..., w=...}}}</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="sendTransforms">
+        <description>Publish several TF transformations between frames.</description>
+        <categories>
+            <category name="topic" />
+            <category name="tf" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="transforms" type="table" skip="true">
+                <description>an array of geometry_msgs/msg/TransformStamped messages</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="imageTransportCreateSubscription">
+        <description>Create a subscription using ImageTransport.</description>
+        <categories>
+            <category name="topic" />
+            <category name="image" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="topicName" type="string">
+                <description>topic name, e.g.: '/cmd_vel'</description>
+            </param>
+            <param name="topicCallback" type="string">
+                <description>name of the callback function, which will be called as: topicCallback(string data, number width, number height)</description>
+            </param>
+            <param name="queueSize" type="int" default="1">
+                <description>(optional) queue size</description>
+            </param>
+        </params>
+        <return>
+            <param name="subscriptionHandle" type="string">
+                <description>a handle to the ROS subscription</description>
+            </param>
+        </return>
+    </command>
+    <command name="imageTransportShutdownSubscription">
+        <description>Shutdown the subscription using ImageTransport.</description>
+        <categories>
+            <category name="topic" />
+            <category name="image" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="subscriptionHandle" type="string">
+                <description>the subscription handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="imageTransportCreatePublisher">
+        <description>Create a publisher using ImageTransport.</description>
+        <categories>
+            <category name="topic" />
+            <category name="image" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="topicName" type="string">
+                <description>topic name, e.g.: '/cmd_vel'</description>
+            </param>
+            <param name="queueSize" type="int" default="1">
+                <description>(optional) queue size</description>
+            </param>
+        </params>
+        <return>
+            <param name="publisherHandle" type="string">
+                <description>a handle to the ROS publisher</description>
+            </param>
+        </return>
+    </command>
+    <command name="imageTransportShutdownPublisher">
+        <description>Shutdown the publisher using ImageTransport.</description>
+        <categories>
+            <category name="topic" />
+            <category name="image" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="publisherHandle" type="string">
+                <description>the publisher handle</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="imageTransportPublish">
+        <description>Publish a message on the topic associated with this publisher using ImageTransport.</description>
+        <categories>
+            <category name="topic" />
+            <category name="image" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="publisherHandle" type="string">
+                <description>the publisher handle</description>
+            </param>
+            <param name="data" type="string">
+                <description>the image data</description>
+            </param>
+            <param name="width" type="int">
+                <description>image width</description>
+            </param>
+            <param name="height" type="int">
+                <description>image height</description>
+            </param>
+            <param name="frame_id" type="string">
+                <description>frame id</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="getTime">
+        <description>Return the current time according to the specified clock.</description>
+        <categories>
+            <category name="time" />
+        </categories>
+        <params>
+            <param name="clock_type" type="int" default="sim_ros2_clock_ros">
+                <description>type of clock. see <enum-ref name="clock_type" />.</description>
+            </param>
+        </params>
+        <return>
+            <param name="time" type="sim_ros2_time">
+                <description>ROS time</description>
+            </param>
+        </return>
+    </command>
+    <command name="getParamString">
+        <description>Retrieve a string parameter from the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="defaultValue" type="string" default='""'>
+                <description>default value returned when parameter does not exist</description>
+            </param>
+        </params>
+        <return>
+            <param name="exists" type="bool">
+                <description>true if the param exists otherwise false</description>
+            </param>
+            <param name="value" type="string" default='""'>
+                <description>the value of the requested parameter</description>
+            </param>
+        </return>
+    </command>
+    <command name="getParamInt">
+        <description>Retrieve an integer parameter from the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="defaultValue" type="int" default="0">
+                <description>default value returned when parameter does not exist</description>
+            </param>
+        </params>
+        <return>
+            <param name="exists" type="bool">
+                <description>true if the param exists otherwise false</description>
+            </param>
+            <param name="value" type="int" default="0">
+                <description>the value of the requested parameter</description>
+            </param>
+        </return>
+    </command>
+    <command name="getParamDouble">
+        <description>Retrieve a double parameter from the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="defaultValue" type="double" default="0.0">
+                <description>default value returned when parameter does not exist</description>
+            </param>
+        </params>
+        <return>
+            <param name="exists" type="bool">
+                <description>true if the param exists otherwise false</description>
+            </param>
+            <param name="value" type="double" default="0.0">
+                <description>the value of the requested parameter</description>
+            </param>
+        </return>
+    </command>
+    <command name="getParamBool">
+        <description>Retrieve a boolean parameter from the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="defaultValue" type="bool" default="false">
+                <description>default value returned when parameter does not exist</description>
+            </param>
+        </params>
+        <return>
+            <param name="exists" type="bool">
+                <description>true if the param exists otherwise false</description>
+            </param>
+            <param name="value" type="bool" default="false">
+                <description>the value of the requested parameter</description>
+            </param>
+        </return>
+    </command>
+    <command name="setParamString">
+        <description>Set a string parameter in the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="value" type="string">
+                <description>value of the parameter</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setParamInt">
+        <description>Set a integer parameter in the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="value" type="int">
+                <description>value of the parameter</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setParamDouble">
+        <description>Set a double parameter in the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="value" type="double">
+                <description>value of the parameter</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setParamBool">
+        <description>Set a boolean parameter in the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+            <param name="value" type="bool">
+                <description>value of the parameter</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="hasParam">
+        <description>Check wether a parameter exists in the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+        </params>
+        <return>
+            <param name="exists" type="bool">
+                <description>true if the parameter exists, false otherwise</description>
+            </param>
+        </return>
+    </command>
+    <command name="deleteParam">
+        <description>Delete a parameter in the ROS Parameter Server.</description>
+        <categories>
+            <category name="param" />
+        </categories>
+        <params>
+            <param name="name" type="string">
+                <description>name of the parameter</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="createInterface">
+        <description>Construct an interface of the specified type, initialized with the default values.</description>
+        <categories>
+            <category name="topic" />
+            <category name="service" />
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="type" type="string">
+                <description>type, e.g.: 'geometry_msgs/msg/Twist'</description>
+            </param>
+        </params>
+        <return>
+            <param name="result" type="table" skip="true">
+                <description>the interface object</description>
+            </param>
+        </return>
+    </command>
+    <command name="getInterfaceConstants">
+        <description>Get an object with the constants defined in the specified interface.</description>
+        <categories>
+            <category name="topic" />
+            <category name="service" />
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+            <param name="type" type="string">
+                <description>type, e.g.: 'geometry_msgs/msg/Twist'</description>
+            </param>
+        </params>
+        <return>
+            <param name="result" type="table" skip="true">
+                <description>the constants object</description>
+            </param>
+        </return>
+    </command>
+    <command name="supportedInterfaces">
+        <description>Retrieve a list of supported interfaces.</description>
+        <categories>
+            <category name="topic" />
+            <category name="service" />
+            <category name="action" />
+        </categories>
+        <see-also>
+            <!--command name="..." /-->
+        </see-also>
+        <params>
+        </params>
+        <return>
+            <param name="result" type="table" item-type="string">
+                <description>the list of supported interfaces</description>
+            </param>
+        </return>
+    </command>
+    <script-function name="subscriptionCallback">
+        <description>Callback for ROS subscription.</description>
+        <params>
+            <param name="message" type="table" skip="true">
+                <description>the topic payload (i.e. the message)</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </script-function>
+    <script-function name="imageTransportCallback">
+        <description>Callback for ROS ImageTransport subscription.</description>
+        <params>
+            <param name="data" type="string">
+                <description>the image data</description>
+            </param>
+            <param name="width" type="int">
+                <description>image width</description>
+            </param>
+            <param name="height" type="int">
+                <description>image height</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </script-function>
+    <script-function name="actionGoalResponseCallback">
+        <description>Callback for action client goal response.</description>
+        <params>
+            <param name="goalID" type="string">
+                <description>the goal id</description>
+            </param>
+            <param name="accepted" type="bool">
+                <description>true if the goal was accepted by the action server</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </script-function>
+    <struct name="sim_ros2_time">
+        <description>Time data structure, equivalent of builtin_interfaces/msg/Time</description>
+        <param name="sec" type="int">
+            <description>seconds</description>
+        </param>
+        <param name="nanosec" type="int">
+            <description>nanoseconds</description>
+        </param>
+    </struct>
+    <enum name="clock_type" item-prefix="clock_" base="4872">
+        <item name="ros" />
+        <item name="system" />
+        <item name="steady" />
+    </enum>
+    <enum name="action_result_code" item-prefix="action_result_code_" base="8564">
+        <item name="succeeded" />
+        <item name="aborted" />
+        <item name="canceled" />
+        <item name="unknown" />
+    </enum>
+    <enum name="goal_response" item-prefix="goal_response_" base="12856">
+        <item name="reject" />
+        <item name="accept_and_execute" />
+        <item name="accept_and_defer" />
+    </enum>
+    <enum name="cancel_response" item-prefix="cancel_response_" base="16099">
+        <item name="reject" />
+        <item name="accept" />
+    </enum>
+</plugin>
