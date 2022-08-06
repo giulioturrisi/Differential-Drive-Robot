@@ -41,59 +41,62 @@ class MinimalSubscriber : public rclcpp::Node
     void controller_callback()
     {
       if(path_ready == true) {
-            reference = path.back();
-
-            //std::cout << "#############" << std::endl;
-            //RCLCPP_INFO(this->get_logger(), "reference x'%f'", reference.x);
-            //RCLCPP_INFO(this->get_logger(), "reference y'%f'", reference.y);
-            //RCLCPP_INFO(this->get_logger(), "state x'%f'", state.x);
-            //RCLCPP_INFO(this->get_logger(), "state y'%f'", state.y);
-
-            double ff_x = (reference.x - previous_reference.x)/dt;
-            double ff_y = (reference.y - previous_reference.y)/dt;
         
-            double k1 = 5;
-            double b = 0.05;
+        
+        if(isSim && !new_state_ready)
+          return;
 
-            double theta_woffset = state.yaw + 0*M_PI/2.;
-            double error_x = 0 - (state.x + b*cos(theta_woffset));
-            double error_y = 0 - (state.y + b*sin(theta_woffset));
+        reference = path.back();
 
-            double u1_io = ff_x + k1*(reference.x - state.x + b*cos(theta_woffset));
-            double u2_io = ff_y + k1*(reference.y - state.y + b*sin(theta_woffset));
+        double ff_x = (reference.x - previous_reference.x)/dt;
+        double ff_y = (reference.y - previous_reference.y)/dt;
+    
+        double k1 = 5;
+        double b = 0.05;
 
-            double v = cos(theta_woffset)*u1_io + sin(theta_woffset)*u2_io;
-            double w = -sin(theta_woffset)*u1_io/b + cos(theta_woffset)*u2_io/b;
+        double theta_woffset = state.yaw + M_PI/2.;
+        double error_x = 0 - (state.x + b*cos(theta_woffset));
+        double error_y = 0 - (state.y + b*sin(theta_woffset));
 
-            //RCLCPP_INFO(this->get_logger(), "v: '%f'", v);
-            //RCLCPP_INFO(this->get_logger(), "w: '%f'", w);
+        double u1_io = ff_x + k1*(reference.x - state.x - b*cos(theta_woffset));
+        double u2_io = ff_y + k1*(reference.y - state.y - b*sin(theta_woffset));
 
-            auto commanded_vel = geometry_msgs::msg::Twist();
-            commanded_vel.linear.x = v;
-            commanded_vel.angular.z = w;
+        double v = cos(theta_woffset)*u1_io + sin(theta_woffset)*u2_io;
+        double w = -sin(theta_woffset)*u1_io/b + cos(theta_woffset)*u2_io/b;
 
-            publisher_command->publish(commanded_vel);
+        //RCLCPP_INFO(this->get_logger(), "v: '%f'", v);
+        //RCLCPP_INFO(this->get_logger(), "w: '%f'", w);
 
-            previous_reference.x = reference.x;
-            previous_reference.y = reference.y;
+        auto commanded_vel = geometry_msgs::msg::Twist();
+        commanded_vel.linear.x = v;
+        commanded_vel.angular.z = w;
 
-            path.pop_back();
-            if(path.empty()) {
-                path_ready = false;
-                RCLCPP_INFO(this->get_logger(), "Controller stop");
-                RCLCPP_INFO(this->get_logger(), "error x'%f'", reference.x - state.x + b*cos(theta_woffset));
-                RCLCPP_INFO(this->get_logger(), "error y'%f'", reference.y - state.y + b*sin(theta_woffset));
-            }
+        publisher_command->publish(commanded_vel);
+
+        previous_reference.x = reference.x;
+        previous_reference.y = reference.y;
+
+        path.pop_back();
+        if(path.empty()) {
+            path_ready = false;
+            RCLCPP_INFO(this->get_logger(), "Controller stop");
+            RCLCPP_INFO(this->get_logger(), "error x'%f'", reference.x - state.x + b*cos(theta_woffset));
+            RCLCPP_INFO(this->get_logger(), "error y'%f'", reference.y - state.y + b*sin(theta_woffset));
+        }
+
+        new_state_ready = false;
       }
       else {
+        if(path.empty()) {
           auto commanded_vel = geometry_msgs::msg::Twist();
           commanded_vel.linear.x = 0;
           commanded_vel.angular.z = 0;
 
-          publisher_command->publish(commanded_vel);
+          //publisher_command->publish(commanded_vel);
 
           previous_reference.x = reference.x;
           previous_reference.y = reference.y;
+        }
       }
     }
   
@@ -133,7 +136,8 @@ class MinimalSubscriber : public rclcpp::Node
         if(msg->transforms[0].child_frame_id == "base_footprint") {
           state.x = msg->transforms[0].transform.translation.x;
           state.y = msg->transforms[0].transform.translation.y;
-          state.yaw = yaw;       
+          state.yaw = yaw;   
+          new_state_ready = true;    
         }
         
     }
@@ -156,6 +160,8 @@ class MinimalSubscriber : public rclcpp::Node
     std::vector<Point> path;
 
     bool path_ready = false;
+    bool new_state_ready = false;
+    bool isSim = true;
     float dt = 0.01;
 };
 
