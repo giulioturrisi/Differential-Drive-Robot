@@ -108,7 +108,7 @@ class RRT:
         x = next_cell[0]
         y = next_cell[1]
 
-        h = np.sqrt(np.power(self.start[0]-x,2) + np.power(self.start[1]-y,2))
+        h = np.sqrt(np.power(self.goal[0]-x,2) + np.power(self.goal[1]-y,2))
         if (h < 0.1):
             return True
         else:

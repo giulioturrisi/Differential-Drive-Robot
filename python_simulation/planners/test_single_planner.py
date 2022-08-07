@@ -2,6 +2,7 @@ import sys
 sys.path.append('/home/python_simulation/planners/')
 #from A_star import A_star
 from sampling_based.rrt import RRT
+from sampling_based.rrt_primitives import RRT_primitives
 import numpy as np
 import matplotlib.pyplot as plt
 from pgm_reader import Reader
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 
 
 
-    grid_search = RRT(state_robot, goal, image, resolution)
+    grid_search = RRT_primitives(state_robot, goal, image, resolution)
     path = grid_search.plan(max_iteration, True)
 
 
