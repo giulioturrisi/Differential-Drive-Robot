@@ -1,7 +1,7 @@
 ## Overview
 This repo contains the code for controlling both a real and a simulated differential drive robot via ROS2. It includes the following folders and subfolders:
 
-1. ```python_simulation```: most of the ROS2 nodes call some classes here
+1. ```python_scripts```: most of the ROS2 nodes call some classes here
  
 2. ```coppeliasim_simulation```: scenes used for simulating the robot (dynamically enabled or not)
 

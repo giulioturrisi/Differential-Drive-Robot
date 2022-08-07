@@ -19,7 +19,8 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': ['run_io_linearization = controllers.run_io_linearization:main',
+        'console_scripts': ['run_io_linearization = controllers.run_casadi_nmpc:main',
+        'console_scripts': ['run_io_linearization = controllers.run_controllers:main',
         ],
     },
 )

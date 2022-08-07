@@ -17,13 +17,17 @@ np.set_printoptions(threshold=sys.maxsize)
 
 sys.path.append('/home/python_simulation/controllers')
 from io_linearization import IO_linearization # type: ignore
+from nonlinear_lyapunov import Nonlinear_lyapunov # type: ignore
+from approximate_linearization import Approximate_linearization # type: ignore
+from dynamic_linearization import Dynamic_linearization # type: ignore
 
 
+# Collection of multiple controllers ---------------------------------------
 
 
-class Controller(Node):
+class Controllers(Node):
     def __init__(self):
-        super().__init__('IO_linearization')
+        super().__init__('Controllers')
         # Path utilities ---------------------------------------
         self.path = []
         self.path_ready = False;
@@ -31,12 +35,37 @@ class Controller(Node):
         # State utilities ---------------------------------------
         self.state_robot = np.zeros(3)
 
-        # Control utilities ---------------------------------------
-        self.dt = 0.01
-        self.k1 = 5
-        self.k2 = 5
-        self.b = 0.05
-        self.controller = IO_linearization(b=self.b, k1=self.k1, k2=self.k2, dt=self.dt)
+
+        # Controller choice ---------------------------------------
+        self.which_controller = 1
+
+        if(self.which_controller == 1):
+            # Control utilities IO_linearization ---------------------------------------
+            self.dt = 0.01
+            self.k1 = 5
+            self.k2 = 5
+            self.b = 0.05
+            self.controller = IO_linearization(b=self.b, k1=self.k1, k2=self.k2, dt=self.dt)
+        elif(self.which_controller == 2):
+            # Control utilities Approximate_linearization ---------------------------------------
+            self.dt = 0.01
+            self.k1 = 5
+            self.k2 = 5
+            self.k3 = 5
+            self.controller = Approximate_linearization(k1=self.k1, k2=self.k2, k3=self.k3, dt=self.dt)
+        elif(self.which_controller == 3):
+            # Control utilities Nonlinear_lyapunov ---------------------------------------
+            self.dt = 0.01
+            self.k1 = 5
+            self.k2 = 5
+            self.k3 = 5
+            self.controller = Nonlinear_lyapunov(k1=self.k1, k2=self.k2, k3=self.k3, dt=self.dt)
+        elif(self.which_controller == 4):
+            # Control utilities Dynamic_linearization ---------------------------------------
+            self.dt = 0.01
+            self.k1 = 5
+            self.k2 = 5
+            self.controller = Dynamic_linearization(k1=self.k1, k2=self.k2, dt=self.dt)
 
 
         # Subscribers and Publishers ---------------------------------------

@@ -23,11 +23,12 @@ from grid_based.greedy_best_first_search import Greedy_Best_First_Search # type:
 from grid_based.breadth_first_search import Breadth_First_Search # type: ignore
 from grid_based.djikstra import Djikstra # type: ignore
 
-from sampling_based.rrt import RRT, RRT_primitives # type: ignore
+from sampling_based.rrt import RRT # type: ignore
+from sampling_based.rrt_primitives import RRT_primitives # type: ignore
 
 from path_utilities import interpolate_path, filter_map, draw_map # type: ignore
 
-
+# Collection of multiple planners ---------------------------------------
 
 class Planners(Node):
     def __init__(self):
@@ -62,6 +63,11 @@ class Planners(Node):
         self.dt = 0.1
 
 
+        # Plan Choice ---------------------------------------
+        self.which_planner = 1
+
+
+
     # Goal Callback ---------------------------------------
     def goal_callback(self, msg):
         if(self.state_arrived == True and self.map_arrived == True):
@@ -85,7 +91,24 @@ class Planners(Node):
 
 
             # Plan ---------------------------------------
-            planner = A_star(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+            if(self.which_planner == 1):
+                planner = A_star(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+            
+            elif(self.which_planner == 2):
+                planner = Greedy_Best_First_Search(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+            
+            elif(self.which_planner == 3):
+                planner = Breadth_First_Search(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+            
+            elif(self.which_planner == 4):
+                planner = Djikstra(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+            
+            elif(self.which_planner == 5):
+                planner = RRT(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+            
+            elif(self.which_planner == 6):
+                planner = RRT_primitives(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+
             path = planner.plan(self.max_iteration,self.visualize)
             
 
