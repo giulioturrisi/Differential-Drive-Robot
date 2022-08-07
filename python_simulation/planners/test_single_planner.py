@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
 
 
-    grid_search = RRT_primitives(state_robot, goal, image, resolution)
+    grid_search = RRT(state_robot, goal, image, resolution)
     path = grid_search.plan(max_iteration, True)
 
 

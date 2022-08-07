@@ -15,7 +15,7 @@ class RRT_primitives:
         self.width = map_shape[1] 
 
         
-        self.multipling_factor = 10
+        self.multipling_factor = 5
         self.dt = 1
         self.goal_bias = 0.7
 

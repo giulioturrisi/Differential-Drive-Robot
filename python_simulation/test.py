@@ -52,7 +52,7 @@ max_iteration = 100
 map_resolution = 0.05
 visualize = False
 
-planner = A_star(state_robot, goal, image, map_resolution)
+planner = RRT(state_robot, goal, image, map_resolution)
 #planner = Greedy_Best_First_Search(state_robot, goal, image, map_resolution)
 
 start_time = time.time()
@@ -66,7 +66,6 @@ for i in range(int(len(path)/dt)):
     temp = spline(xs[i])
     path_spline.insert(0,temp*map_resolution)
 path_spline = np.array(path_spline)
-print("path spline", path_spline)
 
 
 # Control ---------------------------------------
