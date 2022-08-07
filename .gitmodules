@@ -1,9 +1,9 @@
-[submodule "/home/giulio/personal_ws_home/Differential-Drive-Robot/ros2_ws/src/external/simExtROS2"]
-	path = /ros2_ws/src/external/simExtROS2
+[submodule "ros2_ws/src/external/simExtROS2"]
+	path = ros2_ws/src/external/simExtROS2
 	url = https://github.com/CoppeliaRobotics/simExtROS2.git
-[submodule "/home/giulio/personal_ws_home/Differential-Drive-Robot/ros2_ws/src/external/slam_toolbox"]
-	path = /ros2_ws/src/external/slam_toolbox
+[submodule "ros2_ws/src/external/slam_toolbox"]
+	path = ros2_ws/src/external/slam_toolbox
 	url = https://github.com/SteveMacenski/slam_toolbox.git
-[submodule "/home/giulio/personal_ws_home/Differential-Drive-Robot/ros2_ws/src/external/ros2_bubble_rob"]
-	path = /ros2_ws/src/external/ros2_bubble_rob
+[submodule "ros2_ws/src/external/ros2_bubble_rob"]
+	path = ros2_ws/src/external/ros2_bubble_rob
 	url = https://github.com/CoppeliaRobotics/ros2_bubble_rob.git
