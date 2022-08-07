@@ -1,0 +1,3 @@
+[submodule "/home/giulio/personal_ws_home/Differential-Drive-Robot/ros2_ws/src/external/simExtROS2"]
+	path = /home/giulio/personal_ws_home/Differential-Drive-Robot/ros2_ws/src/external/simExtROS2
+	url = https://github.com/CoppeliaRobotics/simExtROS2.git
