@@ -17,7 +17,7 @@ import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
 
-sys.path.append('/home/python_simulation/planners/')
+sys.path.append('/home/python_scripts/planners/')
 from grid_based.a_star import A_star # type: ignore 
 from grid_based.greedy_best_first_search import Greedy_Best_First_Search # type: ignore
 from grid_based.breadth_first_search import Breadth_First_Search # type: ignore
@@ -26,6 +26,7 @@ from grid_based.djikstra import Djikstra # type: ignore
 from sampling_based.rrt import RRT # type: ignore
 from sampling_based.rrt_primitives import RRT_primitives # type: ignore
 
+sys.path.append('/home/python_scripts/')
 from path_utilities import interpolate_path, filter_map, draw_map # type: ignore
 
 # Collection of multiple planners ---------------------------------------

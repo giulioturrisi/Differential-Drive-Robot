@@ -1,9 +1,0 @@
-#ifndef CONFIG_H_INCLUDED
-#define CONFIG_H_INCLUDED
-
-#cmakedefine BUILD_GIT_VERSION "${BUILD_GIT_VERSION}"
-#define BUILD_DATE __DATE__ " (git " BUILD_GIT_VERSION ")"
-
-#cmakedefine01 image_transport_FOUND
-
-#endif // CONFIG_H_INCLUDED

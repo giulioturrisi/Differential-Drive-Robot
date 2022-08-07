@@ -15,7 +15,7 @@ import sys
 import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
-sys.path.append('/home/python_simulation/controllers')
+sys.path.append('/home/python_scripts/controllers')
 from io_linearization import IO_linearization # type: ignore
 from nonlinear_lyapunov import Nonlinear_lyapunov # type: ignore
 from approximate_linearization import Approximate_linearization # type: ignore
@@ -169,7 +169,7 @@ def main(args=None):
     rclpy.init(args=args)
     print("###### Controller started ######")
 
-    controller_node = Controller()
+    controller_node = Controllers()
     rclpy.spin(controller_node)
     controller_node.destroy_node()
     rclpy.shutdown()
