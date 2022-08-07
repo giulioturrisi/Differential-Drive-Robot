@@ -1,11 +1,14 @@
-from A_star import A_star
+import sys
+sys.path.append('/home/python_simulation/planners/')
+#from A_star import A_star
+from sampling_based.rrt import RRT
 import numpy as np
 import matplotlib.pyplot as plt
 from pgm_reader import Reader
 
 
 if __name__ == "__main__":
-    f = './../../maps/map.pgm'
+    f = '/home/python_simulation/maps/map.pgm'
     reader = Reader()
     image = reader.read_pgm(f)
     width = reader.width
@@ -27,8 +30,8 @@ if __name__ == "__main__":
 
 
 
-    grid_search = A_star(state_robot, goal, image, resolution)
-    path = grid_search.plan(max_iteration, False)
+    grid_search = RRT(state_robot, goal, image, resolution)
+    path = grid_search.plan(max_iteration, True)
 
 
     print("path",path)

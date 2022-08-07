@@ -6,10 +6,15 @@ from grid_based.greedy_best_first_search import Greedy_Best_First_Search # type:
 from grid_based.breadth_first_search import Breadth_First_Search # type: ignore 
 from grid_based.djikstra import Djikstra # type: ignore
 
+from sampling_based.rrt import RRT
+
 # Import controllers ---------------------------------------
 sys.path.append('/home/python_simulation/controllers')
 from io_linearization import IO_linearization # type: ignore
 from casadi_nmpc import Casadi_nmpc # type: ignore
+from nonlinear_lyapunov import Nonlinear_lyapunov # type: ignore
+from approximate_linearization import Approximate_linearization # type: ignore
+from dynamic_linearization import Dynamic_linearization # type: ignore
 
 # Import robot model and path utilities ---------------------------------------
 from robot_model import Robot
@@ -34,7 +39,7 @@ height = reader.height
 
 
 # Inizial robot and some parameters ---------------------------------------
-state_robot = np.array([15, 2.45, 0])  # x y theta
+state_robot = np.array([10, 2.45, 0])  # x y theta
 dt = 0.02                               # sampling time
 robot = Robot(dt)
 
@@ -42,10 +47,10 @@ robot = Robot(dt)
 
 
 # Plan ---------------------------------------
-goal = np.array([5, 18])             
-max_iteration = 1000                 
+goal = np.array([5, 5])             
+max_iteration = 100                 
 map_resolution = 0.05
-visualize = True
+visualize = False
 
 planner = A_star(state_robot, goal, image, map_resolution)
 #planner = Greedy_Best_First_Search(state_robot, goal, image, map_resolution)
@@ -61,20 +66,28 @@ for i in range(int(len(path)/dt)):
     temp = spline(xs[i])
     path_spline.insert(0,temp*map_resolution)
 path_spline = np.array(path_spline)
+print("path spline", path_spline)
 
 
 # Control ---------------------------------------
 #horizon = 10
 #controller = Casadi_nmpc(horizon,[],[], dt)
 
-b = 0.1
-k1 = 3
-k2 = 3
+#b = 0.1
+#k1 = 3
+#k2 = 3
+#horizon = 1
+#controller = IO_linearization(b,k1,k2, dt)
+
+
 horizon = 1
-controller = IO_linearization(b,k1,k2, dt)
+k1 = 5
+k2 = 50
+controller = Dynamic_linearization(k1, k2, dt)
 
 state_evolution = [copy.copy(state_robot)]
 for j in range(np.shape(path_spline)[0]):
+    print("state_robot: ", state_robot)
     state_evolution = np.append(state_evolution, [copy.copy(state_robot)], axis=0)
 
     start_time = time.time()
@@ -89,11 +102,12 @@ for j in range(np.shape(path_spline)[0]):
             reference_x.append(path_spline[-1][0])
             reference_y.append(path_spline[-1][1])
 
-
+    print("reference: ", [reference_x, reference_y])
     v, w = controller.compute_control(state_robot, reference_x, reference_y)
     
     print("Control time: ", time.time()-start_time)
     state_robot = robot.integrate(state_robot, v, w)
+    print("##############################")
     
 
 

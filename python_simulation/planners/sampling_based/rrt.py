@@ -19,24 +19,37 @@ class RRT:
 
         self.map = map
 
-        #x, y, theta, parent_node, v, w
-        self.node_opened = [self.start[0], self.start[1], 0, 0]
-
+        #x, y, theta, parent_node,
+        self.node_opened = np.array([[self.start[0], self.start[1], -1]])
     
-    def sample(self,goal_bias):
+    def sample(self,):
         rand = np.random.rand()
         if(rand > self.goal_bias):
-            desired_node = [self.goal[0], self.goal[1], 0]
+            desired_node = [self.goal[0], self.goal[1]]
         else:
             rand_x = np.random.rand()*self.height;
             rand_y = np.random.rand()*self.width;
-            rand_z = 0;
-            desired_node = [rand_x, rand_y, rand_z];
+            desired_node = [rand_x, rand_y];
         return desired_node
+
+    def find_nearest_node(self, desired_node):
+        best_node = []
+        best_cost = 1000
+        best_index = 0
+        for i in range(len(self.node_opened)):
+            temp = self.node_opened[i]
+
+            h = np.sqrt(np.power(desired_node[0]-(temp[0]),2) + np.power(desired_node[1]-(temp[1]),2))
+            if(h < best_cost):
+                best_cost = h
+                best_node = temp
+                best_index = i
+        return best_index
+
 
     def choose_primitives(self, near_index, desired_node):
 
-        near_node = self.nodes[near_index]
+        near_node = self.node_opened[near_index]
         
         best_index = 1;
         best_distance = 10000;
@@ -44,35 +57,20 @@ class RRT:
 
         
         u1 = desired_node[0] - near_node[0];
-        u1 = u1*0.2
+        u1 = u1*0.1
 
         u2 = desired_node[1] - near_node[1];
-        u2 = u2*0.2
-
-        control = [u1, u2];
+        u2 = u2*0.1
 
         x_new = near_node[0] + u1;
         y_new = near_node[1] + u2;
-        theta_new = 0;
-        
-        best_node = [x_new, y_new, theta_new]
-        new_node = [best_node, near_index, control]
+
+
+        new_node = [x_new, y_new, near_index]
 
         return new_node
 
 
-
-    def find_nearest_cell(self,desired_cell):
-        best_node = []
-        best_cost = 1000
-        for i in range(len(self.node_opened)):
-            temp = self.node_opened[i]
-            #h = abs(self.goal[0]-(temp[0])) + abs(self.goal[1]-(temp[1]))
-            h = np.sqrt(np.power(desired_cell[0]-(temp[0]),2) + np.power(desired_cell[1]-(temp[1]),2))
-            if(h < best_cost):
-                best_cost = h
-                best_node = temp
-        return best_node
 
 
     def find_new_start(self,):
@@ -88,15 +86,25 @@ class RRT:
         return best_node
 
 
-    def check_collision(self, node_to_check):
-        x = node_to_check[0];
-        y = node_to_check[1];
+    def in_collision(self, node_to_check, nearest_node_index):
+        x = node_to_check[0]
+        y = node_to_check[1]
 
-        #to check collision!
+        if(self.map[int(round(x))][int(round(y))] != 254):
+            return True
+
+        near_node = self.node_opened[nearest_node_index]
+        distance_x = x - near_node[0]
+        distance_y = y - near_node[1]
+        intermidiate_node = [near_node[0] + distance_x/2. , near_node[1] + distance_y/2.];
+        if(self.map[int(round(intermidiate_node[0]))][int(round(intermidiate_node[1]))] != 254):
+            return True
+        
+
         return False
                         
 
-    def check_goal(self,next_cell):
+    def check_goal(self, next_cell):
         x = next_cell[0]
         y = next_cell[1]
 
@@ -120,21 +128,22 @@ class RRT:
 
     def take_path(self, finish):
         if(finish == 1):
-            last_cell = [self.goal[0],self.goal[1]];
+            last_node = self.node_opened[-1]
         else:
-            last_cell = self.find_nearest_cell(self.goal)
+            last_index = self.find_nearest_node(self.goal)
+            last_node = self.node_opened[int(last_index)]
 
-        path = [last_cell]
-        last_cell = self.node_opened[last_cell[0]][last_cell[1]]
+        path = [[last_node[0], last_node[1]]]
+        last_node = self.node_opened[int(last_node[2])]
 
 
 
         for _ in range(self.width*self.width):
-            path.append(last_cell.tolist())
-            if(last_cell[0] == self.start[0] and last_cell[1] == self.start[1]):
+            temp = last_node.tolist()
+            path.append([temp[0], temp[1]])
+            if(last_node[0] == self.start[0] and last_node[1] == self.start[1]):
                 break
-            last_cell = self.come_from[last_cell[0]][last_cell[1]]
-        #print("path",path)
+            last_node = self.node_opened[int(last_node[2])]
         return path
 
    
@@ -158,21 +167,29 @@ class RRT:
 
 
         while (finish == 0 and iterator <= max_iteration):
-            next_cell = self.find_next_cell()
-            finish = self.check_goal(next_cell)
+            sample_node = self.sample()
+            nearest_node_index = self.find_nearest_node(sample_node)
+            new_node = self.choose_primitives(nearest_node_index, sample_node)
+            
+            #check collision
+            if(self.in_collision(new_node, nearest_node_index) == True):
+                continue
+
+            self.node_opened = np.concatenate((self.node_opened, [new_node]), axis = 0)
+            finish = self.check_goal(new_node)
             if(finish == 1):
                 break
-            self.open_sons_cell(next_cell)
+            #self.open_sons_cell(next_cell)
 
             iterator += 1
 
             if(visualize):
-                rgb_image[next_cell[0]][next_cell[1]] = [0,1,0]
+                rgb_image[int(round(new_node[0]))][int(round(new_node[1]))] = [0,1,0]
                 h.set_data(rgb_image)
                 plt.pause(0.01)
-                rgb_image[next_cell[0]][next_cell[1]] = [1,0,0]
+                rgb_image[int(round(new_node[0]))][int(round(new_node[1]))]  = [1,0,0]
 
-
+        #return 0
         return self.take_path(finish)
 
    
