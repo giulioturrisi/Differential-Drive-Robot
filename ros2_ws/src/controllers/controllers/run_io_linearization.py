@@ -53,7 +53,6 @@ class Controller(Node):
         self.publisher_enableSyncMode =self.create_publisher(Bool,"enableSyncMode", 1);
         self.publisher_enableSyncMode.publish(self.enableSyncMode)
 
-
         self.triggerNextStep = Bool();
         self.triggerNextStep.data = True;
         self.publisher_triggerNextStep = self.create_publisher(Bool,"triggerNextStep", 1);
@@ -66,9 +65,8 @@ class Controller(Node):
 
 
 
-
+    # Controller callback ---------------------------------------
     def controller_callback(self):
-        
         if(self.simStep_done):
             if(self.path_ready):
                 # Compute control ---------------------------------------
@@ -94,8 +92,6 @@ class Controller(Node):
                             
             else:
                 # Zero control inputs ---------------------------------------
-                #print("state robot: ", self.state_robot)
-                #v, w = self.controller.compute_control(self.state_robot, 0.5, 0.2)
                 commanded_vel = Twist();
                 commanded_vel.linear.x = 0.0;
                 commanded_vel.angular.z = 0.0;
@@ -107,7 +103,7 @@ class Controller(Node):
             self.publisher_triggerNextStep.publish(self.triggerNextStep)
         
 
-
+    # Path callback ---------------------------------------
     def getPath_callback(self, msg):
         # Get path from msg ---------------------------------------
         self.path = []
@@ -120,7 +116,7 @@ class Controller(Node):
         print("path received")
 
 
-
+    # Robot state callback ---------------------------------------
     def tf_callback(self, msg):
         # Get state robot ---------------------------------------
         if(msg.transforms[0].child_frame_id == "base_footprint"):
@@ -133,10 +129,9 @@ class Controller(Node):
             self.state_robot[2] = euler[2] 
 
 
-
+    # Perform next step simulation ---------------------------------------
     def simStep_callback(self,msg):
         self.simStep_done = True
-
 
 
 

@@ -1,3 +1,4 @@
+import itertools
 import rclpy # type: ignore
 from rclpy.node import Node # type: ignore
 
@@ -8,9 +9,9 @@ from nav_msgs.msg import OccupancyGrid, Path  # type: ignore
 import tf_transformations # type: ignore
 
 import sys
-import copy 
+import copy
 import matplotlib.pyplot as plt # type: ignore
-import math 
+import math
 from scipy.interpolate import CubicSpline # type: ignore
 import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
@@ -21,17 +22,17 @@ from grid_based.a_star import A_star # type: ignore
 from grid_based.greedy_best_first_search import Greedy_Best_First_Search # type: ignore
 from grid_based.breadth_first_search import Breadth_First_Search # type: ignore
 from grid_based.djikstra import Djikstra # type: ignore
+
+from sampling_based.rrt import RRT, RRT_primitives # type: ignore
+
 from path_utilities import interpolate_path, filter_map, draw_map # type: ignore
 
 
 
-
-
-
 class Planners(Node):
-
     def __init__(self):
         super().__init__('Planners')
+        # Publishers and Subscribers ---------------------------------------
         self.publisher_path = self.create_publisher(Path, 'path', 1)
         self.publisher_map_filtered = self.create_publisher(OccupancyGrid,'map_filtered',1)
 
@@ -39,21 +40,29 @@ class Planners(Node):
         self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
         self.subscription_map = self.create_subscription(OccupancyGrid,'map',self.map_callback,1)
 
+        # State robot variable ---------------------------------------
         self.state_robot = np.zeros(3)
         
+        # Map Resolution and Max num Iteration ---------------------------------------
         self.map_origin = np.zeros(2)
         self.map = np.zeros((10,10))
         self.map_resolution = 0.05
         self.max_iteration = 1000
         self.visualize = False
 
+        # Plan only if there is a request and a map---------------------------------------
         self.state_arrived = False
         self.map_arrived = False
 
-        self.dt = 0.1
+        # Filtered Map ---------------------------------------
         self.safety = 5
         self.useFilteredMap = True
 
+        # Spline dt ---------------------------------------
+        self.dt = 0.1
+
+
+    # Goal Callback ---------------------------------------
     def goal_callback(self, msg):
         if(self.state_arrived == True and self.map_arrived == True):
             goal = np.array([msg.pose.position.x, msg.pose.position.y])
@@ -75,20 +84,16 @@ class Planners(Node):
             goal_shifted[1] = round(goal_shifted[1],1)
 
 
-            #DRAW
-            #draw_map(self.map, state_shifted, goal_shifted, self.map_resolution)
-
-
-            #PLAN
+            # Plan ---------------------------------------
             planner = A_star(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
             path = planner.plan(self.max_iteration,self.visualize)
             
 
-            #SPLINE
+            # Spline for smoothing ---------------------------------------
             spline, xs = interpolate_path(path, self.dt)
 
 
-            #PUBLISH
+            # Publish new path ---------------------------------------
             path_msg = Path()
             path_msg.header.frame_id = "odom"
             for i in range(int(len(path)/0.1)):
@@ -103,6 +108,7 @@ class Planners(Node):
             self.publisher_path.publish(path_msg)
 
 
+    # Robot state callback ---------------------------------------
     def tf_callback(self, msg):
         if(msg.transforms[0].child_frame_id == "base_footprint"):
             quaternion = [float(msg.transforms[0].transform.rotation.x), float(msg.transforms[0].transform.rotation.y), 
@@ -115,7 +121,7 @@ class Planners(Node):
 
             self.state_arrived = True
 
-
+    # Map Callback ---------------------------------------
     def map_callback(self, msg):
         self.map = np.zeros((msg.info.height,msg.info.width))
         d = 0
@@ -140,16 +146,13 @@ class Planners(Node):
         
         self.map_arrived = True
 
-    
-    def publish_map_filter(self,msg):
+
+    # Publish safer map ---------------------------------------
+    def publish_map_filter(self, msg):
         d = 0
-        for i in range(msg.info.height):
-            for j in range(msg.info.width):
-                if (self.map_filtered[i][j] == 254):
-                    msg.data[d] = 0
-                else:
-                    msg.data[d] = 100      
-                d = d+1
+        for i, j in itertools.product(range(msg.info.height), range(msg.info.width)):
+            msg.data[d] = 0 if self.map_filtered[i][j] == 254 else 100
+            d = d + 1
         self.publisher_map_filtered.publish(msg)
 
 
