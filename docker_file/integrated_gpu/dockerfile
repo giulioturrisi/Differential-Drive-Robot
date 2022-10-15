@@ -42,6 +42,7 @@ RUN apt install -y ros-humble-navigation2
 RUN apt install -y ros-humble-nav2-bringup
 
 # VISUALIZATION
+RUN apt-get update
 RUN apt install -y ros-humble-plotjuggler-ros
 
 #CERES
