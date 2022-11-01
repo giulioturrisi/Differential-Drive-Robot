@@ -9,13 +9,11 @@ This repo contains the code for controlling both a real and a simulated differen
 
  
 ## Dependencies
-1. [ROS2](https://docs.ros.org/en/foxy/Installation.html) Hunble
+1. [ROS2](https://docs.ros.org/en/humble/Installation.html) Humble
 
 2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
 
 3. [Acados](https://github.com/acados/acados) for one of the controllers (not mandatory)
-
-4. [Casadi](https://github.com/acados/acados) for one of the controllers (not mandatory)
 
 
 
@@ -80,4 +78,6 @@ in slam_toolbox/congif/mapper_params_localization you should put in map_file_nam
 
 3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
 
+## Status
+Still working in progress, the real robot exists but it's not yet finalized!
 
