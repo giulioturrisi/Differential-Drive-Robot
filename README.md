@@ -58,9 +58,9 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 
 ## How to run the simulation
-1. Open Coppeliasim and run the scene `medium_walls_dynamics.ttt` in the folder coppeliasim_simulation 
+1. Open Coppeliasim and run the scene `dynamics.ttt` in the folder coppeliasim_simulation 
 ```sh
-./coppeliaSim.sh -s ../medium_walls_dynamics.ttt -h
+./coppeliaSim.sh -s ../dynamics.ttt -h
 ```
 disable -h flag to run the gui!
 
@@ -70,7 +70,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard               (if you want 
 ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'   (if you want to use the joystick)
 ros2 run rviz2 rviz2                                               (visualization)
 ros2 run planners run_planners                                     (planning)
-ros2 run controller input_output_linearization                     (control)
+ros2 run controllers run_controllers                               (control)
 ros2 launch slam_toolbox localization_launch.py                    (localization)
 ```
 in slam_toolbox/congif/mapper_params_localization you should put in map_file_name: /home/ros2_ws/name_of_map
