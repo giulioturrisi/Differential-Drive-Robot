@@ -63,8 +63,8 @@ class Controllers(Node):
         elif(self.which_controller == 4):
             # Control utilities Dynamic_linearization ---------------------------------------
             self.dt = 0.01
-            self.k1 = 5
-            self.k2 = 5
+            self.k1 = 2
+            self.k2 = 15
             self.controller = Dynamic_linearization(k1=self.k1, k2=self.k2, dt=self.dt)
 
 
@@ -143,6 +143,7 @@ class Controllers(Node):
 
         self.path_ready = True;
         print("path received")
+        self.controller.reset()
 
 
     # Robot state callback ---------------------------------------

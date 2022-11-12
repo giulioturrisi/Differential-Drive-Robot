@@ -9,11 +9,13 @@ class Nonlinear_lyapunov:
         self.k1 = k1
         self.k2 = k2
         self.k3 = k3
-     
+
+        self.dt = dt
+
+    def reset(self,):
         self.previous_reference = None
         self.previous_reference_dot = [0.0 ,0.0]
 
-        self.dt = dt
 
     def compute_control(self,initial_state, reference_x, reference_y):
         state_x = initial_state[0]
@@ -46,17 +48,6 @@ class Nonlinear_lyapunov:
         vd = math.sqrt(reference_x_dot*reference_x_dot + reference_y_dot*reference_y_dot)
         wd = (reference_y_ddot*reference_x_dot - reference_x_ddot*reference_y_dot)/(reference_x_dot*reference_x_dot + reference_y_dot*reference_y_dot)
 
-
-        '''if(vd > 3):
-            vd = 3.0
-        elif(vd < -3):
-            vd = -3.0
-        
-
-        if(wd > 3):
-            wd = 3.0
-        elif(wd < -3):
-            wd = -3.0'''
         
 
         e1 = math.cos(state_yaw)*(reference_x - state_x) + math.sin(state_yaw)*(reference_y - state_y);

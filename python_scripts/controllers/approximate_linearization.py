@@ -9,10 +9,13 @@ class Approximate_linearization:
         self.k2 = k2
         self.k3 = k3
 
+
+        self.dt = dt
+
+    def reset(self,):
         self.previous_reference = None
         self.previous_reference_dot = [0.0 ,0.0]
 
-        self.dt = dt
 
 
     

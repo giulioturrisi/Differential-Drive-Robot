@@ -7,8 +7,11 @@ class IO_linearization:
         self.b = b
         self.k1 = k1
         self.k2 = k2
-        self.previous_reference = None
+
         self.dt = dt
+
+    def reset(self,):
+        self.previous_reference = None
     
     def compute_control(self,initial_state, reference_x, reference_y):
         state_x = initial_state[0]
