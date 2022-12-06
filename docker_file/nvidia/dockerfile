@@ -78,6 +78,47 @@ RUN apt install -y ros-humble-plotjuggler-ros
 
 
 
+#PINOCCHIO
+RUN apt-get update
+RUN apt install -qqy lsb-release gnupg2 curl
+RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" | sudo tee /etc/apt/sources.list.d/robotpkg.list
+RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
+RUN apt-get update
+RUN apt install -qqy robotpkg-py310-pinocchio
+RUN echo 'export PATH=/opt/openrobots/bin:$PATH' >> /root/.bashrc
+RUN echo 'export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH' >> /root/.bashrc
+RUN echo 'export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
+RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH' >> /root/.bashrc 
+RUN echo 'export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH' >> /root/.bashrc
+
+#CROCODDYL
+#RUN tee /etc/apt/sources.list.d/robotpkg.list <<EOF
+#deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
+#deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg 
+#EOF
+#RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
+#RUN apt-get update
+#RUN apt install robotpkg-py310-crocoddyl 
+#RUN echo 'export PATH=/opt/openrobots/bin:$PATH' >> /root/.bashrc
+#RUN echo 'export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH' >> /root/.bashrc
+#RUN echo 'export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
+#RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH' >> /root/.bashrc
+
+
+
+
+#ACADOS
+RUN git clone https://github.com/acados/acados.git
+RUN cd acados && git submodule update --recursive --init
+RUN cd acados && mkdir -p build
+RUN cd acados/build && cmake -DACADOS_WITH_QPOASES=ON  -DACADOS_WITH_OSQP=ON ..
+# add more optional arguments e.g. -DACADOS_WITH_OSQP=OFF/ON -DACADOS_INSTALL_DIR=<path_to_acados_installation_folder> above
+RUN cd acados/build && make install -j4
+#RUN cd acados/build && make shared_library
+RUN pip install -e /acados/interfaces/acados_template
+RUN echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/acados/lib"' >> /root/.bashrc
+RUN echo 'export ACADOS_SOURCE_DIR="/acados"' >> /root/.bashrc
+
 
 
 
