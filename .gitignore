@@ -10,6 +10,7 @@ coppeliasim_simulation/CoppeliaSim/
 ros2_ws/src/simExtROS2/
 ros2_ws/src/slam_toolbox/
 
+python_scripts/controllers/acados/c_generated_code
 
 ros2_ws/src/.vscode/
 .vscode/
