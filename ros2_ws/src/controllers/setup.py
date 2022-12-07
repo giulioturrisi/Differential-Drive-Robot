@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': ['run_casadi = controllers.run_casadi_nmpc:main',
+                            'run_acados = controllers.run_acados_nmpc:main',
                             'run_controllers = controllers.run_controllers:main',
         ],
     },
