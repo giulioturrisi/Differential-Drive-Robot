@@ -9,7 +9,7 @@ import sys
 sys.path.append('/home/python_scripts/')
 from robot_model import Robot
 
-X0 = np.array([10.0, .1, 0])  # Intitalize the states 
+X0 = np.array([0.0, 1., 0.001])  # Intitalize the states 
 N_horizon = 50  # Define the number of discretization steps
 T_horizon = 1.0  # Define the prediction horizon
 dt = 1.0/50
@@ -32,8 +32,8 @@ def create_ocp_solver_description() -> AcadosOcp:
     ocp.dims.N = N_horizon
 
     # set cost
-    Q_mat = 2 * np.diag([5, 50, 1])  # [x,y,yaw]
-    R_mat = 1 * np.diag([1, 1])
+    Q_mat = np.diag([5, 5, 0])  # [x,0,yaw]
+    R_mat = np.diag([1, 1])
 
     ocp.cost.cost_type = "LINEAR_LS"
     ocp.cost.cost_type_e = "LINEAR_LS"
@@ -41,7 +41,7 @@ def create_ocp_solver_description() -> AcadosOcp:
     ny = nx + nu
     ny_e = nx
 
-    ocp.cost.W_e = Q_mat
+    ocp.cost.W_e = Q_mat*10
     ocp.cost.W = scipy.linalg.block_diag(Q_mat, R_mat)
 
     ocp.cost.Vx = np.zeros((ny, nx))
@@ -91,7 +91,7 @@ def closed_loop_simulation():
 
 
     # prepare simulation
-    Nsim = 200
+    Nsim = 20
     nx = ocp.model.x.size()[0]
     nu = ocp.model.u.size()[0]
 
@@ -109,9 +109,9 @@ def closed_loop_simulation():
         acados_ocp_solver.set(stage, "u", np.zeros((nu,)))
 
     for j in range(N_horizon):
-        yref = np.array([0, 0, 0, 0, 0])
+        yref = np.array([0, 2, 0, 0, 0])
         acados_ocp_solver.set(j, "yref", yref)
-    yref_N = np.array([0, 0, 0])
+    yref_N = np.array([0, 2, 0])
     acados_ocp_solver.set(N_horizon, "yref", yref_N)
 
     # closed loop
@@ -127,10 +127,11 @@ def closed_loop_simulation():
 
         simU[i, :] = acados_ocp_solver.get(0, "u")
 
-        print("u", simU[i,:])
-
+        
         print("control time: ", time.time()-start_time)
 
+
+        print("status", status)
         # simulate system
         xcurrent = unicycle.integrate(xcurrent, simU[i, 0], simU[i, 1])
 

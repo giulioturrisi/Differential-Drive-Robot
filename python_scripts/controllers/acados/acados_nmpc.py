@@ -38,8 +38,8 @@ class NMPC:
 
 
         # set cost
-        Q_mat = 2 * np.diag([5, 5, 0.1])  # [x,y,yaw]
-        R_mat = 1 * np.diag([0.1, 0.1])
+        Q_mat = 2 * np.diag([0, 5, 0])  # [x,y,yaw]
+        R_mat = 1 * np.diag([0.1, 0.001])
 
         ocp.cost.cost_type = "LINEAR_LS"
         ocp.cost.cost_type_e = "LINEAR_LS"
@@ -93,14 +93,18 @@ class NMPC:
         for stage in range(self.horizon):
             self.acados_ocp_solver.set(stage, "u", np.zeros((self.control_dim,)))
 
+ 
+        reference_yaw = 0.0
+
         for j in range(self.horizon):
             ref_x = reference_x[j]
             ref_y = reference_y[j]
-            yref = np.array([ref_x, ref_y, 0, 0, 0])
+            yref = np.array([ref_x, ref_y, reference_yaw, 0, 0])
+            print("yref", yref)
             self.acados_ocp_solver.set(j, "yref", yref)
         ref_x = reference_x[self.horizon-1]
         ref_y = reference_y[self.horizon-1]
-        yref_N = np.array([ref_x, ref_y, 0])
+        yref_N = np.array([ref_x, ref_y, reference_yaw])
         self.acados_ocp_solver.set(self.horizon, "yref", yref_N)
 
 
@@ -119,4 +123,4 @@ class NMPC:
 
 
 
-        return control
+        return control[0],control[1]
