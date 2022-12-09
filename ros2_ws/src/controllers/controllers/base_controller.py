@@ -68,7 +68,7 @@ class Base_Controller(Node):
     # coming from joystick!
     def getVel_callback(self, msg):
         self.path_ready = False
-        self.publish_command(msg.linear.x, msg.linear.z)
+        self.publish_command(msg.linear.x*2, msg.angular.z*5)
         self.controller.reset()
         
 

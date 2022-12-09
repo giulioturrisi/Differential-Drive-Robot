@@ -54,12 +54,7 @@ class Controller(Base_Controller):
                 self.path.pop(0)
                 if(len(self.path) == 0):
                     self.path_ready = False
-                            
-            else:
-                # Zero control inputs ---------------------------------------
-                v = 0
-                w = 0
-                self.publish_command(v, w)
+
 
 
             # Trigger next step Simulation ---------------------------------------
