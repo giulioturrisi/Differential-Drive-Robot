@@ -84,6 +84,15 @@ in slam_toolbox/congif/mapper_params_localization you should put in map_file_nam
 6. Iterative Linear Quadratic Regulator
 7. Iterative Linear Quadratic Regulator via Crocoddyl
 
+## List of available planners
+1. A*
+2. Breadth First search
+3. Djikstra
+4. Greedy Best First search
+5. RRT
+6. RRT* (in progress)
+7. RRT-primitives (in progress)
+
 ## Status
 Still working in progress, the real robot exists but it's not yet finalized!
 
