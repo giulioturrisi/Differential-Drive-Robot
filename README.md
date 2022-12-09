@@ -13,9 +13,6 @@ This repo contains the code for controlling both a real and a simulated differen
 
 2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
 
-3. [Acados](https://github.com/acados/acados) for one of the controllers (not mandatory)
-
-
 
 ## Build on Linux
 1. clone the repo
@@ -39,8 +36,8 @@ docker build -t ros2_humble .
 ```sh
 cd 
 gedit .bashrc
-alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY  -e QT_X11_NO_MITSHM=1 --gpus all --name ddrive_humble ros2_humble'  (if used /nvidia)
-alias ddrive_humble="xhost + && docker run -it --rm -v /home/giulio/giulio_projects/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix --device=/dev/dri -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY --name ddrive_humble  ros2_humble" (if used /integrated_gpu)
+alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix:rw --device=/dev/input/ -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY  -e QT_X11_NO_MITSHM=1 --gpus all --name ddrive_humble ros2_humble'  (if used /nvidia)
+alias ddrive_humble="xhost + && docker run -it --rm -v /home/giulio/giulio_projects/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix --device=/dev/dri --device=/dev/input/ -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY --name ddrive_humble  ros2_humble" (if used /integrated_gpu)
 alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg -v /usr/lib/wsl:/usr/lib/wsl --device=/dev/dxg -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY -e XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR -e PULSE_SERVER=$PULSE_SERVER -e LD_LIBRARY_PATH=/usr/lib/wsl/lib --name ddrive_humble ros2_humble' (if Windows Linux Subsystem)
 
 alias ddrive='docker exec -it ddrive_humble bash' (to attach a new terminal to the running docker)
@@ -66,7 +63,6 @@ disable -h flag to run the gui!
 
 2. on a new terminal 
 ```sh
-ros2 run teleop_twist_keyboard teleop_twist_keyboard               (if you want to use the keyboard)
 ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'   (if you want to use the joystick)
 ros2 run rviz2 rviz2                                               (visualization)
 ros2 run planners run_planners                                     (planning)
@@ -77,6 +73,16 @@ in slam_toolbox/congif/mapper_params_localization you should put in map_file_nam
 
 
 3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
+
+
+## List of available controllers
+1. Approximate linearization
+2. Input-Output linearization
+3. Nonlinear MPC via Casadi
+4. Nonlinear MPC via Acados
+5. Nonlinear Lyapunov
+6. Iterative Linear Quadratic Regulator
+7. Iterative Linear Quadratic Regulator via Crocoddyl
 
 ## Status
 Still working in progress, the real robot exists but it's not yet finalized!
