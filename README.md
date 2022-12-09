@@ -42,7 +42,6 @@ alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Diff
 
 alias ddrive='docker exec -it ddrive_humble bash' (to attach a new terminal to the running docker)
 ```
-You can add --device /dev/input/js0 to give to docker the access to the joystick. 
 
 5. start docker and build
 ```sh
