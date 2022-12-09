@@ -68,10 +68,10 @@ ros2 run planners run_planners                                     (planning)
 ros2 run controllers run_controllers                               (control)
 ros2 launch slam_toolbox localization_launch.py                    (localization)
 ```
-in slam_toolbox/congif/mapper_params_localization you should put in map_file_name: /home/ros2_ws/name_of_map
+3. (optional) to load an existing map, put in slam_toolbox/congif/mapper_params_localization /home/ros2_ws/src/utilities/name_of_map
 
 
-3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
+4. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
 
 
 ## List of available controllers
