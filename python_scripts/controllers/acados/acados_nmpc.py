@@ -38,8 +38,8 @@ class NMPC:
 
 
         # set cost
-        Q_mat = 2 * np.diag([0, 5, 0])  # [x,y,yaw]
-        R_mat = 1 * np.diag([0.1, 0.001])
+        Q_mat = 2 * np.diag([5, 5, 1])  # [x,y,yaw]
+        R_mat = 1 * np.diag([1, 1])
 
         ocp.cost.cost_type = "LINEAR_LS"
         ocp.cost.cost_type_e = "LINEAR_LS"
@@ -86,6 +86,8 @@ class NMPC:
 
     #def compute_control(self, state, state_des):
     def compute_control(self, state, reference_x, reference_y):
+
+        state[2] += 0.02 
      
         # initialize solver
         for stage in range(self.horizon + 1):
@@ -94,17 +96,23 @@ class NMPC:
             self.acados_ocp_solver.set(stage, "u", np.zeros((self.control_dim,)))
 
  
-        reference_yaw = 0.0
+        ref_yaw = 0
 
         for j in range(self.horizon):
             ref_x = reference_x[j]
             ref_y = reference_y[j]
-            yref = np.array([ref_x, ref_y, reference_yaw, 0, 0])
-            print("yref", yref)
+
+            ref_x_d = (reference_x[j+1] - ref_x)/self.dt
+            ref_y_d = (reference_y[j+1] - ref_y)/self.dt
+            ref_yaw = np.arctan2(ref_y_d, ref_x_d) 
+
+            yref = np.array([ref_x, ref_y, ref_yaw, 0, 0])
+            #print("yref", yref)
             self.acados_ocp_solver.set(j, "yref", yref)
-        ref_x = reference_x[self.horizon-1]
-        ref_y = reference_y[self.horizon-1]
-        yref_N = np.array([ref_x, ref_y, reference_yaw])
+        
+        ref_x = reference_x[self.horizon]
+        ref_y = reference_y[self.horizon]
+        yref_N = np.array([ref_x, ref_y, ref_yaw])
         self.acados_ocp_solver.set(self.horizon, "yref", yref_N)
 
 

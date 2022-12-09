@@ -18,7 +18,7 @@ class iLQR:
     def __init__(self, lin_state = None, lin_tau = None, horizon = None, dt = None):
         self.lin_state = np.zeros(3)
         self.lin_tau = np.zeros(2)
-        self.horizon = 1500
+        self.horizon = horizon
         self.iteration = 5
         self.dt = dt
 
@@ -27,9 +27,8 @@ class iLQR:
         self.state_dim = 3
         self.control_dim = 2
 
-        self.Q = np.identity(3)*10
-        self.Q[0,0] = 0
-        self.Q[2,2] = 0
+        self.Q = np.identity(3)*100
+        self.Q[2,2] = 10
         
 
         
@@ -85,12 +84,13 @@ class iLQR:
 
         return P_next
     
-    def compute_backward_pass(self, state_des):
+    def compute_backward_pass(self, state_des_vec):
         #print("##BACKWATD PASS")
         
 
         for step in range(0,self.horizon):
             state_actual = self.state_vec[self.horizon-step-1];
+            state_des = state_des_vec[self.horizon-step-1]
             control_actual = self.control_vec[self.horizon-step-1];
             u = control_actual 
 
@@ -226,17 +226,42 @@ class iLQR:
             
 
 
-    def compute_control(self, state, state_des):
-        # setting last V and initial system simulation
-        self.V_vec[self.horizon] = self.P@(state.reshape(self.state_dim,1) - state_des.reshape(self.state_dim,1))
+    def compute_control(self, state, reference_x, reference_y):
+
+        state_des_vec = np.zeros((self.horizon+1,3,1))
+
+        ref_yaw = 0
+        for k in range(0,self.horizon):
+            ref_x = reference_x[k]
+            ref_y = reference_y[k]
+            
+            ref_x_d = (reference_x[k+1] - ref_x)/self.dt
+            ref_y_d = (reference_y[k+1] - ref_y)/self.dt
+            ref_yaw = np.arctan2(ref_y_d, ref_x_d) 
+            
+            state_des_vec[k] = np.array([ref_x , ref_y, ref_yaw]).reshape(self.state_dim,1)
+
+
+        ref_x = reference_x[self.horizon]
+        ref_y = reference_y[self.horizon]    
+        state_des_vec[self.horizon] = np.array([ref_x , ref_y, ref_yaw]).reshape(self.state_dim,1)
+
+        print("state_des_vec", state_des_vec)
+
+        
+
+
+        # setting last V and initial system simulation #error!!!!
+        #self.V_vec[self.horizon] = self.P@(state.reshape(self.state_dim,1) - state_des_vec[self.N].reshape(self.state_dim,1))
         self.compute_forward_simulation(initial_state=state)
+        self.V_vec[self.horizon] = self.P@(self.state_vec[self.horizon].reshape(self.state_dim,1) - state_des_vec[self.horizon].reshape(self.state_dim,1))
 
         #plt.plot(self.state_vec[:,1])
         #plt.show()
         # compute control and gain
         for i in range(0,self.iteration):
             start_time = time.time()
-            self.compute_backward_pass(state_des=state_des.reshape(self.state_dim,1))
+            self.compute_backward_pass(state_des_vec)
             #print("backward time: ", time.time()-start_time)
             start_time = time.time()
             self.compute_forward_pass(initial_state=state.reshape(self.state_dim,1))
@@ -246,21 +271,21 @@ class iLQR:
             #plt.show()
         #print("control vec", self.control_vec)
 
-        return [0,0]
+        return np.asscalar(self.control_vec[0,0]),np.asscalar(self.control_vec[0,1])
 
 
 
 
 
 if __name__=="__main__":
-    controller=iLQR(dt = 0.01)
+    controller=iLQR(dt = 0.01, horizon=10)
     state = np.zeros(3)
     state[1] = -1
     state[2] = 0.001 #yaw
-    state_des = np.zeros(3)
+    state_des = np.zeros((controller.horizon,3,1))
     
     start_time = time.time()
-    controller.compute_control(state, state_des=state_des)
+    controller.compute_control(state, reference_x=state_des[:,0], reference_y=state_des[:,1])
     print("Control time: ", time.time()-start_time)
 
     plt.plot(controller.state_vec[:,1])
