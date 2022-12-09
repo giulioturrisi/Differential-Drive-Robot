@@ -21,7 +21,11 @@ setup(
     entry_points={
         'console_scripts': ['run_casadi = controllers.run_casadi_nmpc:main',
                             'run_acados = controllers.run_acados_nmpc:main',
-                            'run_controllers = controllers.run_controllers:main',
+                            'run_ilqr = controllers.run_ilqr:main',
+                            'run_approx_linearization = controllers.run_approx_linearization:main',
+                            'run_io_linearization = controllers.run_io_linearization:main',
+                            'run_nonlinear_lyapunov = controllers.run_nonlinear_lyapunov:main',
+                            'run_dynamic_linearization = controllers.run_dynamic_linearization:main',
         ],
     },
 )

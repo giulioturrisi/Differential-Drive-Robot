@@ -109,10 +109,8 @@ class Controllers(Node):
                 print("control time: ", time.time()-start_time)
 
                 # Publish Message ---------------------------------------
-                commanded_vel = Twist();
-                commanded_vel.linear.x = v;
-                commanded_vel.angular.z = w;
-                self.publisher_command.publish(commanded_vel);
+                self.publish_command(v,w)
+
                 
                 # Remove used reference point ---------------------------------------
                 self.path.pop(0)
@@ -121,10 +119,9 @@ class Controllers(Node):
                             
             else:
                 # Zero control inputs ---------------------------------------
-                commanded_vel = Twist();
-                commanded_vel.linear.x = 0.0;
-                commanded_vel.angular.z = 0.0;
-                self.publisher_command.publish(commanded_vel);
+                v = 0
+                w = 0
+                self.publish_command(v, w)
 
 
             # Trigger next step Simulation ---------------------------------------

@@ -15,19 +15,19 @@ import sys
 import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
-sys.path.append('/home/python_scripts/controllers/acados')
-from acados_nmpc import NMPC 
+sys.path.append('/home/python_scripts/controllers')
+from ilqr import iLQR 
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller
 
 class Controller(Base_Controller):
     def __init__(self):
-        super().__init__('Acados_NMPC')
+        super().__init__('ILQR')
 
         self.create_timer(self.dt, self.controller_callback)
 
         self.horizon = 30
-        self.controller = NMPC(self.horizon, self.dt)
+        self.controller = iLQR(horizon=self.horizon, dt=self.dt)
 
 
 
@@ -39,9 +39,10 @@ class Controller(Base_Controller):
                 print("state robot: ", self.state_robot)
                 start_time = time.time()
 
+
                 reference_x = []
                 reference_y = []
-                for i in range(self.horizon+1):
+                for i in range(self.horizon):
                     if(i < len(self.path)):
                         reference_x.append(self.path[i][0])
                         reference_y.append(self.path[i][1])
@@ -72,7 +73,7 @@ class Controller(Base_Controller):
 
             # Trigger next step Simulation ---------------------------------------
             self.triggerNextStep_Sim()
-        
+
 
 
 
