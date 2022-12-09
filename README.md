@@ -19,20 +19,21 @@ This repo contains the code for controlling both a real and a simulated differen
 ```sh
 git clone --recurse-submodules https://github.com/giulioturrisi/differential_drive.git
 ```
-and extract CoppeliaSim in Differential-Drive-Robot/coppeliasim_simulation
 
-2. add the following ls in ros2_ws/src/simExtROS2/meta/interfaces.txt 
+2. extract CoppeliaSim in Differential-Drive-Robot/coppeliasim_simulation
+
+3. add the following ls in ros2_ws/src/simExtROS2/meta/interfaces.txt 
 ```sh
 geometry_msgs/msg/Twist
 sensor_msgs/msg/LaserScan
 ```
 
-3. build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
+4. build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
 ```sh
 docker build -t ros2_humble .
 ```
 
-4. add alias to start the docker
+5. add alias to start the docker
 ```sh
 cd 
 gedit .bashrc
@@ -43,7 +44,7 @@ alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Diff
 alias ddrive='docker exec -it ddrive_humble bash' (to attach a new terminal to the running docker)
 ```
 
-5. start docker and build
+6. start docker and build
 ```sh
 ddrive_humble
 cd ros2_ws
