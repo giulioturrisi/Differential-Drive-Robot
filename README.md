@@ -78,9 +78,9 @@ ros2 launch slam_toolbox localization_launch.py                    (localization
 1. Approximate linearization
 2. Input-Output linearization
 3. Dynamic linearization
-4. Nonlinear MPC via Casadi
-5. Nonlinear MPC via Acados
-6. Nonlinear Lyapunov
+4. Nonlinear Lyapunov
+5. Nonlinear MPC via Casadi
+6. Nonlinear MPC via Acados
 7. Iterative Linear Quadratic Regulator
 8. Iterative Linear Quadratic Regulator via Crocoddyl
 
