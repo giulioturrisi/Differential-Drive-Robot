@@ -77,11 +77,12 @@ ros2 launch slam_toolbox localization_launch.py                    (localization
 ## List of available controllers
 1. Approximate linearization
 2. Input-Output linearization
-3. Nonlinear MPC via Casadi
-4. Nonlinear MPC via Acados
-5. Nonlinear Lyapunov
-6. Iterative Linear Quadratic Regulator
-7. Iterative Linear Quadratic Regulator via Crocoddyl
+3. Dynamic linearization
+4. Nonlinear MPC via Casadi
+5. Nonlinear MPC via Acados
+6. Nonlinear Lyapunov
+7. Iterative Linear Quadratic Regulator
+8. Iterative Linear Quadratic Regulator via Crocoddyl
 
 ## List of available planners
 1. A*
