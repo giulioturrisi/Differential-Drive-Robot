@@ -56,7 +56,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ## How to run the simulation
 1. Open Coppeliasim and run the scene `dynamics.ttt` in the folder coppeliasim_simulation 
 ```sh
-./coppeliaSim.sh -s ../dynamics.ttt (add -h to disable the gui)
+./coppeliaSim.sh -s ../dynamics.ttt                                (add -h to disable the gui)
 ```
 
 2. on a new terminal 
