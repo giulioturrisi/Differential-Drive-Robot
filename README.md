@@ -65,7 +65,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'   (if you want to use the joystick)
 ros2 run rviz2 rviz2                                               (visualization)
 ros2 run planners run_planners                                     (planning)
-ros2 run controllers run_controllers                               (control)
+ros2 run controllers <control_node>                                (control)
 ros2 launch slam_toolbox localization_launch.py                    (localization)
 ```
 3. (optional) to load an existing map, put in slam_toolbox/congif/mapper_params_localization /home/ros2_ws/src/utilities/name_of_map
