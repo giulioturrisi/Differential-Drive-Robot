@@ -1,7 +1,7 @@
 from casadi import * # type: ignore
 import random 
 import matplotlib.pyplot as plt # type: ignore
-import math
+import numpy as np
 import time
 
 class Casadi_nmpc:
@@ -28,7 +28,7 @@ class Casadi_nmpc:
         self.X_casadi = self.opti.variable(self.numberState,self.N+1) # state trajectory
         self.x_casadi   = self.X_casadi[0,:]
         self.y_casadi   = self.X_casadi[1,:]
-        self.theta_casadi   = self.X_casadi[2,:]
+        self.yaw_casadi   = self.X_casadi[2,:]
             
         self.U_casadi = self.opti.variable(self.n_actionsMPC,self.N)   # control trajectory
 
@@ -58,27 +58,50 @@ class Casadi_nmpc:
         start_time = time.time()
         self.opti.subject_to(self.x_casadi[0]==initial_state[0])  
         self.opti.subject_to(self.y_casadi[0]==initial_state[1])   
-        self.opti.subject_to(self.theta_casadi[0]==initial_state[2])
+        self.opti.subject_to(self.yaw_casadi[0]==initial_state[2])
 
         # Setting Cost Function ---------------------------------------
         position_error = 0
         input_use = 0
-    
+        ref_yaw = 0
+
+        
+        # Fill cost function using flat outputs ---------------------------------------------------
         for k in range(1,self.N):
             ref_x = reference_x[k]
             ref_y = reference_y[k]
+
+            ref_x_dot = (reference_x[k+1] - ref_x)/self.dt
+            ref_y_dot = (reference_y[k+1] - ref_y)/self.dt
+            ref_yaw = np.arctan2(ref_y_dot, ref_x_dot) 
+
             position_error += self.Q*(self.x_casadi[k] - ref_x)@(self.x_casadi[k] - ref_x).T
             position_error += self.Q*(self.y_casadi[k] - ref_y)@(self.y_casadi[k] - ref_y).T
-      
-        for k in range(0,self.N-1):
-            ref_v = 0
-            ref_w = 0
+            position_error += self.Q*(self.yaw_casadi[k] - ref_yaw)@(self.yaw_casadi[k] - ref_yaw).T
+
+            
+            ref_x_ddot = (((reference_x[k+2] - reference_x[k+1])/self.dt ) - ref_x_dot)/self.dt
+            ref_y_ddot = (((reference_y[k+2] - reference_y[k+1])/self.dt ) - ref_y_dot)/self.dt
+            
+            ref_v = np.sqrt(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
+            ref_w = (ref_y_ddot*ref_x_dot - ref_x_ddot*ref_y_dot)/(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
+            
             input_use += self.R*(self.U_casadi[0,k] - ref_v)@(self.U_casadi[0,k] - ref_v).T 
             input_use += self.R*(self.U_casadi[1,k] - ref_w)@(self.U_casadi[1,k] - ref_w).T 
         
-        self.opti.minimize(position_error + input_use)
-        #print("Initialization time: ", time.time()-start_time)
         
+        # Last step N horizon -----------------------------------------------------------------------
+        ref_x = reference_x[self.N]
+        ref_y = reference_y[self.N]
+        position_error += self.Q*(self.x_casadi[self.N] - ref_x)@(self.x_casadi[self.N] - ref_x).T
+        position_error += self.Q*(self.y_casadi[self.N] - ref_y)@(self.y_casadi[self.N] - ref_y).T
+        position_error += self.Q*(self.yaw_casadi[self.N] - ref_yaw)@(self.yaw_casadi[self.N] - ref_yaw).T
+        
+        
+        
+        self.opti.minimize(position_error + input_use)
+        
+        #print("Initialization time: ", time.time()-start_time)
         # Compute solution ---------------------------------------
         start_time = time.time()
         sol = self.opti.solve()

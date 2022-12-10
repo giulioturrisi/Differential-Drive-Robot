@@ -17,7 +17,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 
-
+# Shell for all the controllers ----------------------------------------------
 class Base_Controller(Node):
     def __init__(self, name):
         super().__init__(name)
@@ -25,11 +25,12 @@ class Base_Controller(Node):
         self.path_ready = False;
         self.state_arrived = False
         self.dt = 0.01
+        self.state_robot = np.zeros(3)
 
         self.controller = None
 
-        self.state_robot = np.zeros(3)
         
+        # Publisher and Subscribers -------------------------------------------
         self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
         self.subscription_path = self.create_subscription(Path,'path',self.getPath_callback,1)
         self.subscription_cmd_vel = self.create_subscription(Twist,"cmd_vel", self.getVel_callback, 1);
@@ -52,7 +53,7 @@ class Base_Controller(Node):
         self.subscription_simStep = self.create_subscription(Bool,'simulationStepDone',self.simStep_callback,1)
 
 
-
+    # Path callback ----------------------------------------------
     def getPath_callback(self, msg):
         self.path = []
         for i in range (len(msg.poses)):
@@ -65,7 +66,7 @@ class Base_Controller(Node):
         print("Path received!")
         self.controller.reset()
 
-    # coming from joystick!
+    # Velocity received by the joystick ---------------------------
     def getVel_callback(self, msg):
         self.path_ready = False
         self.publish_command(msg.linear.x*2, msg.angular.z*5)
@@ -73,7 +74,7 @@ class Base_Controller(Node):
         
 
 
-
+    # Trasformation callback ---------------------------------------
     def tf_callback(self, msg):
         if(msg.transforms[0].child_frame_id == "base_footprint"):
             quaternion = [float(msg.transforms[0].transform.rotation.x), float(msg.transforms[0].transform.rotation.y), 
@@ -88,15 +89,18 @@ class Base_Controller(Node):
             self.state_arrived = True
 
 
+    # Simulation step done flag -------------------------------------
     def simStep_callback(self,msg):
         self.simStep_done = True
 
 
+    # Request for next step simulation ------------------------------
     def triggerNextStep_Sim(self,):
         self.simStep_done = False
         self.publisher_triggerNextStep.publish(self.triggerNextStep)
 
 
+    # Publish the motor commands ------------------------------------
     def publish_command(self, v, w):
         commanded_vel = Twist()
         commanded_vel.linear.x = np.float(v)

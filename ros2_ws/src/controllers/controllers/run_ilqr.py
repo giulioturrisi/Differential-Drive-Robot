@@ -20,6 +20,9 @@ from ilqr import iLQR
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller
 
+
+
+
 class Controller(Base_Controller):
     def __init__(self):
         super().__init__('ILQR')
@@ -42,7 +45,7 @@ class Controller(Base_Controller):
 
                 reference_x = []
                 reference_y = []
-                for i in range(self.horizon):
+                for i in range(self.horizon+1):
                     if(i < len(self.path)):
                         reference_x.append(self.path[i][0])
                         reference_y.append(self.path[i][1])

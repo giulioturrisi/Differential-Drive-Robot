@@ -23,8 +23,9 @@ class NMPC:
         self.state_dim = self.ocp.model.x.size()[0]
         self.control_dim = self.ocp.model.u.size()[0]
 
+
     def create_ocp_solver_description(self,) -> AcadosOcp:
-        # create ocp object to formulate the OCP
+        # Create ocp object to formulate the OCP
         ocp = AcadosOcp()
 
         model = export_robot_model()
@@ -33,11 +34,11 @@ class NMPC:
         nu = model.u.size()[0]
         ny = nx + nu
 
-        # set dimensions
+        # Set dimensions
         ocp.dims.N = self.horizon
 
 
-        # set cost
+        # Set cost
         Q_mat = 2 * np.diag([5, 5, 1])  # [x,y,yaw]
         R_mat = 1 * np.diag([1, 1])
 
@@ -62,16 +63,17 @@ class NMPC:
         ocp.cost.yref = np.zeros((ny,))
         ocp.cost.yref_e = np.zeros((ny_e,))
 
-        # set constraints
-        v_max = 0.5 
-        ocp.constraints.lbu = np.array([-v_max, -v_max])
-        ocp.constraints.ubu = np.array([+v_max, +v_max])
+        # Set constraints
+        v_max = 1 
+        w_max = 1 
+        ocp.constraints.lbu = np.array([-v_max, -w_max])
+        ocp.constraints.ubu = np.array([+v_max, +w_max])
         ocp.constraints.idxbu = np.array([0,1])
 
         X0 = np.array([0.0, 0.0, 0.0])
         ocp.constraints.x0 = X0
 
-        # set options
+        # Set options
         ocp.solver_options.qp_solver = "PARTIAL_CONDENSING_HPIPM"  # FULL_CONDENSING_QPOASES
         ocp.solver_options.hessian_approx = "GAUSS_NEWTON"  # 'GAUSS_NEWTON', 'EXACT'
         ocp.solver_options.integrator_type = "IRK"
@@ -79,17 +81,17 @@ class NMPC:
         ocp.solver_options.nlp_solver_max_iter = 400
         # ocp.solver_options.levenberg_marquardt = 1e-2
 
-        # set prediction horizon
+        # Set prediction horizon
         ocp.solver_options.tf = self.T_horizon
 
         return ocp
 
-    #def compute_control(self, state, state_des):
+
     def compute_control(self, state, reference_x, reference_y):
 
         state[2] += 0.02 
      
-        # initialize solver
+        # Initialize solver
         for stage in range(self.horizon + 1):
             self.acados_ocp_solver.set(stage, "x", 0.0 * np.ones((self.state_dim,)))
         for stage in range(self.horizon):
@@ -97,31 +99,41 @@ class NMPC:
 
  
         ref_yaw = 0
-
+        # Fill cost function using flat outputs ---------------------------------------------------
         for j in range(self.horizon):
             ref_x = reference_x[j]
             ref_y = reference_y[j]
 
-            ref_x_d = (reference_x[j+1] - ref_x)/self.dt
-            ref_y_d = (reference_y[j+1] - ref_y)/self.dt
-            ref_yaw = np.arctan2(ref_y_d, ref_x_d) 
+            ref_x_dot = (reference_x[j+1] - ref_x)/self.dt
+            ref_y_dot = (reference_y[j+1] - ref_y)/self.dt
+            ref_yaw = np.arctan2(ref_y_dot, ref_x_dot) 
 
-            yref = np.array([ref_x, ref_y, ref_yaw, 0, 0])
-            #print("yref", yref)
+            ref_v = 0
+            ref_w = 0
+            if(j < self.horizon-1):
+                ref_x_ddot = (((reference_x[j+2] - reference_x[j+1])/self.dt ) - ref_x_dot)/self.dt
+                ref_y_ddot = (((reference_y[j+2] - reference_y[j+1])/self.dt ) - ref_y_dot)/self.dt
+                
+                ref_v = np.sqrt(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
+                ref_w = (ref_y_ddot*ref_x_dot - ref_x_ddot*ref_y_dot)/(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
+
+            yref = np.array([ref_x, ref_y, ref_yaw, ref_v, ref_w])
             self.acados_ocp_solver.set(j, "yref", yref)
+            #print("yref", yref)
         
+        # Fill last step horizon ---------------------------------------------------
         ref_x = reference_x[self.horizon]
         ref_y = reference_y[self.horizon]
         yref_N = np.array([ref_x, ref_y, ref_yaw])
         self.acados_ocp_solver.set(self.horizon, "yref", yref_N)
 
 
-        # set initial state constraint
+        # Set initial state constraint ---------------------------------------------
         self.acados_ocp_solver.set(0, "lbx", state)
         self.acados_ocp_solver.set(0, "ubx", state)
 
 
-        # solve ocp
+        # Solve ocp -----------------------------------------------------------------
         status = self.acados_ocp_solver.solve()
 
         control = self.acados_ocp_solver.get(0, "u")

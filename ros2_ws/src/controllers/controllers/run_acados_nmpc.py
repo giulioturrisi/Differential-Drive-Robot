@@ -20,6 +20,8 @@ from acados_nmpc import NMPC
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller
 
+
+
 class Controller(Base_Controller):
     def __init__(self):
         super().__init__('Acados_NMPC')
@@ -28,8 +30,6 @@ class Controller(Base_Controller):
 
         self.horizon = 30
         self.controller = NMPC(self.horizon, self.dt)
-
-
 
 
     def controller_callback(self):
