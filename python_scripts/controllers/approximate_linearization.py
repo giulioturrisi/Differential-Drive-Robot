@@ -4,7 +4,16 @@ import time
 import numpy as np
 
 class Approximate_linearization:
+    """Class for the Approximate_linearization control law
+    """
     def __init__(self, k1, k2, k3, dt):
+        """Init func
+        Args:
+            k1 (float): gain number 1
+            k2 (float): gain number 2
+            k3 (float): gain number ...3!
+            dt (float): sampling time
+        """
         self.k1 = k1
         self.k2 = k2
         self.k3 = k3
@@ -13,13 +22,21 @@ class Approximate_linearization:
         self.dt = dt
 
     def reset(self,):
+        """Every control class should have a reset function
+        """
         self.previous_reference = None
         self.previous_reference_dot = [0.0 ,0.0]
 
 
-
-    
-    def compute_control(self,initial_state, reference_x, reference_y):
+    def compute_control(self, initial_state, reference_x, reference_y):
+        """Compute the control actions
+        Args:
+            initial_state (np.array): actual state of the robot
+            reference_x (np.array): x reference for the robot
+            reference_y (np.array): y reference for the robot
+        Returns:
+            (np.array): control actions
+        """
         state_x = initial_state[0]
         state_y = initial_state[1]
         state_yaw = initial_state[2]
@@ -72,6 +89,5 @@ class Approximate_linearization:
 
         v = vd*math.cos(e3) + self.k1*e1;
         w = wd + self.k2*np.sign(vd)*e2 +self.k3*e3;
-
 
         return v, w

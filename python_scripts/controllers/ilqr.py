@@ -15,7 +15,14 @@ import copy
 import casadi as cs
 
 class iLQR:
-    def __init__(self, lin_state = None, lin_tau = None, horizon = None, dt = None):
+    """Class for the Iterative Linear Quadratic Regulator control law
+    """
+    def __init__(self, horizon = None, dt = None):
+        """Init func
+        Args:
+            horizon (float): how many steps to look into the future
+            dt (float): sampling time
+        """
         self.lin_state = np.zeros(3)
         self.lin_tau = np.zeros(2)
         self.horizon = horizon
@@ -29,8 +36,6 @@ class iLQR:
 
         self.Q = np.identity(3)*100
         self.Q[2,2] = 10
-        
-
         
 
         self.R = np.identity(2)*10
@@ -62,7 +67,14 @@ class iLQR:
 
 
     def compute_discrete_LQR_P(self,lin_state, lin_tau):
+        """Calculate by backward iterations the optimal LQR gains
+        Args:
+            lin_state (np.array): linearization state
+            lin_tau (np.array): linearization control inputs
 
+        Returns:
+             K (np.array): optimal gains
+        """
         dt = 0.001
 
         P_next = np.identity(self.state_dim)
@@ -84,9 +96,12 @@ class iLQR:
 
         return P_next
     
+
     def compute_backward_pass(self, state_des_vec):
-        #print("##BACKWATD PASS")
-        
+        """Calculate ILQR backward pass
+        Args:
+            state_des (np.array): desired state
+        """
 
         for step in range(0,self.horizon):
             state_actual = self.state_vec[self.horizon-step-1];
@@ -149,11 +164,11 @@ class iLQR:
             self.V_vec[self.horizon - step - 1] = V_x
         
 
-        
-
-
-    def compute_forward_pass(self,initial_state):
-
+    def compute_forward_pass(self, initial_state):
+        """Calculate ILQR forward pass
+        Args:
+            initial_state (np.array): actual state of the robot
+        """
         self.state_vec[0] = initial_state.reshape(self.state_dim,1) 
         state_forward = copy.deepcopy(self.state_vec)
         
@@ -173,8 +188,6 @@ class iLQR:
             # new control update
             k = -pinv_Q_uu@Q_u
             K = -pinv_Q_uu@Q_ux
-
-
             
             self.control_vec[step,0] += k[0]*1 + K[0]@(error)
             self.control_vec[step,1] += k[1]*1 + K[1]@(error)
@@ -205,8 +218,11 @@ class iLQR:
         #print("evolution forward pass", self.state_vec)
 
 
-    def compute_forward_simulation(self,initial_state):
-
+    def compute_forward_simulation(self, initial_state):
+        """Calculate first ILQR rollout
+        Args:
+            initial_state (np.array): actual state of the robot
+        """
         self.state_vec[0] = initial_state.reshape(self.state_dim,1) 
 
         for step in range(0,self.horizon):
@@ -223,11 +239,16 @@ class iLQR:
             # integration
             self.state_vec[step+1] = self.ddrive.integrate(state, control[0], control[1]).reshape(self.state_dim,1)
 
-            
-
 
     def compute_control(self, state, reference_x, reference_y):
-
+        """Compute the control actions
+        Args:
+            initial_state (np.array): actual state of the robot
+            reference_x (np.array): x reference for the robot
+            reference_y (np.array): y reference for the robot
+        Returns:
+            (np.array): control actions
+        """
         state_des_vec = np.zeros((self.horizon+1,3,1))
 
         ref_yaw = 0

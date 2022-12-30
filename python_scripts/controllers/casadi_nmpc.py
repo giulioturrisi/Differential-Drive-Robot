@@ -5,7 +5,16 @@ import numpy as np
 import time
 
 class Casadi_nmpc:
+    """Class for a Nonlinear Model Predictive Control law based using Casadi 
+    """
     def __init__(self,horizon, input_constraint, state_constraints, dt):
+        """Init func
+        Args:
+            horizon (float): how many steps to look into the future
+            input_constraint (np.array): control constraints
+            state_constraints (np.array): state contraints
+            dt (float): sampling time
+        """
         self.N = horizon
         self.input_constraint = input_constraint
         self.state_constraints = state_constraints
@@ -21,6 +30,8 @@ class Casadi_nmpc:
 
     #INIT CASADI PLANNING
     def initialize_casadi(self):
+        """Every time we want to compute a solution we initialize the problem
+        """
         # Casadi problem formulation ---------------------------------------
         self.opti = Opti() # Optimization problem
         
@@ -54,6 +65,14 @@ class Casadi_nmpc:
 
 
     def compute_control(self, initial_state, reference_x, reference_y):
+        """Compute the control actions
+        Args:
+            initial_state (np.array): actual state of the robot
+            reference_x (np.array): x reference for the robot
+            reference_y (np.array): y reference for the robot
+        Returns:
+            (np.array): control actions
+        """
         # Setting Initial State ---------------------------------------
         start_time = time.time()
         self.opti.subject_to(self.x_casadi[0]==initial_state[0])  
@@ -96,7 +115,6 @@ class Casadi_nmpc:
         position_error += self.Q*(self.x_casadi[self.N] - ref_x)@(self.x_casadi[self.N] - ref_x).T
         position_error += self.Q*(self.y_casadi[self.N] - ref_y)@(self.y_casadi[self.N] - ref_y).T
         position_error += self.Q*(self.yaw_casadi[self.N] - ref_yaw)@(self.yaw_casadi[self.N] - ref_yaw).T
-        
         
         
         self.opti.minimize(position_error + input_use)

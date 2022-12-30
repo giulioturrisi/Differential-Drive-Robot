@@ -4,6 +4,8 @@ import casadi as cs
 
 
 class Robot:
+    """Class that defines the little differential drive
+    """
     def __init__(self, dt):
         """Init func
         Args:
@@ -13,6 +15,7 @@ class Robot:
  
         self.A_f = self.get_A_f_matrix()
         self.B_f = self.get_B_f_matrix()
+
 
     # Integration unycicle kynematics ----------------------------------
     def integrate(self, state, v, w):

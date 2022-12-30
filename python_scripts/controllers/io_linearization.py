@@ -3,17 +3,38 @@ import math
 import time
 
 class IO_linearization:
+    """Class for the IO_linearization control law
+    """
     def __init__(self, b, k1, k2, dt):
+        """Init func
+        Args:
+            b (float): distance from the center of the robot where to perform the linearization
+            k1 (float): gain for x error
+            k2 (float): gain for y error
+            dt (float): sampling time
+        """
         self.b = b
         self.k1 = k1
         self.k2 = k2
 
         self.dt = dt
 
+
     def reset(self,):
+        """Every control class should have a reset function
+        """
         self.previous_reference = None
     
+
     def compute_control(self,initial_state, reference_x, reference_y):
+        """Compute the control actions
+        Args:
+            initial_state (np.array): actual state of the robot
+            reference_x (np.array): x reference for the robot
+            reference_y (np.array): y reference for the robot
+        Returns:
+            (np.array): control actions
+        """
         state_x = initial_state[0]
         state_y = initial_state[1]
         state_yaw = initial_state[2]
