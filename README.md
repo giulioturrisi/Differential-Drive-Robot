@@ -91,7 +91,7 @@ ros2 launch slam_toolbox localization_launch.py                    (localization
 4. Greedy Best First search
 5. RRT
 6. RRT* (in progress)
-7. RRT-primitives (in progress)
+7. RRT-primitives
 
 ## Status
 Still working in progress, the real robot exists but it's not yet finalized!

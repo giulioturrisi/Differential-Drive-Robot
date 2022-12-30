@@ -4,18 +4,25 @@ import matplotlib.pyplot as plt # type: ignore
 
 
 class A_star:
+    """Path planning with a simple A* algorithm
+    """
     def __init__(self, start, goal, map, resolution):
+        """Init func
+        Args:
+            start (np.array): actual state of the robot
+            goal (np.array): desired goal 
+            map (np.array): multidimensional array containing the map
+            resolution (float): dimension of each cell
+        """
         self.resolution = resolution
         self.start = np.array([int(start[0]/resolution), int(start[1]/resolution)])
         self.goal = np.array([int(goal[0]/resolution), int(goal[1]/resolution)])
-
 
         map_shape = map.shape 
         self.height = map_shape[0]  
         self.width = map_shape[1] 
 
         
-
         self.map = map
 
         # node to expand
@@ -37,6 +44,10 @@ class A_star:
 
 
     def find_next_cell(self,):
+        """Find next cell to expand given the cost
+        Returns:
+            (list): x and y coordinate of the new point
+        """
         best_node = []
         best_cost = 1000
         best_index = 0
@@ -53,6 +64,12 @@ class A_star:
 
 
     def find_nearest_cell(self,desired_cell):
+        """Find the nearest cell given a desired cell
+        Args:
+            desired_node (list): x-y coordinate of the desired node
+        Returns:
+            (int): index in the global list of node point
+        """
         best_node = []
         best_cost = 1000
         for i in range(len(self.node_opened)):
@@ -66,6 +83,10 @@ class A_star:
 
 
     def find_new_start(self,):
+        """If the start node is unfeasible, choose a new start near the initial one
+        Returns:
+            (list): a new feasible starting goal
+        """
         best_node = []
         best_cost = 1000
         for i in range(self.height):
@@ -79,6 +100,10 @@ class A_star:
 
 
     def open_sons_cell(self ,parent):
+        """Expand nodes that are sons of a given parent
+        Args:
+            parent (list): cell to expand
+        """
         x_parent = parent[0];
         y_parent = parent[1];
 
@@ -110,15 +135,21 @@ class A_star:
                         self.come_from[x_new][y_new] = [x_parent,y_parent]  # where i come from!      
                         
 
-
-
-
     def check_goal(self,next_cell):
+        """Check if the goal is reached
+        Args:
+            next_cell (list): x-y coordinate of the node to check
+        Returns:
+            (bool): boolean for goal reaching
+        """
         x = next_cell[0];
         y = next_cell[1];
         return 1 if (x == self.goal[0] and y == self.goal[1]) else 0
 
+
     def check_start(self):
+        """Check if the starting node is feasible - it calls find_new_start()
+        """
         if(self.map[self.start[0]][self.start[1]] != 254):
             print("Start is unfeasible!")
             new_start = self.find_new_start()
@@ -138,6 +169,12 @@ class A_star:
 
 
     def take_path(self, finish):
+        """Take the final path
+        Args:
+            finish (bool): if the goal is reached or time limit, return a path!
+        Returns:
+            (list): list of nodes contained in the path
+        """
         if(finish == 1):
             last_cell = [self.goal[0],self.goal[1]];
         else:
@@ -145,8 +182,6 @@ class A_star:
 
         path = [last_cell]
         last_cell = self.come_from[last_cell[0]][last_cell[1]]
-
-
 
         for _ in range(self.width*self.width):
             path.append(last_cell.tolist())
@@ -156,12 +191,15 @@ class A_star:
         #print("path",path)
         return path
 
-   
-
-
-
 
     def plan(self, max_iteration, visualize=False):
+        """Main function of the planning procedure
+        Args:
+            max_iteration (int): time limit for the search
+            visualize (bool): boolean for plotting the planning procedure
+        Returns:
+            (list): list of nodes contained in the path
+        """
         finish = 0
         iterator = 0
 

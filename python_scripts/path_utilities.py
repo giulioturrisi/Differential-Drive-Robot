@@ -24,12 +24,27 @@ def map_filter_fn(values_ptr, len_values, result, user_data):
 
 
 def filter_map(map, size):
+    """Filtering the map to increae clearence with obstacles
+    Args:
+        map (np.array): multidimansional array representing the map
+        size (int): size of the map
+    Returns:
+        (np.array): multidimansional array representing the filtered map
+    """
     return scipy.ndimage.generic_filter(map, LowLevelCallable(map_filter_fn.ctypes), footprint=np.ones((size, size)), mode='constant', cval=np.nan,)
 
 
 
 # Spline interpolation ---------------------------------------
 def interpolate_path(path, dt):
+    """Spline interpolation of the planned path
+    Args:
+        path (list): path found by the planned
+        dt (float): sampling time
+    Returns:
+        (CubicSpline): interpolated spline
+        (np.array): grid of points over the path
+    """
     time = np.arange(0, len(path), 1)
     spline = CubicSpline(time,np.array(path))
     xs = np.arange(0, len(path), dt)
@@ -39,6 +54,13 @@ def interpolate_path(path, dt):
 
 # Draw map for debug ---------------------------------------
 def draw_map(map, state, goal, resolution):
+    """Draw a given map for debug
+    Args:
+        map (np.array): multidimensional array containing the map
+        start (np.array): actual state of the robot
+        goal (np.array): desired goal 
+        resolution (float): dimension of each cell
+    """
     rgb_image = np.stack([map]*3, axis=2)/255.
     rgb_image[int(state[0]/resolution)][int(state[1]/resolution)] = [1,0,0]
     rgb_image[int(goal[0]/resolution)][int(goal[1]/resolution)] = [0,0,1]

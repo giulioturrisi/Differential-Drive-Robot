@@ -9,7 +9,7 @@ from pgm_reader import Reader
 
 
 if __name__ == "__main__":
-    f = '/home/python_simulation/maps/map.pgm'
+    f = '/home/python_scripts/maps/map.pgm'
     reader = Reader()
     image = reader.read_pgm(f)
     width = reader.width

@@ -4,7 +4,16 @@ import matplotlib.pyplot as plt # type: ignore
 
 
 class Greedy_Best_First_Search:
+    """Path planning with a simple Greedy_Best_First_Search algorithm
+    """
     def __init__(self, start, goal, map, resolution):
+        """Init func
+        Args:
+            start (np.array): actual state of the robot
+            goal (np.array): desired goal 
+            map (np.array): multidimensional array containing the map
+            resolution (float): dimension of each cell
+        """
         self.resolution = resolution
         self.start = np.array([int(start[0]/resolution), int(start[1]/resolution)])
         self.goal = np.array([int(goal[0]/resolution), int(goal[1]/resolution)])
@@ -15,7 +24,6 @@ class Greedy_Best_First_Search:
         self.width = map_shape[1] 
 
         
-
         self.map = map
 
         # node to expand
@@ -37,6 +45,10 @@ class Greedy_Best_First_Search:
 
 
     def find_next_cell(self,):
+        """Find next cell to expand given the cost
+        Returns:
+            (list): x and y coordinate of the new point
+        """
         best_node = []
         best_cost = 1000
         best_index = 0
@@ -52,6 +64,12 @@ class Greedy_Best_First_Search:
 
 
     def find_nearest_cell(self,desired_cell):
+        """Find the nearest cell given a desired cell
+        Args:
+            desired_node (list): x-y coordinate of the desired node
+        Returns:
+            (int): index in the global list of node point
+        """
         best_node = []
         best_cost = 1000
         for i in range(len(self.node_opened)):
@@ -65,6 +83,10 @@ class Greedy_Best_First_Search:
 
 
     def find_new_start(self,):
+        """If the start node is unfeasible, choose a new start near the initial one
+        Returns:
+            (list): a new feasible starting goal
+        """
         best_node = []
         best_cost = 1000
         for i in range(self.height):
@@ -78,14 +100,18 @@ class Greedy_Best_First_Search:
 
 
     def open_sons_cell(self ,parent):
-        x_parent = parent[0];
-        y_parent = parent[1];
+        """Expand nodes that are sons of a given parent
+        Args:
+            parent (list): cell to expand
+        """
+        x_parent = parent[0]
+        y_parent = parent[1]
 
         #need to check 8 sons!
         for i in range(-1,2):
             for j in range(-1,2):   
                 if(i == 0 and j == 0):
-                    continue;
+                    continue
                 x_new = x_parent + i
                 y_new = y_parent + j
 
@@ -99,15 +125,21 @@ class Greedy_Best_First_Search:
                         self.cost_so_far[x_new][y_new] = new_cost
 
 
-
-
     def check_goal(self,next_cell):
-        x = next_cell[0];
-        y = next_cell[1];
+        """Check if the goal is reached
+        Args:
+            next_cell (list): x-y coordinate of the node to check
+        Returns:
+            (bool): boolean for goal reaching
+        """
+        x = next_cell[0]
+        y = next_cell[1]
         return 1 if (x == self.goal[0] and y == self.goal[1]) else 0
 
 
     def check_start(self):
+        """Check if the starting node is feasible - it calls find_new_start()
+        """
         if(self.map[self.start[0]][self.start[1]] != 254):
             print("Start is unfeasible!")
             new_start = self.find_new_start()
@@ -127,6 +159,12 @@ class Greedy_Best_First_Search:
 
 
     def take_path(self, finish):
+        """Take the final path
+        Args:
+            finish (bool): if the goal is reached or time limit, return a path!
+        Returns:
+            (list): list of nodes contained in the path
+        """
         if(finish == 1):
             last_cell = [self.goal[0],self.goal[1]];
         else:
@@ -147,6 +185,13 @@ class Greedy_Best_First_Search:
 
 
     def plan(self, max_iteration, visualize=False):
+        """Main function of the planning procedure
+        Args:
+            max_iteration (int): time limit for the search
+            visualize (bool): boolean for plotting the planning procedure
+        Returns:
+            (list): list of nodes contained in the path
+        """
         finish = 0
         iterator = 0
 

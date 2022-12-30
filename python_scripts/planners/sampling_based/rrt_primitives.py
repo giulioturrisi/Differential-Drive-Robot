@@ -4,7 +4,16 @@ import math
 
 
 class RRT_primitives:
+    """Path planning with a simple RRT with a primitives interconnection between nodes
+    """
     def __init__(self, start, goal, map, resolution):
+        """Init func
+        Args:
+            start (np.array): actual state of the robot
+            goal (np.array): desired goal 
+            map (np.array): multidimensional array containing the map
+            resolution (float): dimension of each cell
+        """
         self.resolution = resolution
         self.start = np.array([int(start[0]/resolution), int(start[1]/resolution)])
         self.goal = np.array([int(goal[0]/resolution), int(goal[1]/resolution)])
@@ -24,7 +33,6 @@ class RRT_primitives:
         #x, y, theta, control inputs, parent_node,
         self.node_opened = np.array([[self.start[0], self.start[1], start[2], 0, 0, -1]])
 
-
         #primitives
         forward = [1,0]
         backward = [-1,0]
@@ -37,7 +45,12 @@ class RRT_primitives:
 
         self.primitives = [forward, backward , turn_left, turn_right, arc_left_forward, arc_right_forward, arc_left_backward, arc_right_backward]
     
+
     def sample(self,):
+        """Sample a new random point
+        Returns:
+            (list): x and y coordinate of the new point
+        """
         rand = np.random.rand()
         if(rand > self.goal_bias):
             desired_node = [self.goal[0], self.goal[1]]
@@ -47,7 +60,14 @@ class RRT_primitives:
             desired_node = [rand_x, rand_y];
         return desired_node
 
+
     def find_nearest_node(self, desired_node):
+        """Find the index of the node neared to a desired one
+        Args:
+            desired_node (list): x-y coordinate of the desired node
+        Returns:
+            (int): index in the global list of a node point
+        """
         best_node = []
         best_cost = 1000
         best_index = 0
@@ -63,6 +83,14 @@ class RRT_primitives:
 
 
     def sample_primitives(self,rand_index):
+        """Connect two node with a random sampled primitives
+        Args:
+            near_index (int): index of the nearest node
+            desired_node (list): x-y coordinate of the desired node
+        Returns:
+            (list): a new node is generated connecting the near node and the desired node with the line
+            (bool): boolean for reporting collision using the primitive
+        """
         #rand_index = np.random.randint(self.node_opened.shape[0])
         near_node = self.node_opened[rand_index]
         
@@ -99,8 +127,11 @@ class RRT_primitives:
 
 
 
-
     def find_new_start(self,):
+        """If the start node is unfeasible, choose a new start near the initial one
+        Returns:
+            (list): a new feasible starting goal
+        """
         best_node = []
         best_cost = 1000
         for i in range(self.height):
@@ -114,6 +145,13 @@ class RRT_primitives:
 
 
     def in_collision(self, node_to_check):
+        """Check multiple point collisions while connecting two nodes
+        Args:
+            node_to_check (list): x-y coordinate of the node to check
+            nearest_node_index (int): starting node of the primitive
+        Returns:
+            (bool): boolean for collision checking
+        """
         x = node_to_check[0]
         y = node_to_check[1]
 
@@ -124,6 +162,12 @@ class RRT_primitives:
                         
 
     def check_goal(self, next_cell):
+        """Check if the goal is reached
+        Args:
+            next_cell (list): x-y coordinate of the node to check
+        Returns:
+            (bool): boolean for goal reaching
+        """
         x = next_cell[0]
         y = next_cell[1]
 
@@ -133,7 +177,10 @@ class RRT_primitives:
         else:
             return False
 
+
     def check_start(self):
+        """Check if the starting node is feasible - it calls find_new_start()
+        """
         if(self.map[self.start[0]][self.start[1]] != 254):
             print("Start is unfeasible!")
             new_start = self.find_new_start()
@@ -146,6 +193,12 @@ class RRT_primitives:
 
 
     def take_path(self, finish):
+        """Take the final path
+        Args:
+            finish (bool): if the goal is reached or time limit, return a path!
+        Returns:
+            (list): list of nodes contained in the path
+        """
         if(finish == 1):
             last_node = self.node_opened[-1]
         else:
@@ -154,8 +207,6 @@ class RRT_primitives:
 
         path = [[last_node[0], last_node[1]]]
         last_node = self.node_opened[int(last_node[-1])]
-
-
 
         for _ in range(self.width*self.width):
             temp = last_node.tolist()
@@ -166,12 +217,15 @@ class RRT_primitives:
         
         return path
 
-   
-
-
-
 
     def plan(self, max_iteration, visualize=False):
+        """Main function of the planning procedure
+        Args:
+            max_iteration (int): time limit for the search
+            visualize (bool): boolean for plotting the planning procedure
+        Returns:
+            (list): list of nodes contained in the path
+        """
         finish = 0
         iterator = 0
 
