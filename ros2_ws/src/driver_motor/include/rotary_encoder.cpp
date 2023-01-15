@@ -5,52 +5,24 @@
 #include "rotary_encoder.hpp"
 
 /*
-
              +---------+         +---------+      0
              |         |         |         |
    A         |         |         |         |
              |         |         |         |
    +---------+         +---------+         +----- 1
-
        +---------+         +---------+            0
        |         |         |         |
    B   |         |         |         |
        |         |         |         |
    ----+         +---------+         +---------+  1
-
 */
 
 /*void re_decoder::_pulse(int gpio, int level, uint32_t tick)
 {
-
-   std::cout << "######" << std::endl;
-   std::cout << "chiamato da " << gpio << std::endl;
-   std::cout << "con valore " << level << std::endl;
-   std::cout << "l'ultimo era " << lastGpio << std::endl;
-   //levA = gpioRead(27);
-   if(level == 2) return;
-   levA = level;
-   levB = gpioRead(17);
-   levB = !levA;
-   std::cout << "B è " << levB << std::endl;
-
-   if (levA != lastGpio) 
-   {
-
-         if (levA != levB) (mycallback)(1);
-
-         if (levA == levB) (mycallback)(-1);
-
-   }
-   lastGpio = levA;
-   std::cout << "lastGPIO" << lastGpio <<  std::endl;
-}*/
-
-/*void re_decoder::_pulse(int gpio, int level, uint32_t tick)
-{
+   
    if (gpio == mygpioA) levA = level; else levB = level;
 
-   if (gpio != lastGpio) 
+   if (gpio != lastGpio) // debounce 
    {
       lastGpio = gpio;
 
@@ -69,7 +41,7 @@ void re_decoder::_pulse(int gpio, int level, uint32_t tick)
 {
    bool A,B;
    if (gpio == mygpioA) A = level; else B = level;
-   //bool A = gpioRead(22), B = gpioRead(23);
+   
 
    if(levA == A && levB == B) return; 
 
@@ -86,23 +58,6 @@ void re_decoder::_pulse(int gpio, int level, uint32_t tick)
 
 }
 
-/*void re_decoder::_pulse(int gpio, int level, uint32_t tick) {
-   bool A = gpioRead(27), B = gpioRead(17);
-
-   int counter = 0;
-
-   if (B != prevB) counter += (B-prevB) * (A ? +1 : -1);
-   else if (A != prevA) counter += (A-prevA) * (B ? -1 : +1);
-   else return; //nothing changed: exit
-
-   if(counter > 0)
-     (mycallback)(1);
-   else
-      (mycallback)(-1);
-   prevA = A;
-   prevB = B;
-
-}*/
 
 void re_decoder::_pulseEx(int gpio, int level, uint32_t tick, void *user)
 {
@@ -119,6 +74,7 @@ re_decoder::re_decoder(int gpioA, int gpioB, re_decoderCB_t callback)
 {
    mygpioA = gpioA;
    mygpioB = gpioB;
+
 
    mycallback = callback;
 
@@ -144,6 +100,5 @@ re_decoder::re_decoder(int gpioA, int gpioB, re_decoderCB_t callback)
 void re_decoder::re_cancel(void)
 {
    gpioSetAlertFuncEx(mygpioA, 0, this);
-   //gpioSetAlertFuncEx(mygpioB, 0, this);
+   gpioSetAlertFuncEx(mygpioB, 0, this);
 }
-
