@@ -11,7 +11,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES \
 
 # install ros2 packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-humble-desktop=0.10.0-1* \
+    ros-humble-desktop \
     && rm -rf /var/lib/apt/lists/*
 #RUN apt-get install ros-humble-test-msgs \
 #    && rm -rf /var/lib/apt/lists/*
@@ -121,7 +121,8 @@ RUN echo 'export ACADOS_SOURCE_DIR="/acados"' >> /root/.bashrc
 
 
 
-
+RUN apt-get update 
+RUN apt upgrade -y
 
 
 
