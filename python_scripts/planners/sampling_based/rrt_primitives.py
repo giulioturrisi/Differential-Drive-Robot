@@ -252,7 +252,6 @@ class RRT_primitives:
             self.node_opened = np.concatenate((self.node_opened, [new_node]), axis = 0)
             finish = self.check_goal(new_node)
             if(finish == 1):
-                print("finish!")
                 break
 
 
