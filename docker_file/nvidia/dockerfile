@@ -92,17 +92,15 @@ RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHON
 RUN echo 'export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH' >> /root/.bashrc
 
 #CROCODDYL
-#RUN tee /etc/apt/sources.list.d/robotpkg.list <<EOF
-#deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
-#deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg 
-#EOF
-#RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
-#RUN apt-get update
-#RUN apt install robotpkg-py310-crocoddyl 
-#RUN echo 'export PATH=/opt/openrobots/bin:$PATH' >> /root/.bashrc
-#RUN echo 'export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH' >> /root/.bashrc
-#RUN echo 'export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
-#RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH' >> /root/.bashrc
+RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg" |  sudo tee /etc/apt/sources.list.d/robotpkg.list
+RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg" |  sudo tee /etc/apt/sources.list.d/robotpkg.list
+RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
+RUN apt-get update
+RUN apt install robotpkg-py310-crocoddyl -y
+RUN echo 'export PATH=/opt/openrobots/bin:$PATH' >> /root/.bashrc
+RUN echo 'export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH' >> /root/.bashrc
+RUN echo 'export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
+RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH' >> /root/.bashrc
 
 
 
