@@ -65,6 +65,7 @@ class Controller(Base_Controller):
                 self.path.pop(0)
                 if(len(self.path) == 0):
                     self.path_ready = False
+                    self.publish_command(0,0)
 
 
 
