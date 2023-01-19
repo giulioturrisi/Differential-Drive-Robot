@@ -50,7 +50,7 @@ class A_star:
         """
         best_node = []
         best_cost = 1000
-        best_index = 0
+        best_index = -1
         for i in range(len(self.frontiers)):
             temp = self.frontiers[i][:2]
             temp_cost = self.frontiers[i][2]
@@ -58,9 +58,13 @@ class A_star:
                 best_cost = temp_cost
                 best_node = temp
                 best_index = i
-        self.frontiers.pop(best_index)
-        self.node_opened.append([best_node[0],best_node[1]])
-        return best_node
+        
+        if(best_index == -1):
+            return best_node
+        else:
+            self.frontiers.pop(best_index)
+            self.node_opened.append([best_node[0],best_node[1]])
+            return best_node
 
 
     def find_nearest_cell(self,desired_cell):
@@ -216,6 +220,9 @@ class A_star:
 
         while (finish == 0 and iterator <= max_iteration):
             next_cell = self.find_next_cell()
+            if(next_cell == []):
+                break
+            
             finish = self.check_goal(next_cell)
             if(finish == 1):
                 break

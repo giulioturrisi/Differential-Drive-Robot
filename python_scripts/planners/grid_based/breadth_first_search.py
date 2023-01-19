@@ -42,8 +42,12 @@ class Breadth_First_Search:
         Returns:
             (list): x and y coordinate of the new point
         """
-        temp = self.frontiers.pop(0)
-        self.node_opened.append([temp[0],temp[1]])
+        if(len(self.frontiers) == 0):
+            temp = []
+            return temp
+        else:
+            temp = self.frontiers.pop(0)
+            self.node_opened.append([temp[0],temp[1]])
         return temp
 
 
@@ -161,8 +165,6 @@ class Breadth_First_Search:
                 break
             last_cell = self.come_from[last_cell[0]][last_cell[1]]
 
-
-        print("path",path)
         return path
 
 
@@ -190,6 +192,9 @@ class Breadth_First_Search:
 
         while (finish == 0 and iterator <= max_iteration):
             next_cell = self.find_next_cell()
+            if(next_cell == []):
+                break
+
             finish = self.check_goal(next_cell)
             if(finish == 1):
                 break
