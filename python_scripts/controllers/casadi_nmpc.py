@@ -28,6 +28,11 @@ class Casadi_nmpc:
 
         self.initialize_casadi()
 
+    def reset(self,):
+        """Every control class should have a reset function
+        """
+        return
+
     #INIT CASADI PLANNING
     def initialize_casadi(self):
         """Every time we want to compute a solution we initialize the problem
@@ -98,12 +103,14 @@ class Casadi_nmpc:
             position_error += self.Q*(self.y_casadi[k] - ref_y)@(self.y_casadi[k] - ref_y).T
             position_error += self.Q*(self.yaw_casadi[k] - ref_yaw)@(self.yaw_casadi[k] - ref_yaw).T
 
-            
-            ref_x_ddot = (((reference_x[k+2] - reference_x[k+1])/self.dt ) - ref_x_dot)/self.dt
-            ref_y_ddot = (((reference_y[k+2] - reference_y[k+1])/self.dt ) - ref_y_dot)/self.dt
-            
+            if(k < self.N-1):
+                ref_x_ddot = (((reference_x[k+2] - reference_x[k+1])/self.dt ) - ref_x_dot)/self.dt
+                ref_y_ddot = (((reference_y[k+2] - reference_y[k+1])/self.dt ) - ref_y_dot)/self.dt
+            else:
+                ref_x_ddot = 0.0
+                ref_y_ddot = 0.0
             ref_v = np.sqrt(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
-            ref_w = (ref_y_ddot*ref_x_dot - ref_x_ddot*ref_y_dot)/(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
+            ref_w = (ref_y_ddot*ref_x_dot - ref_x_ddot*ref_y_dot)/(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot + 0.001)
             
             input_use += self.R*(self.U_casadi[0,k] - ref_v)@(self.U_casadi[0,k] - ref_v).T 
             input_use += self.R*(self.U_casadi[1,k] - ref_w)@(self.U_casadi[1,k] - ref_w).T 

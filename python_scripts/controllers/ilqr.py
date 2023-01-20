@@ -26,7 +26,7 @@ class iLQR:
         self.lin_state = np.zeros(3)
         self.lin_tau = np.zeros(2)
         self.horizon = horizon
-        self.iteration = 5
+        self.iteration = 3
         self.dt = dt
 
         self.ddrive = Robot(self.dt)
@@ -38,7 +38,7 @@ class iLQR:
         self.Q[2,2] = 10
         
 
-        self.R = np.identity(2)*10
+        self.R = np.identity(2)*0.1
         
         # compute optimal cost to go LQR
         #self.P = self.compute_discrete_LQR_P(self.lin_state, self.lin_tau)
@@ -64,6 +64,11 @@ class iLQR:
         #self.twip.fd.generate("fd.c")
         #C = cs.Importer("fd.c", "shell")
         #self.f = cs.external('fd',C)
+
+    def reset(self,):
+        """Every control class should have a reset function
+        """
+        return
 
 
     def compute_discrete_LQR_P(self,lin_state, lin_tau):
@@ -267,9 +272,7 @@ class iLQR:
         ref_y = reference_y[self.horizon]    
         state_des_vec[self.horizon] = np.array([ref_x , ref_y, ref_yaw]).reshape(self.state_dim,1)
 
-        print("state_des_vec", state_des_vec)
-
-        
+      
 
 
         # setting last V and initial system simulation #error!!!!

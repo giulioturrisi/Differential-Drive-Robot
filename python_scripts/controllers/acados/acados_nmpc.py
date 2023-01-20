@@ -23,6 +23,11 @@ class NMPC:
         self.state_dim = self.ocp.model.x.size()[0]
         self.control_dim = self.ocp.model.u.size()[0]
 
+    def reset(self,):
+        """Every control class should have a reset function
+        """
+        return
+
 
     def create_ocp_solver_description(self,) -> AcadosOcp:
         # Create ocp object to formulate the OCP
@@ -40,7 +45,7 @@ class NMPC:
 
         # Set cost
         Q_mat = 2 * np.diag([5, 5, 1])  # [x,y,yaw]
-        R_mat = 1 * np.diag([1, 1])
+        R_mat = 1 * np.diag([0.1, 0.1])
 
         ocp.cost.cost_type = "LINEAR_LS"
         ocp.cost.cost_type_e = "LINEAR_LS"
