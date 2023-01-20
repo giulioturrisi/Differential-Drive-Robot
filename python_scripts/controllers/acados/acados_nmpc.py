@@ -23,6 +23,9 @@ class NMPC:
         self.state_dim = self.ocp.model.x.size()[0]
         self.control_dim = self.ocp.model.u.size()[0]
 
+        self.last_solutions_x = None
+        self.last_solutions_u = None
+
     def reset(self,):
         """Every control class should have a reset function
         """
@@ -44,7 +47,7 @@ class NMPC:
 
 
         # Set cost
-        Q_mat = 2 * np.diag([5, 5, 1])  # [x,y,yaw]
+        Q_mat = 2 * np.diag([5, 5, 2])  # [x,y,yaw]
         R_mat = 1 * np.diag([0.1, 0.1])
 
         ocp.cost.cost_type = "LINEAR_LS"
@@ -68,12 +71,12 @@ class NMPC:
         ocp.cost.yref = np.zeros((ny,))
         ocp.cost.yref_e = np.zeros((ny_e,))
 
-        # Set constraints
+        '''# Set constraints
         v_max = 1 
         w_max = 1 
         ocp.constraints.lbu = np.array([-v_max, -w_max])
         ocp.constraints.ubu = np.array([+v_max, +w_max])
-        ocp.constraints.idxbu = np.array([0,1])
+        ocp.constraints.idxbu = np.array([0,1])'''
 
         X0 = np.array([0.0, 0.0, 0.0])
         ocp.constraints.x0 = X0
@@ -94,13 +97,12 @@ class NMPC:
 
     def compute_control(self, state, reference_x, reference_y):
 
-        state[2] += 0.02 
-     
-        # Initialize solver
+        
+        '''# Initialize solver
         for stage in range(self.horizon + 1):
-            self.acados_ocp_solver.set(stage, "x", 0.0 * np.ones((self.state_dim,)))
+            self.acados_ocp_solver.set(stage, "x", state * np.ones((self.state_dim,)))
         for stage in range(self.horizon):
-            self.acados_ocp_solver.set(stage, "u", np.zeros((self.control_dim,)))
+            self.acados_ocp_solver.set(stage, "u", np.zeros((self.control_dim,)))'''
 
  
         ref_yaw = 0
@@ -120,7 +122,7 @@ class NMPC:
                 ref_y_ddot = (((reference_y[j+2] - reference_y[j+1])/self.dt ) - ref_y_dot)/self.dt
                 
                 ref_v = np.sqrt(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
-                ref_w = (ref_y_ddot*ref_x_dot - ref_x_ddot*ref_y_dot)/(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
+                ref_w = (ref_y_ddot*ref_x_dot - ref_x_ddot*ref_y_dot)/(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot + 0.01)
 
             yref = np.array([ref_x, ref_y, ref_yaw, ref_v, ref_w])
             self.acados_ocp_solver.set(j, "yref", yref)
@@ -143,8 +145,6 @@ class NMPC:
 
         control = self.acados_ocp_solver.get(0, "u")
 
-        print("control", control)
-        
 
 
 
