@@ -19,6 +19,7 @@
 
 #include <tf2_ros/transform_broadcaster.h>
 #include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 
 #include "tf2/utils.h"
 
@@ -82,7 +83,7 @@ class MotorController : public rclcpp::Node{
   public:
 
     rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr publisher_motors_info;
-    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr publisher_odom;
+    rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr publisher_odom;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_motors_commands;
     rclcpp::TimerBase::SharedPtr timer_;
     std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
@@ -98,7 +99,7 @@ class MotorController : public rclcpp::Node{
     : Node("motors_controller")
     {
         publisher_motors_info = this->create_publisher<std_msgs::msg::Float64MultiArray>("motors_info", 1);
-        publisher_odom = this->create_publisher<std_msgs::msg::Float64MultiArray>("odometry", 1);
+        publisher_odom = this->create_publisher<geometry_msgs::msg::TwistStamped>("odometry", 1);
 
         subscription_motors_commands = this->create_subscription<geometry_msgs::msg::Twist>(
                     "cmd_vel", 1, std::bind(&MotorController::controller_callback, this, _1));
@@ -165,11 +166,12 @@ class MotorController : public rclcpp::Node{
         delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF);
         float v_reconstructed = delta_s/0.005;
         float w_reconstructed = delta_theta/0.005;
-        auto motors_message = std_msgs::msg::Float64MultiArray();
-        motors_message.data.push_back(v_reconstructed);
-        motors_message.data.push_back(w_reconstructed);
-        motors_message.data.push_back(0.0); //time to complete
-        publisher_odom->publish(motors_message);
+        auto odom_message = geometry_msgs::msg::TwistStamped();
+        odom_message.twist.linear.x = v_reconstructed;
+        odom_message.twist.angular.z = w_reconstructed;
+        odom_message.header.stamp = this->get_clock()->now();
+        odom_message.header.frame_id = "base_footprint";
+        publisher_odom->publish(odom_message);
 
         tickRight_forTF = 0;
         tickLeft_forTF = 0;
