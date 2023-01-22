@@ -64,7 +64,7 @@ RUN apt install -y ros-humble-plotjuggler-ros
 #          -DCXX11=ON \
 #          -DBUILD_DOCUMENTATION=ON \
 #          .. && \
-#    make -j3 && \
+#    make -j5 && \
 #    make test && \
 #    make install
 
@@ -123,7 +123,7 @@ RUN echo 'export COPPELIASIM_ROOT_DIR=/home/coppeliasim_simulation/CoppeliaSim' 
 RUN echo '. /home/ros2_ws/install/setup.bash' >> /root/.bashrc
 
 RUN echo 'alias rviz2="ros2 run rviz2 rviz2 -d /home/ros2_ws/src/utilities/rviz_config/common.rviz"' >> /root/.bashrc
-RUN echo 'alias coppelia="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../medium_walls_kynematics.ttt"' >> /root/.bashrc
+RUN echo 'alias coppelia="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../dynamics.ttt"' >> /root/.bashrc
 
 
 WORKDIR /home
