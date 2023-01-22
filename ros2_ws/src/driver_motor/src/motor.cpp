@@ -32,9 +32,16 @@ using std::placeholders::_1;
 
 int tickLeft = 0;
 int tickRight = 0;
+
+int tickLeft_forTF = 0;
+int tickRight_forTF = 0;
+float angle_rad_Left_forTF = 0;
+float angle_rad_Right_forTF = 0;
+
 float odom_x = 0;
 float odom_y = 0;
 float odom_theta = 0;
+
 float angleRight_sum = 0;
 float angleLeft_sum = 0;
 float delta_s = 0;
@@ -50,7 +57,6 @@ float speed_Left_outside = 0;
 float error_vel_integral_Right_outside = 0;
 float error_vel_integral_Left_outside = 0;
 
-
 float Ts_innerLoop = 0.005;
 float Ts_innerLoop_nanosecond = Ts_innerLoop*1000000;
 float step = 10;
@@ -58,28 +64,25 @@ float step = 10;
 float minimum_pwm = 15;
 
 
+
 //3120 tick more or less
 static void update_leftEncoder(const int way){
     tickLeft += way;
-    //std::cout << "angle_rad_Left: " << (tickLeft*0.115)*3.14159/180 << std::endl;
+    tickLeft_forTF += way;
 }
 static void update_rightEncoder(const int way){
-    tickRight += way;      
-    //std::cout << "tickRight: " << tickRight << std::endl; 
-    //std::cout << "angle_rad_Rigth: " << (tickRight*0.115)*3.14159/180 << std::endl;
+    tickRight += way; 
+    tickRight_forTF += way;     
 }
 
 
 
-
-
-//float error_vel_integral_Left = 0;
-//float error_vel_integral_Right = 0;
 
 class MotorController : public rclcpp::Node{
   public:
 
-    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr publisher_motors_commands;
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr publisher_motors_info;
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr publisher_odom;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_motors_commands;
     rclcpp::TimerBase::SharedPtr timer_;
     std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
@@ -94,38 +97,12 @@ class MotorController : public rclcpp::Node{
     MotorController()
     : Node("motors_controller")
     {
-        publisher_motors_commands = this->create_publisher<std_msgs::msg::Float64MultiArray>("motors", 1);
+        publisher_motors_info = this->create_publisher<std_msgs::msg::Float64MultiArray>("motors_info", 1);
+        publisher_odom = this->create_publisher<std_msgs::msg::Float64MultiArray>("odometry", 1);
 
         subscription_motors_commands = this->create_subscription<geometry_msgs::msg::Twist>(
                     "cmd_vel", 1, std::bind(&MotorController::controller_callback, this, _1));
-        tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
-        timer_ = this->create_wall_timer(10ms,std::bind(&MotorController::timer_callback, this));
-
-        /*gpioInitialise();
-        // left motor -------------------------------------
-        gpioSetMode(20, PI_OUTPUT);
-        gpioWrite(20,0);
-        gpioSetMode(26, PI_OUTPUT);
-        gpioWrite(26,0);
-
-
-        gpioSetMode(13, PI_OUTPUT);
-        gpioSetPWMfrequency(13,50);
-        gpioSetPWMrange(13,255);
-
-
-        // right motor ------------------------------------
-        gpioSetMode(5, PI_OUTPUT);
-        gpioWrite(5,0);
-        gpioSetMode(6, PI_OUTPUT);
-        gpioWrite(6,0);
-
-        gpioSetMode(12, PI_OUTPUT);
-        gpioSetPWMfrequency(12,50);
-        gpioSetPWMrange(12,255);*/
-    
-
-
+        timer_ = this->create_wall_timer(5ms,std::bind(&MotorController::timer_callback, this));
 
         // declare and set external param -------------------------------------
         declare_parameter("W", 10.0);
@@ -139,21 +116,9 @@ class MotorController : public rclcpp::Node{
 
         std::cout << "Kd: " << Kd << ", Ki: " << Ki << ", W:" << W << ", Ka: " << Ka << std::endl; 
 
-
-
     }
 
   private:
-
-    /*static void update_leftEncoder(const int way){
-        tickLeft += way;
-        std::cout << "angle_rad_Left: " << (tickLeft*0.20)*3.14159/180 << std::endl;
-    }
-    static void update_rightEncoder(const int way){
-        tickRight += way;      
-        std::cout << "angle_rad_Rigth: " << (tickRight*0.20)*3.14159/180 << std::endl;
-    }*/
-
 
     void forward(bool isLeft,double duty_cycle_forw) const{
         //RCLCPP_INFO(this->get_logger(), "duty '%f'", duty_cycle_forw);
@@ -162,9 +127,6 @@ class MotorController : public rclcpp::Node{
             gpioPWM(13,(int)duty_cycle_forw);
             gpioWrite(26,0);
             gpioWrite(20,1);
-
-            //gpioSetMode(13, PI_OUTPUT);
-            //gpioPWM(13, (int)duty_cycle_forw);
         }
         else{
             //right
@@ -184,9 +146,6 @@ class MotorController : public rclcpp::Node{
             gpioPWM(13,(int)duty_cycle_back);
             gpioWrite(26,1);
             gpioWrite(20,0);
-
-            //gpioSetMode(20, PI_OUTPUT);
-            //gpioPWM(20, (int)duty_cycle_back);
         }
         else{
             //right
@@ -198,67 +157,36 @@ class MotorController : public rclcpp::Node{
 
     
     void timer_callback() {
-        
 
-        // euler to quat
-        float roll = 0;
-        float pitch = 0;
-        float yaw = odom_theta;
-        double cy = cos(yaw * 0.5);
-        double sy = sin(yaw * 0.5);
-        double cp = cos(pitch * 0.5);
-        double sp = sin(pitch * 0.5);
-        double cr = cos(roll * 0.5);
-        double sr = sin(roll * 0.5);
+        angle_rad_Left_forTF = (tickLeft_forTF*0.115)*3.14159/180 - angle_rad_Left_forTF;
+        angle_rad_Right_forTF = (tickRight_forTF*0.115)*3.14159/180 - angle_rad_Right_forTF;
 
-        //Quaternion q;
-        //q.w = cr * cp * cy + sr * sp * sy;
-        //q.x = sr * cp * cy - cr * sp * sy;
-        //q.y = cr * sp * cy + sr * cp * sy;
-        //q.z = cr * cp * sy - sr * sp * cy;
+        delta_s = (r/2.)*(angle_rad_Left_forTF + angle_rad_Right_forTF);
+        delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF);
+        float v_reconstructed = delta_s/0.005;
+        float w_reconstructed = delta_theta/0.005;
+        auto motors_message = std_msgs::msg::Float64MultiArray();
+        motors_message.data.push_back(v_reconstructed);
+        motors_message.data.push_back(w_reconstructed);
+        motors_message.data.push_back(0.0); //time to complete
+        publisher_odom->publish(motors_message);
 
+        tickRight_forTF = 0;
+        tickLeft_forTF = 0;
 
-
-        //i should publish something
-        geometry_msgs::msg::TransformStamped transform_stamped; 
-        transform_stamped.header.stamp = rclcpp::Time();
-        transform_stamped.header.frame_id = "odom";
-        //transform_stamped.child_frame_id = "base_link";
-        transform_stamped.child_frame_id = "base_footprint";
-        transform_stamped.transform.translation.x = odom_x;
-        transform_stamped.transform.translation.y = odom_y;
-        transform_stamped.transform.translation.z = 0.0;
-        transform_stamped.transform.rotation.w = cr * cp * cy + sr * sp * sy;
-        transform_stamped.transform.rotation.x = sr * cp * cy - cr * sp * sy;
-        transform_stamped.transform.rotation.y = cr * sp * cy + sr * cp * sy;
-        transform_stamped.transform.rotation.z = cr * cp * sy - sr * sp * cy;
-         
-        tf_broadcaster_->sendTransform(transform_stamped);
-
-        //std::cout << "x: " << odom_x << " y: " << odom_y << " theta: " << odom_theta << std::endl;
-
-      
 
     }
     
 
-    void controller_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
-
-        // instantiate encoder/decoder ---------------------------------------------
-        //re_decoder left(27, 17, update_leftEncoder);
-        //re_decoder right(22, 23, update_rightEncoder);
-
-        
+    void controller_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{ 
 
         // calculate velocity of each wheel ----------------------------------------
         float v = msg->linear.x;
         float w = msg->angular.z;
-        double vel_d_Left = (2*v - w*d)/(2*r);
-        double vel_d_Right = -(2*v + w*d)/(2*r);
+        float vel_d_Left = (2*v - w*d)/(2*r);
+        float vel_d_Right = -(2*v + w*d)/(2*r);
 
-        //std::cout << "v_d: " << v << ", w_d: " << w << std::endl;
-        //std::cout << "vel_d_LEFT: " << vel_d_Left << ", vel_d_RIGHT: " << vel_d_Right << std::endl;
-        
+     
         
         //LEFT WHEEL variables ------------------------
         double duty_cycle_Left =  0;     
@@ -410,43 +338,17 @@ class MotorController : public rclcpp::Node{
 
         }
 
-        
-
-        //left.re_cancel();
-        //right.re_cancel();
-        
-        //maybe to eliminate
-        //forward(0,0);
-        //forward(1,0);
-
-        angleRight_sum = angle_rad_Right + angleRight_sum;
-        angleLeft_sum = angle_rad_Left + angleLeft_sum;
-        
-        delta_s = (r/2.)*(angleRight_sum + angleLeft_sum) - delta_s;
-        delta_theta = (r/d)*(angleRight_sum - angleLeft_sum) - delta_theta;
-        float v_reconstructed = delta_s/Ts;
-        float w_reconstructed = delta_theta/Ts;
-
-        odom_x = odom_x + v_reconstructed*Ts*cos(odom_theta);
-        odom_y = odom_y + v_reconstructed*Ts*sin(odom_theta);
-        odom_theta = odom_theta + w_reconstructed*Ts;
-        
-        //std::cout << "speed left: " << speed_Left_outside/step << " speed Right: " << speed_Right_outside/step << std::endl;
-        //std::cout << "x: " << odom_x << " y: " << odom_y << " theta: " << odom_theta << std::endl;
-        
-        //speed_Left_outside = 0;
-        //speed_Right_outside = 0;
 
         auto motors_message = std_msgs::msg::Float64MultiArray();
         motors_message.data.push_back(vel_d_Left);
         motors_message.data.push_back(speed_Left_outside);
         motors_message.data.push_back(vel_d_Right);
         motors_message.data.push_back(speed_Right_outside);
-        publisher_motors_commands->publish(motors_message);
+        publisher_motors_info->publish(motors_message);
 
         auto finish_total = std::chrono::high_resolution_clock::now();
         auto time_total = std::chrono::duration_cast<std::chrono::microseconds>(finish_total - start_principal).count();
-        RCLCPP_INFO(this->get_logger(), "Ts_all_loop '%f'", (float)time_total / 1e6);
+        //RCLCPP_INFO(this->get_logger(), "Ts_all_loop '%f'", (float)time_total / 1e6);
         //RCLCPP_INFO(this->get_logger(), "###########");
     }    
 
