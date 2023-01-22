@@ -28,7 +28,7 @@ class Controller(Base_Controller):
 
         self.create_timer(self.dt, self.controller_callback)
 
-        self.horizon = 1
+        self.horizon = 20
         self.controller = NMPC(self.horizon, self.dt)
 
 
