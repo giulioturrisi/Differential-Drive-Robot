@@ -5,8 +5,8 @@
       <author>Assimp</author>
       <authoring_tool>Assimp Exporter</authoring_tool>
     </contributor>
-    <created>2022-07-16T10:34:09</created>
-    <modified>2022-07-16T10:34:09</modified>
+    <created>2023-01-22T09:11:53</created>
+    <modified>2023-01-22T09:11:53</modified>
     <unit name="meter" meter="1" />
     <up_axis>Y_UP</up_axis>
   </asset>
@@ -16,16 +16,16 @@
         <technique sid="standard">
           <phong>
             <emission>
-              <color sid="emission">0   0   0   4.567252084773876e-41</color>
+              <color sid="emission">0   0   0   0</color>
             </emission>
             <ambient>
-              <color sid="ambient">0.217647060751915   0.217647060751915   0.217647060751915   3.080054024585948e-41</color>
+              <color sid="ambient">0.217647060751915   0.217647060751915   0.217647060751915   0</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.217647060751915   0.217647060751915   0.217647060751915   3.080054024585948e-41</color>
+              <color sid="diffuse">0.217647060751915   0.217647060751915   0.217647060751915   0</color>
             </diffuse>
             <specular>
-              <color sid="specular">0.1500000059604645   0.1500000059604645   0.1500000059604645   -1.67190800064499e-18</color>
+              <color sid="specular">0.1500000059604645   0.1500000059604645   0.1500000059604645   1.779649049692518e-43</color>
             </specular>
           </phong>
         </technique>
@@ -36,7 +36,7 @@
         <technique sid="standard">
           <phong>
             <emission>
-              <color sid="emission">0   0   0   4.567252084773876e-41</color>
+              <color sid="emission">0   0   0   0</color>
             </emission>
             <ambient>
               <color sid="ambient">0.217647060751915   0.217647060751915   0.217647060751915   0.1500000059604645</color>
@@ -56,7 +56,7 @@
         <technique sid="standard">
           <phong>
             <emission>
-              <color sid="emission">0   0   0   4.567252084773876e-41</color>
+              <color sid="emission">0   0   0   0</color>
             </emission>
             <ambient>
               <color sid="ambient">1   1   0.1111111119389534   0.1500000059604645</color>
@@ -155,7 +155,7 @@
   </library_controllers>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="Node_0x7f50fe89fa30"  name="Node_0x7f50fe89fa30" type="NODE">
+      <node id="Node_0x7fc8352bc8f0"  name="Node_0x7fc8352bc8f0" type="NODE">
         <matrix sid="matrix">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#meshId0">
           <bind_material>

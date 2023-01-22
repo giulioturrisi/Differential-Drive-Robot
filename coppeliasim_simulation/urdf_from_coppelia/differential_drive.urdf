@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<robot name="differential_drive">
+    <material name="grey_light">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+    </material>
+    <material name="grey">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+    </material>
+
+    <link name="base_footprint">
+        <inertial>
+            <origin rpy="-3.141593 3.141593 -3.141593" xyz="0.000000 0.000000 0.000000" />
+            <inertia izz="0.0084555726498365" iyz="0.0" ixz="0.0" iyy="0.0058123935014009" ixx="0.0042234761640429" ixy="0.0" />
+            <mass value="1.8809319734573" />
+        </inertial>
+        <collision>
+            <origin xyz="0.000000 0.000000 0.000000" rpy="-3.141593 3.141593 -3.141593" />
+            <geometry>
+                <box size="0.179000 0.148000 0.071000" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin xyz="0.000000 0.000000 0.000000" rpy="-3.141593 3.141593 -3.141593" />
+            <geometry>
+                <box size="0.179000 0.148000 0.071000" />
+            </geometry>
+            <material name="grey_light"/>
+        </visual>
+        <!--visual>
+            <origin xyz="-0.000000 0.000000 0.035000" rpy="-3.141593 3.141593 0.000000" />
+            <geometry>
+                <mesh filename="file:///home/coppeliasim_simulation/urdf_from_coppelia/differential_drive_Hokuyo_URG_04LX_UG01_body__70__.dae" />
+            </geometry>
+            <material name="Hokuyo_URG_04LX_UG01_body__70___material">
+                <color rgba="1.000000 1.000000 0.111111 1.0" />
+            </material>
+        </visual-->
+    </link>
+    <link name="wheel_right">
+        <inertial>
+            <origin rpy="-3.141593 3.141593 -3.141593" xyz="0.000000 0.000000 0.000000" />
+            <inertia izz="6.4412466599606e-05" iyz="0.0" ixz="0.0" iyy="3.2736381399445e-05" ixx="3.2736381399445e-05" ixy="0.0" />
+            <mass value="0.063617251813412" />
+        </inertial>
+        <collision>
+            <origin xyz="0.000000 0.000000 0.000000" rpy="-3.141593 3.141593 -3.141593" />
+            <geometry>
+                <cylinder length="0.0099999997764826" radius="0.045000001788139" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin xyz="0.000000 0.000000 0.000000" rpy="-3.141593 3.141593 -3.141593" />
+            <geometry>
+                <cylinder length="0.0099999997764826" radius="0.045000001788139" />
+            </geometry>
+            <material name="grey"/>
+        </visual>
+    </link>
+
+    <joint type="continuous" name="joint_right">
+        <axis xyz="0 0 1" />
+        <parent link="base_footprint" />
+        <child link="wheel_right" />
+        <origin xyz="-0.026999 0.091000 -0.005000" rpy="-1.570747 3.038619 -0.000005" />
+    </joint>
+
+    <link name="wheel_left">
+        <inertial>
+            <origin rpy="-3.141593 3.141593 -3.141593" xyz="0.000000 0.000000 0.000000" />
+            <inertia izz="6.4412466599606e-05" iyz="0.0" ixz="0.0" iyy="3.2736381399445e-05" ixx="3.2736381399445e-05" ixy="0.0" />
+            <mass value="0.063617251813412" />
+        </inertial>
+        <collision>
+            <origin xyz="0.000000 0.000000 0.000000" rpy="-3.141593 3.141593 -3.141593" />
+            <geometry>
+                <cylinder length="0.0099999997764826" radius="0.045000001788139" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin xyz="0.000000 0.000000 0.000000" rpy="-3.141593 3.141593 -3.141593" />
+            <geometry>
+                <cylinder length="0.0099999997764826" radius="0.045000001788139" />
+            </geometry>
+            <material name="grey"/>
+        </visual>
+    </link>
+
+    <joint type="continuous" name="joint_left">
+        <axis xyz="0 0 1" />
+        <parent link="base_footprint" />
+        <child link="wheel_left" />
+        <origin xyz="-0.029000 -0.090000 -0.005000" rpy="-1.570796 1.570796 0.000000" />
+    </joint>
+</robot>
