@@ -106,9 +106,9 @@ class MotorController : public rclcpp::Node{
         timer_ = this->create_wall_timer(5ms,std::bind(&MotorController::timer_callback, this));
 
         // declare and set external param -------------------------------------
-        declare_parameter("W", 10.0);
-        declare_parameter("Kd", 30.0); 
-        declare_parameter("Ki", 0.0);
+        declare_parameter("W", 1.0);
+        declare_parameter("Kd", 10.0); 
+        declare_parameter("Ki", 0.05);
         declare_parameter("Ka", 0.0);
         get_parameter("W", W);
         get_parameter("Kd", Kd);
