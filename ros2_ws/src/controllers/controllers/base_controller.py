@@ -7,6 +7,10 @@ from tf2_msgs.msg import TFMessage # type: ignore
 from nav_msgs.msg import OccupancyGrid, Path # type: ignore
 import tf_transformations # type: ignore
 
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
+from tf2_ros import TransformException
+
 import copy
 import matplotlib.pyplot as plt # type: ignore
 import math
@@ -27,11 +31,16 @@ class Base_Controller(Node):
         self.dt = 0.01
         self.state_robot = np.zeros(3)
 
+
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+
         self.controller = None
 
         
         # Publisher and Subscribers -------------------------------------------
-        self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
+        #self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
+        self.create_timer(self.dt/2., self.tf_callback)
         self.subscription_path = self.create_subscription(Path,'path',self.getPath_callback,1)
         self.subscription_cmd_vel = self.create_subscription(Twist,"cmd_vel", self.getVel_callback, 1);
 
@@ -75,18 +84,23 @@ class Base_Controller(Node):
 
 
     # Trasformation callback ---------------------------------------
-    def tf_callback(self, msg):
-        if(msg.transforms[0].child_frame_id == "base_footprint"):
-            quaternion = [float(msg.transforms[0].transform.rotation.x), float(msg.transforms[0].transform.rotation.y), 
-                float(msg.transforms[0].transform.rotation.z), float(msg.transforms[0].transform.rotation.w)]
+    def tf_callback(self,): 
+        try:
+            t = self.tf_buffer.lookup_transform(
+                "map",
+                "base_footprint",
+                rclpy.time.Time())
+            quaternion = [float(t.transform.rotation.x), float(t.transform.rotation.y), 
+                float(t.transform.rotation.z), float(t.transform.rotation.w)]
             euler = tf_transformations.euler_from_quaternion(quaternion)
             
-            self.state_robot[0] = msg.transforms[0].transform.translation.x #???
-            self.state_robot[1] = msg.transforms[0].transform.translation.y
+            self.state_robot[0] = t.transform.translation.x #???
+            self.state_robot[1] = t.transform.translation.y
             self.state_robot[2] = euler[2] 
-
-
+            
             self.state_arrived = True
+        except TransformException as ex:
+            return
 
 
     # Simulation step done flag -------------------------------------
@@ -102,6 +116,7 @@ class Base_Controller(Node):
 
     # Publish the motor commands ------------------------------------
     def publish_command(self, v, w):
+        print("control actions: ", [v,w])
         commanded_vel = Twist()
         commanded_vel.linear.x = np.float(v)
         commanded_vel.angular.z = np.float(w)

@@ -8,6 +8,10 @@ from tf2_msgs.msg import TFMessage # type: ignore
 from nav_msgs.msg import OccupancyGrid, Path  # type: ignore
 import tf_transformations # type: ignore
 
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
+from tf2_ros import TransformException
+
 import sys
 import copy
 import matplotlib.pyplot as plt # type: ignore
@@ -39,8 +43,14 @@ class Planners(Node):
         self.publisher_map_filtered = self.create_publisher(OccupancyGrid,'map_filtered',1)
 
         self.subscription_goal = self.create_subscription(PoseStamped,'goal_pose',self.goal_callback,1)
-        self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
+        #self.subscription_tf = self.create_subscription(TFMessage,'tf',self.tf_callback,1)
         self.subscription_map = self.create_subscription(OccupancyGrid,'map',self.map_callback,1)
+
+
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+
+        self.create_timer(0.5, self.tf_callback)
 
         # State robot variable ---------------------------------------
         self.state_robot = np.zeros(3)
@@ -119,31 +129,37 @@ class Planners(Node):
 
             # Publish new path ---------------------------------------
             path_msg = Path()
-            path_msg.header.frame_id = "odom"
+            path_msg.header.frame_id = "map"
             for i in range(int(len(path)/0.1)):
                 temp = spline(xs[i])
                 poseStamped = PoseStamped()
                 poseStamped.pose.position.x = temp[0]*self.map_resolution + self.map_origin[0]
                 poseStamped.pose.position.y = temp[1]*self.map_resolution + self.map_origin[1]
 
-                poseStamped.header.frame_id = "odom"
+                poseStamped.header.frame_id = "map"
                 path_msg.poses.append(poseStamped)
 
             self.publisher_path.publish(path_msg)
 
 
     # Robot state callback ---------------------------------------
-    def tf_callback(self, msg):
-        if(msg.transforms[0].child_frame_id == "base_footprint"):
-            quaternion = [float(msg.transforms[0].transform.rotation.x), float(msg.transforms[0].transform.rotation.y), 
-                float(msg.transforms[0].transform.rotation.z), float(msg.transforms[0].transform.rotation.w)]
+    def tf_callback(self,):
+        try:
+            t = self.tf_buffer.lookup_transform(
+                "map",
+                "base_footprint",
+                rclpy.time.Time())
+            quaternion = [float(t.transform.rotation.x), float(t.transform.rotation.y), 
+                float(t.transform.rotation.z), float(t.transform.rotation.w)]
             euler = tf_transformations.euler_from_quaternion(quaternion)
             
-            self.state_robot[0] = msg.transforms[0].transform.translation.x
-            self.state_robot[1] = msg.transforms[0].transform.translation.y
-            self.state_robot[2] = euler[2]
-
+            self.state_robot[0] = t.transform.translation.x #???
+            self.state_robot[1] = t.transform.translation.y
+            self.state_robot[2] = euler[2] 
+            #print("pose ", self.state_robot)
             self.state_arrived = True
+        except TransformException as ex:
+            return
 
     # Map Callback ---------------------------------------
     def map_callback(self, msg):
