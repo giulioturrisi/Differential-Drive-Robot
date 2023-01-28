@@ -61,7 +61,7 @@ class StatePublisher(Node):
         print("odometry received")
 
         v_reconstructed = msg.twist.linear.x 
-        w_reconstructed = msg.twist.angular.z + 0.03
+        w_reconstructed = msg.twist.angular.z 
         time = msg.header.stamp.nanosec/1000000000.00
 
         if(self.last_time != 0.0):
