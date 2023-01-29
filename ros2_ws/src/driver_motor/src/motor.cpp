@@ -38,6 +38,10 @@ int tickLeft_forTF = 0;
 int tickRight_forTF = 0;
 float angle_rad_Left_forTF = 0;
 float angle_rad_Right_forTF = 0;
+float v_reconstructed = 0;
+float w_reconstructed = 0;
+float v_reconstructed2 = 0;
+float w_reconstructed2 = 0;
 
 float odom_x = 0;
 float odom_y = 0;
@@ -50,7 +54,7 @@ float delta_theta = 0;
 
 float Ts = 0.01;
 float r = 0.45;
-float d = 0.2;
+float d = 0.8;
 
 float speed_Right_outside = 0;
 float speed_Left_outside = 0;
@@ -159,19 +163,34 @@ class MotorController : public rclcpp::Node{
     
     void timer_callback() {
 
-        angle_rad_Left_forTF = (tickLeft_forTF*0.115)*3.14159/180 - angle_rad_Left_forTF;
-        angle_rad_Right_forTF = (tickRight_forTF*0.115)*3.14159/180 - angle_rad_Right_forTF;
+        angle_rad_Left_forTF = (tickLeft_forTF*0.115)*3.14159/180.0; //+ angle_rad_Left_forTF;
+        angle_rad_Right_forTF = -(tickRight_forTF*0.115)*3.14159/180.0; // + angle_rad_Right_forTF;
+        if(tickLeft_forTF != 0 && tickRight_forTF != 0 ) {
+            std::cout << "##################" << std::endl;
+            std::cout << "left tick: " << tickLeft_forTF << std::endl;
+            std::cout << "right tick: " << tickRight_forTF << std::endl;
+            std::cout << "left angle: " << angle_rad_Left_forTF << std::endl;
+            std::cout << "right angle: " << angle_rad_Right_forTF << std::endl;
 
-        delta_s = (r/2.)*(angle_rad_Left_forTF + angle_rad_Right_forTF);
-        delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF);
-        float v_reconstructed = delta_s/0.005;
-        float w_reconstructed = delta_theta/0.005;
-        auto odom_message = geometry_msgs::msg::TwistStamped();
-        odom_message.twist.linear.x = v_reconstructed;
-        odom_message.twist.angular.z = w_reconstructed;
-        odom_message.header.stamp = this->get_clock()->now();
-        odom_message.header.frame_id = "base_footprint";
-        publisher_odom->publish(odom_message);
+            delta_s = (r/2.)*(angle_rad_Left_forTF + angle_rad_Right_forTF); //- delta_s;
+            delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF); //- delta_theta;
+            v_reconstructed = (delta_s/0.005)*0.7 + delta_s*0.3;
+            w_reconstructed = (delta_theta/0.005)*0.7 + delta_theta*0.3;
+
+            v_reconstructed2 = v_reconstructed*0.9 + v_reconstructed2*0.1;
+            w_reconstructed2 = w_reconstructed*0.9 + w_reconstructed*0.1;
+
+            v_reconstructed = v_reconstructed2;
+            w_reconstructed = w_reconstructed2;
+            std::cout << "v_reconstructed: " << v_reconstructed << std::endl;
+            std::cout << "w_reconstructed: " << w_reconstructed << std::endl;
+            auto odom_message = geometry_msgs::msg::TwistStamped();
+            odom_message.twist.linear.x = v_reconstructed;
+            odom_message.twist.angular.z = w_reconstructed;
+            odom_message.header.stamp = this->get_clock()->now();
+            odom_message.header.frame_id = "base_footprint";
+            publisher_odom->publish(odom_message);
+        }
 
         tickRight_forTF = 0;
         tickLeft_forTF = 0;
@@ -240,7 +259,7 @@ class MotorController : public rclcpp::Node{
 
             //calculate the new angle and save the last one
             old_angle_rad_Left = angle_rad_Left;    
-            angle_rad_Left = (tickLeft*0.115)*3.14159/180;
+            angle_rad_Left = (tickLeft*0.115)*3.14159/180.0;
 
             //calculate new velocity and filtering
             speed_Left = (angle_rad_Left - old_angle_rad_Left)/Ts_innerLoop;
@@ -284,7 +303,7 @@ class MotorController : public rclcpp::Node{
 
             //calculate the new angle and save the last one
             old_angle_rad_Right = angle_rad_Right;
-            angle_rad_Right = (tickRight*0.115)*3.14159/180;
+            angle_rad_Right = (tickRight*0.115)*3.14159/180.0;
 
             //calculate new velocity and filtering
             speed_Right = (angle_rad_Right - old_angle_rad_Right)/Ts_innerLoop;
