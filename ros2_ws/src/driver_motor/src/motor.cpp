@@ -106,7 +106,7 @@ class MotorController : public rclcpp::Node{
         publisher_odom = this->create_publisher<geometry_msgs::msg::TwistStamped>("odometry", 1);
 
         subscription_motors_commands = this->create_subscription<geometry_msgs::msg::Twist>(
-                    "cmd_vel", 1, std::bind(&MotorController::controller_callback, this, _1));
+                    "control_vel", 1, std::bind(&MotorController::controller_callback, this, _1));
         timer_ = this->create_wall_timer(5ms,std::bind(&MotorController::timer_callback, this));
 
         // declare and set external param -------------------------------------
@@ -166,30 +166,38 @@ class MotorController : public rclcpp::Node{
         angle_rad_Left_forTF = (tickLeft_forTF*0.115)*3.14159/180.0; //+ angle_rad_Left_forTF;
         angle_rad_Right_forTF = -(tickRight_forTF*0.115)*3.14159/180.0; // + angle_rad_Right_forTF;
         if(tickLeft_forTF != 0 && tickRight_forTF != 0 ) {
-            std::cout << "##################" << std::endl;
+            /*std::cout << "##################" << std::endl;
             std::cout << "left tick: " << tickLeft_forTF << std::endl;
             std::cout << "right tick: " << tickRight_forTF << std::endl;
             std::cout << "left angle: " << angle_rad_Left_forTF << std::endl;
-            std::cout << "right angle: " << angle_rad_Right_forTF << std::endl;
+            std::cout << "right angle: " << angle_rad_Right_forTF << std::endl;*/
 
-            delta_s = (r/2.)*(angle_rad_Left_forTF + angle_rad_Right_forTF); //- delta_s;
-            delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF); //- delta_theta;
-            v_reconstructed = (delta_s/0.005)*0.7 + delta_s*0.3;
-            w_reconstructed = (delta_theta/0.005)*0.7 + delta_theta*0.3;
+            delta_s = (r/2.)*(angle_rad_Left_forTF + angle_rad_Right_forTF)/15.; //- delta_s;
+            delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF)/15.; //- delta_theta;
+            v_reconstructed = (delta_s/0.005)*0.7 + (delta_s/0.005)*0.3;
+            w_reconstructed = (delta_theta/0.005)*0.7 + (delta_theta/0.005)*0.3;
 
             v_reconstructed2 = v_reconstructed*0.9 + v_reconstructed2*0.1;
             w_reconstructed2 = w_reconstructed*0.9 + w_reconstructed*0.1;
 
             v_reconstructed = v_reconstructed2;
             w_reconstructed = w_reconstructed2;
-            std::cout << "v_reconstructed: " << v_reconstructed << std::endl;
-            std::cout << "w_reconstructed: " << w_reconstructed << std::endl;
+            //std::cout << "v_reconstructed: " << v_reconstructed << std::endl;
+            //std::cout << "w_reconstructed: " << w_reconstructed << std::endl;
             auto odom_message = geometry_msgs::msg::TwistStamped();
             odom_message.twist.linear.x = v_reconstructed;
             odom_message.twist.angular.z = w_reconstructed;
             odom_message.header.stamp = this->get_clock()->now();
             odom_message.header.frame_id = "base_footprint";
             publisher_odom->publish(odom_message);
+        }
+        else {
+            auto odom_message = geometry_msgs::msg::TwistStamped();
+            odom_message.twist.linear.x = 0.0;
+            odom_message.twist.angular.z = 0.0;
+            odom_message.header.stamp = this->get_clock()->now();
+            odom_message.header.frame_id = "base_footprint";
+            publisher_odom->publish(odom_message);  
         }
 
         tickRight_forTF = 0;
@@ -204,6 +212,7 @@ class MotorController : public rclcpp::Node{
         // calculate velocity of each wheel ----------------------------------------
         float v = msg->linear.x;
         float w = msg->angular.z;
+        
         float vel_d_Left = (2*v - w*d)/(2*r);
         float vel_d_Right = -(2*v + w*d)/(2*r);
 
@@ -215,7 +224,7 @@ class MotorController : public rclcpp::Node{
         //speed
         float speed_Left = 0;
         float old_speed_Left = speed_Left_outside;
-        float speed_filtered_Left = 0;
+        float speed_filtered_Left = speed_Left_outside;
 
         //error
         float error_vel_Left = 0;
@@ -232,7 +241,7 @@ class MotorController : public rclcpp::Node{
         //speed
         float speed_Right = 0;
         float old_speed_Right = speed_Right_outside;
-        float speed_filtered_Right = 0;
+        float speed_filtered_Right = speed_Right_outside;
 
         //error
         float error_vel_Right = 0;
@@ -263,10 +272,11 @@ class MotorController : public rclcpp::Node{
 
             //calculate new velocity and filtering
             speed_Left = (angle_rad_Left - old_angle_rad_Left)/Ts_innerLoop;
-            speed_filtered_Left = speed_Left*0.7 + (1.0-0.7)*old_speed_Left;
+            speed_filtered_Left = speed_Left*0.7 + (0.3)*old_speed_Left;
+            
 
-            //save velocity
-            old_angle_rad_Left = speed_filtered_Left;
+            //save angle and velocity
+            old_angle_rad_Left = angle_rad_Left;
             speed_Left_outside = speed_filtered_Left;
 
 
@@ -308,9 +318,10 @@ class MotorController : public rclcpp::Node{
             //calculate new velocity and filtering
             speed_Right = (angle_rad_Right - old_angle_rad_Right)/Ts_innerLoop;
             speed_filtered_Right = speed_Right*0.7 + (1.0 - 0.7)*old_speed_Right; 
+            
         
-            //save velocity
-            old_speed_Right = speed_filtered_Right;
+            //save angle and velocity
+            old_speed_Right = old_angle_rad_Right;
             speed_Right_outside = speed_filtered_Right;
             
             //calculation errors
@@ -365,6 +376,16 @@ class MotorController : public rclcpp::Node{
         motors_message.data.push_back(speed_Left_outside);
         motors_message.data.push_back(vel_d_Right);
         motors_message.data.push_back(speed_Right_outside);
+
+        float v_info = (r/2.)*(speed_Left_outside - speed_Right_outside);
+        float w_info = (r/d)*(-speed_Right_outside - speed_Left_outside);
+
+        motors_message.data.push_back(v);
+        motors_message.data.push_back(v_info);
+        
+        motors_message.data.push_back(w);
+        motors_message.data.push_back(w_info);
+        
         publisher_motors_info->publish(motors_message);
 
         auto finish_total = std::chrono::high_resolution_clock::now();

@@ -58,7 +58,7 @@ class StatePublisher(Node):
        
 
     def odometry_callback(self, msg):
-        print("odometry received")
+        #print("odometry received")
 
         v_reconstructed = msg.twist.linear.x 
         w_reconstructed = msg.twist.angular.z 
@@ -66,8 +66,8 @@ class StatePublisher(Node):
 
         if(self.last_time != 0.0):
             Ts = time - self.last_time    
-            print("Ts", Ts)
             if(Ts > 0.0):
+                print("Ts", Ts)
                 self.odom_x = self.odom_x + v_reconstructed*Ts*cos(self.odom_theta);
                 self.odom_y = self.odom_y + v_reconstructed*Ts*sin(self.odom_theta);
                 self.odom_theta = self.odom_theta + w_reconstructed*Ts
