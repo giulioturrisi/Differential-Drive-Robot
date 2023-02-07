@@ -112,7 +112,8 @@ class Base_Controller(Node):
 
     # Request for next step simulation ------------------------------
     def triggerNextStep_Sim(self,):
-        self.simStep_done = False
+        if(self.enableSyncMode.data == True):
+            self.simStep_done = False
         self.publisher_triggerNextStep.publish(self.triggerNextStep)
 
 
