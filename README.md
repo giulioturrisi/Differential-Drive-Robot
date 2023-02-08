@@ -96,6 +96,10 @@ ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - on
 6. RRT* (in progress)
 7. RRT-primitives
 
+## List of avilable keyboard shortcuts
+1. coppelia (launch CoppeliaSim)
+2. rviz2    (launch rviz2 with custom config file)
+
 ## Status
 Still working in progress, the real robot exists but it's not yet finalized!
 
