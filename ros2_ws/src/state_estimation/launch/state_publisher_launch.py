@@ -9,7 +9,8 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
-    urdf = '/home/coppeliasim_simulation/urdf_from_coppelia/differential_drive.urdf'
+    urdf = './../coppeliasim_simulation/urdf_from_coppelia/differential_drive.urdf'
+    
     with open(urdf, 'r') as infp:
         robot_desc = infp.read()
 
