@@ -69,7 +69,7 @@ ros2 run controllers <control_node>                                (control)
 ros2 launch state_estimation state_publisher_launch.py             (tf and robot model)
 ros2 launch slam_toolbox localization_launch.py                    (localization)
 ros2 launch slam_toolbox online_async_launch.py                    (slam)
-ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - only for real robot)
+ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - only real robot)
 ```
 3. (optional) to load an existing map, put in slam_toolbox/congif/mapper_params_localization /home/ros2_ws/src/utilities/name_of_map
 
