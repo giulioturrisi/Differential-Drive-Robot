@@ -1,11 +1,35 @@
 # This is an auto generated Dockerfile for ros:desktop
 # generated from docker_images_ros2/create_ros_image.Dockerfile.em
-FROM ros:humble-ros-base-jammy
+FROM nvidia/cuda:11.7.1-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+
+RUN locale  
+
+RUN apt update && apt install -y locales
+RUN locale-gen en_US en_US.UTF-8
+RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+RUN export LANG=en_US.UTF-8
+
+RUN locale  
+RUN apt install -y software-properties-common
+RUN add-apt-repository universe
+
+RUN apt update && apt install -y curl
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+RUN apt update
+RUN apt upgrade
+
 # install ros2 packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-humble-desktop \
+    ros-humble-desktop=0.10.0-1* \
     && rm -rf /var/lib/apt/lists/*
 #RUN apt-get install ros-humble-test-msgs \
 #    && rm -rf /var/lib/apt/lists/*
@@ -15,7 +39,7 @@ RUN apt-get update && apt-get install -y mesa-utils && apt-get install -y gedit
 
 RUN apt-get update && apt-get install -y lsb-release wget gnupg
 RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 RUN apt-get update && apt-get install -y ignition-fortress
 RUN apt-get install -y git
 RUN apt-get install -y ros-humble-tf-transformations
@@ -24,6 +48,9 @@ RUN pip install transforms3d
 RUN pip install pgm_reader
 RUN pip install casadi
 RUN pip install numba
+RUN pip install control
+
+
 
 #PIGPIO
 RUN apt install -y python-setuptools python3-setuptools
@@ -64,16 +91,13 @@ RUN apt install -y ros-humble-plotjuggler-ros
 #          -DCXX11=ON \
 #          -DBUILD_DOCUMENTATION=ON \
 #          .. && \
-#    make -j5 && \
+#    make -j3 && \
 #    make test && \
 #    make install
 
-
-
 #PINOCCHIO
-RUN apt-get update
 RUN apt install -qqy lsb-release gnupg2 curl
-RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" | sudo tee /etc/apt/sources.list.d/robotpkg.list
+RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" | tee /etc/apt/sources.list.d/robotpkg.list
 RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
 RUN apt-get update
 RUN apt install -qqy robotpkg-py310-pinocchio
@@ -111,11 +135,10 @@ RUN echo 'export ACADOS_SOURCE_DIR="/acados"' >> /root/.bashrc
 
 
 
-RUN apt-get update 
-RUN apt upgrade -y
-
 #JAX
-RUN pip install --upgrade "jax[cpu]"
+RUN pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
+
 
 #SHELL COLOR
 SHELL ["/bin/bash", "-c"]
@@ -124,8 +147,8 @@ RUN echo 'export COPPELIASIM_ROOT_DIR=/home/coppeliasim_simulation/CoppeliaSim' 
 RUN echo '. /home/ros2_ws/install/setup.bash' >> /root/.bashrc
 
 RUN echo 'alias rviz2="ros2 run rviz2 rviz2 -d /home/ros2_ws/src/utilities/rviz_config/common.rviz"' >> /root/.bashrc
-RUN echo 'alias coppelia="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../dynamics.ttt"' >> /root/.bashrc
-RUN echo 'alias python="python3"' >> /root/.bashrc
+RUN echo 'alias coppelia="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh ../self_balancing_robot.ttt"' >> /root/.bashrc
+
 
 
 WORKDIR /home
