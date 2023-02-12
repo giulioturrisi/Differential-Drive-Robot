@@ -86,6 +86,7 @@ ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - on
 6. Nonlinear MPC via Acados
 7. Iterative Linear Quadratic Regulator
 8. Iterative Linear Quadratic Regulator via Crocoddyl
+9. Predictive Sampling MPC
 
 ## List of available planners
 1. A*
