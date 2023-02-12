@@ -2,6 +2,8 @@ import numpy as np
 import math 
 import casadi as cs
 
+import jax
+import jax.numpy as jnp
 
 class Robot:
     """Class that defines the little differential drive
@@ -32,6 +34,21 @@ class Robot:
         state[2] = state[2] + w*self.dt
 
         return state
+    
+    def integrate_jax(self, state, v, w):
+        """Integrate the system kynematics
+        Args:
+            state (np.array): actual state of the robot
+            v (float): linear speed
+            w (float): angular speed
+        Returns:
+            (np.array): new state of the robot
+        """
+        x_new = state[0] + v*jnp.cos(state[2])*self.dt
+        y_new = state[1] + v*jnp.sin(state[2])*self.dt
+        theta_new = state[2] + w*self.dt
+
+        return jnp.array([x_new, y_new, theta_new])
 
 
     # Simple unycicle kynematics ---------------------------------------

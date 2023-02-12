@@ -10,15 +10,7 @@ from sampling_based.rrt import RRT
 
 # Import controllers ---------------------------------------
 sys.path.append('/home/python_scripts/controllers')
-from io_linearization import IO_linearization # type: ignore
-from casadi_nmpc import Casadi_nmpc # type: ignore
-from nonlinear_lyapunov import Nonlinear_lyapunov # type: ignore
-from approximate_linearization import Approximate_linearization # type: ignore
-from dynamic_linearization import Dynamic_linearization # type: ignore
-from ilqr import iLQR 
 from predictive_sampling import Sampling_MPC
-sys.path.append('/home/python_scripts/controllers/acados')
-from acados_nmpc import NMPC 
 
 
 from scipy.interpolate import CubicSpline, Akima1DInterpolator
@@ -71,42 +63,8 @@ path_spline_y = np.array(path_spline_y[0:len(path_spline_y)-1])
 
 
 # Control ---------------------------------------
-
-#horizon = 10
-#controller = Casadi_nmpc(horizon,[],[], dt)
-
-
-#horizon = 0
-#b = 0.1
-#k1 = 3
-#k2 = 3
-#controller = IO_linearization(b,k1,k2, dt)
-
-
-#horizon = 0
-#k1 = 5
-#k2 = 50
-#controller = Dynamic_linearization(k1, k2, dt)
-
-#horizon = 0
-#k1 = 15
-#k2 = 15
-#k3 = 5
-#controller = Nonlinear_lyapunov(k1=k1, k2=k2, k3=k3, dt=dt)
-
-
-#horizon = 0
-#k1 = 5
-#k2 = 5
-#k3 = 5
-#controller = Approximate_linearization(k1=k1, k2=k2, k3=k3, dt=dt)
-
-
-#horizon = 10
-#controller = NMPC(horizon, dt)
-
 horizon = 20
-controller = iLQR(horizon=horizon, dt=dt)
+controller = Sampling_MPC(horizon=horizon,dt= dt, init_jax = True, linear = False)
 
 
 controller.reset()
@@ -119,19 +77,18 @@ for j in range(np.shape(path_spline_x)[0]):
 
     reference_x = []
     reference_y = []
-    if(horizon == 0):
-        reference_x = path_spline_x[j]
-        reference_y = path_spline_y[j]
-    else:
-        for i in range(horizon+1):
-            if(j+i < np.shape(path_spline_x)[0]):
-                reference_x.append(path_spline_x[j+i])
-                reference_y.append(path_spline_y[j+i])
-            else:
-                reference_x.append(path_spline_x[-1])
-                reference_y.append(path_spline_y[-1])
+    reference_theta = []
+    for i in range(horizon):
+        if(j+i < np.shape(path_spline_x)[0]):
+            reference_x.append(path_spline_x[j+i])
+            reference_y.append(path_spline_y[j+i])
+            reference_theta.append(path_spline_y[j+i])
+        else:
+            reference_x.append(path_spline_x[-1])
+            reference_y.append(path_spline_y[-1])
+            reference_theta.append(path_spline_y[-1])
 
-    v, w = controller.compute_control(state_robot, reference_x, reference_y)
+    v, w = controller.compute_control(state_robot, reference_x, reference_y, reference_theta)
     
     print("Control actions: ", [v, w])
     print("Control time: ", time.time()-start_time)
