@@ -34,6 +34,19 @@ import copy
 import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
+
+print("Choose a controller:\n", 
+    "1 - Casadi NMPC\n",
+    "2 - IO Linearization\n",
+    "3 - Dynamic Linearization\n",
+    "4 - Nonlinear Lyapunov\n",
+    "5 - Approximate Linearization\n",
+    "6 - Acados NMPC\n",
+    "7 - Iterative LQR")
+
+controller_choice = input()
+controller_choice = int(controller_choice)
+
 # Inizial robot and some parameters ---------------------------------------
 state_robot = np.array([0.0, 0.0, 0.0])  # x y theta
 dt = 0.02                              # sampling time
@@ -71,42 +84,43 @@ path_spline_y = np.array(path_spline_y[0:len(path_spline_y)-1])
 
 
 # Control ---------------------------------------
+horizon = 0
+if(controller_choice==1):
+    horizon = 10
+    controller = Casadi_nmpc(horizon,[],[], dt)
 
-#horizon = 10
-#controller = Casadi_nmpc(horizon,[],[], dt)
+elif(controller_choice==2):
+    b = 0.1
+    k1 = 3
+    k2 = 3
+    controller = IO_linearization(b,k1,k2, dt)
+
+elif(controller_choice==3):
+    k1 = 5
+    k2 = 50
+    controller = Dynamic_linearization(k1, k2, dt)
+
+elif(controller_choice==4):
+    k1 = 15
+    k2 = 15
+    k3 = 5
+    controller = Nonlinear_lyapunov(k1=k1, k2=k2, k3=k3, dt=dt)
+
+elif(controller_choice==5):
+    k1 = 5
+    k2 = 5
+    k3 = 5
+    controller = Approximate_linearization(k1=k1, k2=k2, k3=k3, dt=dt)
+
+elif(controller_choice==6):
+    horizon = 10
+    controller = NMPC(horizon, dt)
+
+elif(controller_choice==7):
+    horizon = 20
+    controller = iLQR(horizon=horizon, dt=dt)
 
 
-#horizon = 0
-#b = 0.1
-#k1 = 3
-#k2 = 3
-#controller = IO_linearization(b,k1,k2, dt)
-
-
-#horizon = 0
-#k1 = 5
-#k2 = 50
-#controller = Dynamic_linearization(k1, k2, dt)
-
-#horizon = 0
-#k1 = 15
-#k2 = 15
-#k3 = 5
-#controller = Nonlinear_lyapunov(k1=k1, k2=k2, k3=k3, dt=dt)
-
-
-#horizon = 0
-#k1 = 5
-#k2 = 5
-#k3 = 5
-#controller = Approximate_linearization(k1=k1, k2=k2, k3=k3, dt=dt)
-
-
-#horizon = 10
-#controller = NMPC(horizon, dt)
-
-horizon = 20
-controller = iLQR(horizon=horizon, dt=dt)
 
 
 controller.reset()

@@ -46,6 +46,19 @@ if __name__ == "__main__":
             planner = Breadth_First_Search(state_robot, goal, image, resolution)
         elif(k==5):
             planner = Greedy_Best_First_Search(state_robot, goal, image, resolution)
+        
         path = planner.plan(max_iteration, False)
-        print("planning time: ", time.time()-start_time)
+
+        if(k==0):
+            print("planning time RRT: ", time.time()-start_time)
+        elif(k==1):
+            print("planning time RRT primitives: ", time.time()-start_time)
+        elif(k==2):
+            print("planning time A star: ", time.time()-start_time)
+        elif(k==3):
+            print("planning time Djikstra: ", time.time()-start_time)
+        elif(k==4):
+            print("planning time Breadth First Search: ", time.time()-start_time)
+        elif(k==5):
+            print("planning time Greedy Best First Search: ", time.time()-start_time)
         
