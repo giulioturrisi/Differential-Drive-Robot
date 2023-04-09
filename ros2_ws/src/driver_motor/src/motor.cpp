@@ -172,10 +172,13 @@ class MotorController : public rclcpp::Node{
             std::cout << "left angle: " << angle_rad_Left_forTF << std::endl;
             std::cout << "right angle: " << angle_rad_Right_forTF << std::endl;*/
 
-            delta_s = (r/2.)*(angle_rad_Left_forTF + angle_rad_Right_forTF)/15.; //- delta_s;
-            delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF)/15.; //- delta_theta;
-            v_reconstructed = (delta_s/0.005)*0.7 + (delta_s/0.005)*0.3;
-            w_reconstructed = (delta_theta/0.005)*0.7 + (delta_theta/0.005)*0.3;
+            //delta_s = (r/2.)*(angle_rad_Left_forTF + angle_rad_Right_forTF)/15.; //- delta_s;
+            //delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF)/15.; //- delta_theta;
+            //v_reconstructed = (delta_s/0.005)*0.7 + (delta_s/0.005)*0.3;
+            //w_reconstructed = (delta_theta/0.005)*0.7 + (delta_theta/0.005)*0.3;
+
+            v_reconstructed = (r/2.)*((angle_rad_Left_forTF + angle_rad_Right_forTF)/0.005);
+            w_reconstructed = (r/d)*((angle_rad_Right_forTF - angle_rad_Left_forTF)/0.005);
 
             v_reconstructed2 = v_reconstructed*0.9 + v_reconstructed2*0.1;
             w_reconstructed2 = w_reconstructed*0.9 + w_reconstructed*0.1;
