@@ -50,11 +50,15 @@ ddrive_humble
 cd ros2_ws
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro humble
 ulimit -s unlimited
-colcon build --symlink-install --packages-ignore slam_toolbox --cmake-args -DCMAKE_BUILD_TYPE=Release
+colcon build --symlink-install
 ```
 
 
 ## How to run the simulation
+All the commands below can be easily launched via some aliases. Check them by activating the docker ```ddrive_humble``` and writing on the keyboard ```launch_``` (plus tab for the autocomplete)
+
+Otherwise:
+
 1. open Coppeliasim and run the scene `dynamics.ttt` in the folder coppeliasim_simulation 
 ```sh
 ./coppeliaSim.sh -s ../dynamics.ttt                                (add -h to disable the gui)
@@ -75,6 +79,7 @@ ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - on
 
 
 4. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
+
 
 
 ## List of available controllers
