@@ -28,15 +28,17 @@ class Casadi_nmpc:
 
         self.initialize_casadi()
 
+
     def reset(self,):
         """Every control class should have a reset function
         """
         return
 
-    #INIT CASADI PLANNING
+
     def initialize_casadi(self):
-        """Every time we want to compute a solution we initialize the problem
+        """Initialize the casadi optimal control problem
         """
+
         # Casadi problem formulation ---------------------------------------
         self.opti = Opti() # Optimization problem
         
@@ -45,9 +47,30 @@ class Casadi_nmpc:
         self.x_casadi   = self.X_casadi[0,:]
         self.y_casadi   = self.X_casadi[1,:]
         self.yaw_casadi   = self.X_casadi[2,:]
-            
+
         self.U_casadi = self.opti.variable(self.n_actionsMPC,self.N)   # control trajectory
 
+        # Initial State Constraint -----------------------------------
+        self.x_0 = self.opti.parameter()
+        self.y_0 = self.opti.parameter()
+        self.yaw_0 = self.opti.parameter()
+        self.opti.subject_to(self.x_casadi[0]==self.x_0)
+        self.opti.subject_to(self.y_casadi[0]==self.y_0)
+        self.opti.subject_to(self.yaw_casadi[0]==self.yaw_0) 
+
+        # State Constraints and Cost Function -------------------------
+        self.set_kinematics()
+        self.set_cost_function()
+        
+        # Solver parameters ---------------------------------------
+        p_opts = dict(print_time=False, verbose=False) 
+        s_opts = dict(print_level=0)
+        self.opti.solver("ipopt",p_opts,s_opts) # set numerical backend
+
+
+    def set_kinematics(self):
+        """Setting the kinematics constraints
+        """
 
         # Kynematic Constraints ---------------------------------------
         f = lambda x,u: vertcat(x[1],u-x[1]) # dx/dt = f(x,u)
@@ -62,41 +85,24 @@ class Casadi_nmpc:
             self.opti.subject_to(self.X_casadi[2,k+1]==next_theta) # close the gaps   
 
 
-        # Solver parameters ---------------------------------------
-        p_opts = dict(print_time=False, verbose=False) 
-        s_opts = dict(print_level=0)
-        self.opti.solver("ipopt",p_opts,s_opts) # set numerical backend
 
-
-
-    def compute_control(self, initial_state, reference_x, reference_y):
-        """Compute the control actions
-        Args:
-            initial_state (np.array): actual state of the robot
-            reference_x (np.array): x reference for the robot
-            reference_y (np.array): y reference for the robot
-        Returns:
-            (np.array): control actions
+    def set_cost_function(self):
+        """Setting the cost function
         """
-        # Setting Initial State ---------------------------------------
-        start_time = time.time()
-        self.opti.subject_to(self.x_casadi[0]==initial_state[0])  
-        self.opti.subject_to(self.y_casadi[0]==initial_state[1])   
-        self.opti.subject_to(self.yaw_casadi[0]==initial_state[2])
 
-        # Setting Cost Function ---------------------------------------
+        # Parametric Cost Function -------------------------------------
         position_error = 0
         input_use = 0
         ref_yaw = 0
+        self.reference_x = self.opti.parameter(self.N+1)
+        self.reference_y = self.opti.parameter(self.N+1)
 
-        
-        # Fill cost function using flat outputs ---------------------------------------------------
-        for k in range(1,self.N):
-            ref_x = reference_x[k]
-            ref_y = reference_y[k]
+        for k in range(1, self.N):
+            ref_x = self.reference_x[k]
+            ref_y = self.reference_y[k]
 
-            ref_x_dot = (reference_x[k+1] - ref_x)/self.dt
-            ref_y_dot = (reference_y[k+1] - ref_y)/self.dt
+            ref_x_dot = (self.reference_x[k+1] - ref_x)/self.dt
+            ref_y_dot = (self.reference_y[k+1] - ref_y)/self.dt
             ref_yaw = np.arctan2(ref_y_dot, ref_x_dot) 
 
             position_error += self.Q*(self.x_casadi[k] - ref_x)@(self.x_casadi[k] - ref_x).T
@@ -104,8 +110,8 @@ class Casadi_nmpc:
             position_error += self.Q*(self.yaw_casadi[k] - ref_yaw)@(self.yaw_casadi[k] - ref_yaw).T
 
             if(k < self.N-1):
-                ref_x_ddot = (((reference_x[k+2] - reference_x[k+1])/self.dt ) - ref_x_dot)/self.dt
-                ref_y_ddot = (((reference_y[k+2] - reference_y[k+1])/self.dt ) - ref_y_dot)/self.dt
+                ref_x_ddot = (((self.reference_x[k+2] - self.reference_x[k+1])/self.dt ) - ref_x_dot)/self.dt
+                ref_y_ddot = (((self.reference_y[k+2] - self.reference_y[k+1])/self.dt ) - ref_y_dot)/self.dt
             else:
                 ref_x_ddot = 0.0
                 ref_y_ddot = 0.0
@@ -117,16 +123,35 @@ class Casadi_nmpc:
         
         
         # Last step N horizon -----------------------------------------------------------------------
-        ref_x = reference_x[self.N]
-        ref_y = reference_y[self.N]
+        ref_x = self.reference_x[self.N]
+        ref_y = self.reference_y[self.N]
         position_error += self.Q*(self.x_casadi[self.N] - ref_x)@(self.x_casadi[self.N] - ref_x).T
         position_error += self.Q*(self.y_casadi[self.N] - ref_y)@(self.y_casadi[self.N] - ref_y).T
         position_error += self.Q*(self.yaw_casadi[self.N] - ref_yaw)@(self.yaw_casadi[self.N] - ref_yaw).T
         
-        
         self.opti.minimize(position_error + input_use)
-        
-        #print("Initialization time: ", time.time()-start_time)
+
+
+    def compute_control(self, initial_state, reference_x, reference_y):
+        """Compute the control actions
+        Args:
+            initial_state (np.array): actual state of the robot
+            reference_x (np.array): x reference for the robot
+            reference_y (np.array): y reference for the robot
+        Returns:
+            (np.array): control actions
+        """
+
+        # Setting Initial State ---------------------------------------
+        start_time = time.time()
+        self.opti.set_value(self.x_0, initial_state[0])
+        self.opti.set_value(self.y_0, initial_state[1])
+        self.opti.set_value(self.yaw_0, initial_state[2])
+
+        # Setting Reference ------------------------------------------
+        self.opti.set_value(self.reference_x, reference_x)
+        self.opti.set_value(self.reference_y, reference_y)
+           
         # Compute solution ---------------------------------------
         start_time = time.time()
         sol = self.opti.solve()
@@ -136,6 +161,4 @@ class Casadi_nmpc:
         v = sol.value(self.U_casadi)[0]
         w = sol.value(self.U_casadi)[1]
 
-        # For the next step! ---------------------------------------
-        self.initialize_casadi() 
-        return v[0],w[0]
+        return v[0], w[0]
