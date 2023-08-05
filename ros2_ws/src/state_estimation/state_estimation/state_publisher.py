@@ -53,7 +53,7 @@ class StatePublisher(Node):
 
         # send the joint state and transform
         self.joint_pub.publish(joint_state)
-        self.broadcaster.sendTransform(odom_trans)
+        #self.broadcaster.sendTransform(odom_trans)
 
        
 
