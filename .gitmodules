@@ -7,3 +7,9 @@
 [submodule "ros2_ws/src/external/ros2_bubble_rob"]
 	path = ros2_ws/src/external/ros2_bubble_rob
 	url = https://github.com/CoppeliaRobotics/ros2_bubble_rob.git
+[submodule "ros2_ws/src/external/kiss-icp"]
+	path = ros2_ws/src/external/kiss-icp
+	url = https://github.com/giulioturrisi/kiss-icp.git
+[submodule "ros2_ws/src/external/pointcloud_to_laserscan"]
+	path = ros2_ws/src/external/pointcloud_to_laserscan
+	url = https://github.com/giulioturrisi/pointcloud_to_laserscan.git
