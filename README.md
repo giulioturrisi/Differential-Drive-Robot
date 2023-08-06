@@ -13,7 +13,7 @@ This repo contains the code for controlling both a real and a simulated differen
 
 2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
 
-3. [kiss-icp] (https://github.com/PRBonn/kiss-icp)
+3. [kiss-icp](https://github.com/PRBonn/kiss-icp)
 
 
 ## Build on Linux
