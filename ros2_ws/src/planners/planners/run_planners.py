@@ -82,6 +82,7 @@ class Planners(Node):
 
         # Interactive Command Line ----------------------------
         t1 = threading.Thread(target=self.interactive_command_line)
+        t1.daemon = True
         t1.start()
 
 
@@ -217,23 +218,29 @@ class Planners(Node):
             new_planner = input(">>> ")
             if(new_planner == "1"):
                 self.which_planner = 1
+                print("## Planner started with A* ##")
             elif(new_planner == "2"):
                 self.which_planner = 2
+                print("## Planner started with Greedy Best First Search ##")
             elif(new_planner == "3"):
                 self.which_planner = 3
+                print("## Planner started with Breadth First Search ##")
             elif(new_planner == "4"):
                 self.which_planner = 4
+                print("## Planner started with Djikstra ##")
             elif(new_planner == "5"):
                 self.which_planner = 5
+                print("## Planner started with RRT ##")
             elif(new_planner == "6"):
                 self.which_planner = 6
+                print("## Planner started with RRT with primitives ##")
             else:
                 print("Wrong input")
                 continue
 
 def main(args=None):
     rclpy.init(args=args)
-    print("###### Planner started with A* ######")
+    print("## Planner started with A* ##")
 
     planner_node = Planners()
 

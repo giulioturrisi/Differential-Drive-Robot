@@ -5,7 +5,7 @@ This repo contains the code for controlling both a real and a simulated differen
  
 2. ```coppeliasim_simulation```: scenes used for simulating the robot (dynamically enabled or not)
 
-3. ```ros2_ws```: collection of ROS2 nodes for controlling the robot and some external folders such as ```slam_toolbox``` (generate a map - [slam](https://github.com/SteveMacenski/slam_toolbox)), ```simExtROS2``` and ```ros2_bubble_rob```(dependencies for CoppeliaSim)
+3. ```ros2_ws```: collection of ROS2 nodes for controlling the robot and some external folders such as ```slam_toolbox``` (generate a map and localization - [link](https://github.com/SteveMacenski/slam_toolbox)), ```kiss-icp``` (lidar odometry - [link](https://github.com/PRBonn/kiss-icp)), ```simExtROS2``` and ```ros2_bubble_rob```(dependencies for CoppeliaSim)
 
  
 ## Dependencies
@@ -59,20 +59,20 @@ All the commands below can be easily launched via some aliases. Check them by ac
 
 Otherwise:
 
-1. open Coppeliasim and run the scene `dynamics.ttt` in the folder coppeliasim_simulation 
+1. on a new terminal 
 ```sh
-./coppeliaSim.sh -s ../dynamics.ttt                                (add -h to disable the gui)
+launch_sim_kinematics                                              (scene with kinematics)
+launch_sim_dynamics                                                (scene with dynamics)
 ```
 
-2. on a new terminal 
+2. on each terminal you can press 
 ```sh
-ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'   (if you want to use the joystick)
-ros2 run rviz2 rviz2                                               (visualization)
-ros2 run planners run_planners                                     (planning)
-ros2 run controllers <control_node>                                (control)
-ros2 launch state_estimation state_publisher_launch.py             (tf and robot model)
-ros2 launch slam_toolbox localization_launch.py                    (localization)
-ros2 launch slam_toolbox online_async_launch.py                    (slam)
+launch_joy                                                         (if you want to use the joystick)
+launch_rviz                                                        (visualization)
+launch_planners                                                    (planning)
+launch_controllers                                                 (control)
+launch_lidar_odometry                                              (tf, robot model, and kiss-icp)
+launch_slam                                                        (slam-toolbox)
 ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - only real robot)
 ```
 3. (optional) to load an existing map, put in slam_toolbox/congif/mapper_params_localization /home/ros2_ws/src/utilities/name_of_map

@@ -19,7 +19,8 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': ['run_casadi = controllers.run_casadi_nmpc:main',
+        'console_scripts': ['run_controllers = controllers.run_controllers:main',
+                            'run_casadi = controllers.run_casadi_nmpc:main',
                             'run_acados = controllers.run_acados_nmpc:main',
                             'run_ilqr = controllers.run_ilqr:main',
                             'run_approx_linearization = controllers.run_approx_linearization:main',
