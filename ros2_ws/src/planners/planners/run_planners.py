@@ -20,6 +20,8 @@ from scipy.interpolate import CubicSpline # type: ignore
 import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
+import threading
+
 
 sys.path.append('/home/python_scripts/planners/')
 from grid_based.a_star import A_star # type: ignore 
@@ -76,6 +78,11 @@ class Planners(Node):
 
         # Plan Choice ---------------------------------------
         self.which_planner = 1
+
+
+        # Interactive Command Line ----------------------------
+        t1 = threading.Thread(target=self.interactive_command_line)
+        t1.start()
 
 
 
@@ -197,11 +204,36 @@ class Planners(Node):
 
 
 
-
+    def interactive_command_line(self, ):
+        print("---- You can change the planner by pressing -------")
+        print("1: A*")
+        print("2: Greedy Best First Search")
+        print("3: Breadth First Search")
+        print("4: Djikstra")
+        print("5: RRT")
+        print("6: RRT with primitives")
+        print("---------------------------------------------------")
+        while True:
+            new_planner = input(">>> ")
+            if(new_planner == "1"):
+                self.which_planner = 1
+            elif(new_planner == "2"):
+                self.which_planner = 2
+            elif(new_planner == "3"):
+                self.which_planner = 3
+            elif(new_planner == "4"):
+                self.which_planner = 4
+            elif(new_planner == "5"):
+                self.which_planner = 5
+            elif(new_planner == "6"):
+                self.which_planner = 6
+            else:
+                print("Wrong input")
+                continue
 
 def main(args=None):
     rclpy.init(args=args)
-    print("###### Planner started ######")
+    print("###### Planner started with A* ######")
 
     planner_node = Planners()
 

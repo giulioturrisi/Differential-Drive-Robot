@@ -121,8 +121,8 @@ class Base_Controller(Node):
     def publish_command(self, v, w):
         print("control actions: ", [v,w])
         commanded_vel = Twist()
-        commanded_vel.linear.x = np.float(v)
-        commanded_vel.angular.z = np.float(w)
+        commanded_vel.linear.x = float(v)
+        commanded_vel.angular.z = float(w)
         self.publisher_command.publish(commanded_vel);
 
 

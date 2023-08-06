@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y ignition-fortress
 RUN apt-get install -y git
 RUN apt-get install -y ros-humble-tf-transformations
 RUN apt-get install -y python3-pip
+RUN pip install numpy==1.24
 RUN pip install transforms3d
 RUN pip install pgm_reader
 RUN pip install casadi
@@ -115,6 +116,7 @@ RUN apt-get update
 RUN apt upgrade -y
 
 #JAX
+RUN apt-get update 
 RUN pip install --upgrade "jax[cpu]"
 
 #SHELL COLOR
