@@ -9,9 +9,9 @@ This repo contains the code for controlling both a real and a simulated differen
 
  
 ## Dependencies
-1. [ROS2](https://docs.ros.org/en/humble/Installation.html) Humble
+1. [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
 
-2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
+2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads)
 
 3. [kiss-icp](https://github.com/PRBonn/kiss-icp)
 
