@@ -5,13 +5,15 @@ This repo contains the code for controlling both a real and a simulated differen
  
 2. ```coppeliasim_simulation```: scenes used for simulating the robot (dynamically enabled or not)
 
-3. ```ros2_ws```: collection of ROS2 nodes for controlling the robot and some external folders such as ```slam_toolbox``` (generate a map and localization - [link](https://github.com/SteveMacenski/slam_toolbox)), ```kiss-icp``` (lidar odometry - [link](https://github.com/PRBonn/kiss-icp)), ```simExtROS2``` and ```ros2_bubble_rob```(dependencies for CoppeliaSim)
+3. ```ros2_ws```: collection of ROS2 nodes for controlling the robot with the aid of some external tools such as ```slam_toolbox``` (generate a map and localization) and ```kiss-icp``` (lidar odometry)
 
  
 ## Dependencies
 1. [ROS2](https://docs.ros.org/en/humble/Installation.html) Humble
 
 2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads) for simulations (not mandatory)
+
+3. [kiss-icp] (https://github.com/PRBonn/kiss-icp)
 
 
 ## Build on Linux
@@ -67,7 +69,7 @@ launch_sim_dynamics                                                (scene with d
 
 2. on each terminal you can press 
 ```sh
-launch_joy                                                         (if you want to use the joystick)
+launch_joy                                                         (to use the joystick)
 launch_rviz                                                        (visualization)
 launch_planners                                                    (planning)
 launch_controllers                                                 (control)
