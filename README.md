@@ -15,6 +15,8 @@ This repo contains the code for controlling both a real and a simulated differen
 
 3. [kiss-icp](https://github.com/PRBonn/kiss-icp)
 
+4. [slam_toolbox](https://github.com/SteveMacenski/slam_toolbox)
+
 
 ## Build on Linux
 1. clone the repo
