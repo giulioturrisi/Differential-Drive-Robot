@@ -2,7 +2,7 @@
 This repo contains the code for controlling both a real and a simulated differential drive robot via ROS2 using different planners, controllers, and open-source libraries for slam and odometry. 
 
 
-## Repo structure
+## Repository structure
 It includes the following folders and subfolders:
 
 1. ```python_scripts```: most of the ROS2 nodes call some classes here
