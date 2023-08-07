@@ -65,7 +65,7 @@ colcon build --symlink-install
 ## How to run the simulation
 All the commands below can be easily launched via some aliases. Check them by activating the docker ```ddrive_humble``` and writing on the keyboard ```launch_``` (plus tab for the autocomplete)
 
-Otherwise:
+Follow the command below to run all the framework:
 
 1. on a new terminal 
 ```sh
