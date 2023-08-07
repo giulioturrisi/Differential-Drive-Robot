@@ -103,7 +103,7 @@ class MotorController : public rclcpp::Node{
     : Node("motors_controller")
     {
         publisher_motors_info = this->create_publisher<std_msgs::msg::Float64MultiArray>("motors_info", 1);
-        publisher_odom = this->create_publisher<geometry_msgs::msg::TwistStamped>("odometry", 1);
+        publisher_odom = this->create_publisher<geometry_msgs::msg::TwistStamped>("wheel_odometry", 1);
 
         subscription_motors_commands = this->create_subscription<geometry_msgs::msg::Twist>(
                     "control_vel", 1, std::bind(&MotorController::controller_callback, this, _1));
