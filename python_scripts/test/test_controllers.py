@@ -48,7 +48,7 @@ controller_choice = input()
 controller_choice = int(controller_choice)
 
 # Inizial robot and some parameters ---------------------------------------
-state_robot = np.array([0.0, 0.0, 0.0])  # x y theta
+state_robot = np.array([0.2, -0.1, 2.0])  # x y theta
 dt = 0.02                              # sampling time
 robot = Robot(dt)
 
