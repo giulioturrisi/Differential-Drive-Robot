@@ -67,13 +67,13 @@ All the commands below can be easily launched via some aliases. Check them by ac
 
 Follow the commands below to run all the framework:
 
-1. on a new terminal 
+1. on a new terminal first launch the simulation 
 ```sh
 launch_sim_kinematics                                              (scene with kinematics)
 launch_sim_dynamics                                                (scene with dynamics)
 ```
 
-2. on each terminal you can press 
+2. on each new terminal, then launch all the other packages 
 ```sh
 launch_joy                                                         (to use the joystick)
 launch_rviz                                                        (visualization)
@@ -83,10 +83,8 @@ launch_lidar_odometry                                              (tf, robot mo
 launch_slam                                                        (slam-toolbox)
 ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - only real robot)
 ```
-3. (optional) to load an existing map, put in slam_toolbox/congif/mapper_params_localization /home/ros2_ws/src/utilities/name_of_map
 
-
-4. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
+3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
    
 
 ## List of available controllers
