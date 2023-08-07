@@ -79,7 +79,7 @@ launch_joy                                                         (to use the j
 launch_rviz                                                        (visualization)
 launch_planners                                                    (planning)
 launch_controllers                                                 (control)
-launch_lidar_odometry                                              (tf, robot model, and kiss-icp)
+launch_lidar_odometry                                              (tf and kiss-icp)
 launch_slam                                                        (slam-toolbox)
 ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - only real robot)
 ```
