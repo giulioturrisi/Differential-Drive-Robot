@@ -65,7 +65,7 @@ colcon build --symlink-install
 ## How to run the simulation
 All the commands below can be easily launched via some aliases. Check them by activating the docker ```ddrive_humble``` and writing on the keyboard ```launch_``` (plus tab for the autocomplete)
 
-Follow the command below to run all the framework:
+Follow the commands below to run all the framework:
 
 1. on a new terminal 
 ```sh
@@ -87,8 +87,7 @@ ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - on
 
 
 4. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
-
-
+   
 
 ## List of available controllers
 1. Approximate linearization
@@ -101,6 +100,7 @@ ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - on
 8. Iterative Linear Quadratic Regulator via Crocoddyl
 9. Predictive Sampling MPC
 
+
 ## List of available planners
 1. A*
 2. Breadth First search
@@ -110,9 +110,6 @@ ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - on
 6. RRT* (in progress)
 7. RRT-primitives
 
-## List of avilable keyboard shortcuts
-1. coppelia (launch CoppeliaSim)
-2. rviz2    (launch rviz2 with custom config file)
 
 ## Status
 Still working in progress, the real robot exists but it's not yet finalized!
