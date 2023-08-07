@@ -15,7 +15,7 @@ import sys
 import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
-sys.path.append('/home/python_simulation/controllers')
+sys.path.append('/home/python_scripts/controllers')
 from casadi_nmpc import Casadi_nmpc # type: ignore
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller

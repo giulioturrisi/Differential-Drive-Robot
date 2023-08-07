@@ -295,7 +295,7 @@ class iLQR:
             #plt.show()
         #print("control vec", self.control_vec)
 
-        return np.asscalar(self.control_vec[0,0]),np.asscalar(self.control_vec[0,1])
+        return np.ndarray.item(self.control_vec[0,0]),np.ndarray.item(self.control_vec[0,1])
 
 
 
