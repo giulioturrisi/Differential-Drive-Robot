@@ -10,3 +10,6 @@
 [submodule "ros2_ws/src/external/pointcloud_to_laserscan"]
 	path = ros2_ws/src/external/pointcloud_to_laserscan
 	url = https://github.com/giulioturrisi/pointcloud_to_laserscan.git
+[submodule "/home/giulio/personal_ws_home/Differential-Drive-Robot/ros2_ws/src/external/kiss-icp"]
+	path = /home/giulio/personal_ws_home/Differential-Drive-Robot/ros2_ws/src/external/kiss-icp
+	url = https://github.com/PRBonn/kiss-icp.git
