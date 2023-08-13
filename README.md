@@ -33,6 +33,7 @@ git clone --recurse-submodules https://github.com/giulioturrisi/differential_dri
 3. add the following ls in ros2_ws/src/simExtROS2/meta/interfaces.txt 
 ```sh
 geometry_msgs/msg/Twist
+geometry_msgs/msg/TwistStamped
 sensor_msgs/msg/LaserScan
 ```
 
