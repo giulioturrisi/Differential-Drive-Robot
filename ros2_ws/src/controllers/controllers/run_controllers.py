@@ -18,14 +18,14 @@ np.set_printoptions(threshold=sys.maxsize)
 import threading
 
 sys.path.append('/home/python_scripts/controllers/acados')
-from acados_nmpc import NMPC 
+from acados_nmpc import Acados_NMPC 
 sys.path.append('/home/python_scripts/controllers')
 from dynamic_linearization import Dynamic_linearization 
 from ilqr import iLQR 
 from io_linearization import IO_linearization
 from nonlinear_lyapunov import Nonlinear_lyapunov
 from approximate_linearization import Approximate_linearization
-from casadi_nmpc import Casadi_nmpc
+from casadi_nmpc import Casadi_NMPC
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller
 
@@ -65,9 +65,13 @@ class Controller(Base_Controller):
                         if(i < len(self.path)):
                             reference_x.append(self.path[i][0])
                             reference_y.append(self.path[i][1])
+                            #reference_x.append(0.1)
+                            #reference_y.append(1)
                         else:
                             reference_x.append(self.path[-1][0])
                             reference_y.append(self.path[-1][1])
+                            #reference_x.append(0.1)
+                            #reference_y.append(1)
 
                 
                 v, w = self.controller.compute_control(self.state_robot, reference_x, reference_y)
@@ -88,16 +92,24 @@ class Controller(Base_Controller):
 
             # Trigger next step Simulation ---------------------------------------
             self.triggerNextStep_Sim()
+            self.steps_without_answer = 0
+            self.requested_step = True
+        
+        if(self.requested_step == True):
+            self.steps_without_answer = self.steps_without_answer + 1
+            if(self.steps_without_answer > 100):
+                self.triggerNextStep_Sim()
+                self.steps_without_answer = 0
 
 
 
     def select_controller(self, ):
         if(self.which_controller == 1):
             self.horizon = 20
-            self.controller = NMPC(self.horizon, self.dt)
+            self.controller = Acados_NMPC(self.horizon, self.dt)
         elif(self.which_controller == 2):
             self.horizon = 20
-            self.controller = Casadi_nmpc(self.horizon,[],[], self.dt)
+            self.controller = Casadi_NMPC(self.horizon, self.dt)
         elif(self.which_controller == 3):
             self.horizon = 20
             self.controller = iLQR(horizon=self.horizon, dt=self.dt)

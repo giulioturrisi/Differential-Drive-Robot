@@ -16,7 +16,7 @@ import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
 sys.path.append('/home/python_scripts/controllers')
-from casadi_nmpc import Casadi_nmpc # type: ignore
+from casadi_nmpc import Casadi_NMPC # type: ignore
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller
 
@@ -30,7 +30,7 @@ class Controller(Base_Controller):
         self.create_timer(self.dt, self.controller_callback)
 
         self.horizon = 30
-        self.controller = Casadi_nmpc(self.horizon,[],[], self.dt)
+        self.controller = Casadi_NMPC(self.horizon,[],[], self.dt)
 
 
 

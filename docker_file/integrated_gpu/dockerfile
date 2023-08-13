@@ -131,7 +131,7 @@ RUN echo 'alias launch_planners="ros2 run planners run_planners"' >> /root/.bash
 RUN echo 'alias launch_joy="ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'"' >> /root/.bashrc
 RUN echo 'alias launch_controllers="ros2 run controllers run_controllers"' >> /root/.bashrc
 
-RUN echo 'alias launch_lidar_odometry="os2 launch pointcloud_to_laserscan sample_laserscan_to_pointcloud_launch.py | ros2 launch kiss_icp odometry.launch.py topic:=/pointcloud visualize:=false child_frame:=base_footprint max_range:=5.0 min_range:=0.2"' >> /root/.bashrc
+RUN echo 'alias launch_lidar_odometry="ros2 launch pointcloud_to_laserscan sample_laserscan_to_pointcloud_launch.py | ros2 launch kiss_icp odometry.launch.py topic:=/pointcloud visualize:=false child_frame:=base_footprint max_range:=5.0 min_range:=0.2"' >> /root/.bashrc
 RUN echo 'alias launch_state_publisher="cd /home/ros2_ws && ros2 launch state_estimation state_publisher_launch.py "' >> /root/.bashrc
 
 

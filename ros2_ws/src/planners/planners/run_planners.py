@@ -99,6 +99,7 @@ class Planners(Node):
             state_shifted[0] = self.state_robot[0] - self.map_origin[0]
             state_shifted[1] = self.state_robot[1] - self.map_origin[1]
 
+            print("#########")
             print("Start: ", state_shifted)
             print("Goal: ", goal_shifted)
 

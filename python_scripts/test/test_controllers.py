@@ -11,14 +11,14 @@ from sampling_based.rrt import RRT
 # Import controllers ---------------------------------------
 sys.path.append('/home/python_scripts/controllers')
 from io_linearization import IO_linearization # type: ignore
-from casadi_nmpc import Casadi_nmpc # type: ignore
+from casadi_nmpc import Casadi_NMPC # type: ignore
 from nonlinear_lyapunov import Nonlinear_lyapunov # type: ignore
 from approximate_linearization import Approximate_linearization # type: ignore
 from dynamic_linearization import Dynamic_linearization # type: ignore
 from ilqr import iLQR 
 from predictive_sampling import Sampling_MPC
 sys.path.append('/home/python_scripts/controllers/acados')
-from acados_nmpc import NMPC 
+from acados_nmpc import Acados_NMPC 
 
 
 from scipy.interpolate import CubicSpline, Akima1DInterpolator
@@ -48,7 +48,7 @@ controller_choice = input()
 controller_choice = int(controller_choice)
 
 # Inizial robot and some parameters ---------------------------------------
-state_robot = np.array([0.2, -0.1, 2.0])  # x y theta
+state_robot = np.array([0.0, 0.0, 0])  # x y theta
 dt = 0.02                              # sampling time
 robot = Robot(dt)
 
@@ -87,7 +87,7 @@ path_spline_y = np.array(path_spline_y[0:len(path_spline_y)-1])
 horizon = 0
 if(controller_choice==1):
     horizon = 10
-    controller = Casadi_nmpc(horizon,[],[], dt)
+    controller = Casadi_NMPC(horizon, dt)
 
 elif(controller_choice==2):
     b = 0.1
@@ -141,9 +141,13 @@ for j in range(np.shape(path_spline_x)[0]):
             if(j+i < np.shape(path_spline_x)[0]):
                 reference_x.append(path_spline_x[j+i])
                 reference_y.append(path_spline_y[j+i])
+                #reference_x.append(0)
+                #reference_y.append(0)
             else:
                 reference_x.append(path_spline_x[-1])
                 reference_y.append(path_spline_y[-1])
+                #reference_x.append(0)
+                #reference_y.append(0)
 
     v, w = controller.compute_control(state_robot, reference_x, reference_y)
     

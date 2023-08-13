@@ -53,11 +53,14 @@ class Base_Controller(Node):
         self.publisher_enableSyncMode =self.create_publisher(Bool,"enableSyncMode", 1);
         self.publisher_enableSyncMode.publish(self.enableSyncMode)
 
+        self.requested_step = False
+
 
         self.triggerNextStep = Bool();
         self.triggerNextStep.data = True;
         self.publisher_triggerNextStep = self.create_publisher(Bool,"triggerNextStep", 1);
 
+        self.steps_without_answer = 0
         self.simStep_done = True
         self.subscription_simStep = self.create_subscription(Bool,'simulationStepDone',self.simStep_callback,1)
 
@@ -108,6 +111,7 @@ class Base_Controller(Node):
     # Simulation step done flag -------------------------------------
     def simStep_callback(self,msg):
         self.simStep_done = True
+        self.requested_step = False
 
 
     # Request for next step simulation ------------------------------

@@ -16,7 +16,7 @@ import numpy as np # type: ignore
 np.set_printoptions(threshold=sys.maxsize)
 
 sys.path.append('/home/python_scripts/controllers/acados')
-from acados_nmpc import NMPC 
+from acados_nmpc import Acados_NMPC 
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller
 
@@ -29,7 +29,7 @@ class Controller(Base_Controller):
         self.create_timer(self.dt, self.controller_callback)
 
         self.horizon = 20
-        self.controller = NMPC(self.horizon, self.dt)
+        self.controller = Acados_NMPC(self.horizon, self.dt)
 
 
     def controller_callback(self):

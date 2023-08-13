@@ -7,7 +7,7 @@ import time
 
 import sys
 
-class NMPC:
+class Acados_NMPC:
     def __init__(self, horizon, dt):
         self.horizon = horizon  # Define the number of discretization steps
         self.dt = dt

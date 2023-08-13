@@ -42,6 +42,9 @@ class StatePublisher(Node):
         self.lidar_odom_y = 0.0
         self.lidar_odom_theta = 0.0
 
+        self.odom_x = 0.0
+        self.odom_y = 0.0
+        self.odom_theta = 0.0
 
 
     def tf_callback(self):
@@ -56,9 +59,6 @@ class StatePublisher(Node):
         joint_state.name = ['joint_left', 'joint_right']
         joint_state.position = [0.0, 0.0]
 
-        self.odom_x = self.wheel_odom_x*0.2 + self.lidar_odom_x*0.8
-        self.odom_y = self.wheel_odom_y*0.2 + self.lidar_odom_y*0.8
-        self.odom_theta = self.wheel_odom_theta*0.2 + self.lidar_odom_theta*0.8
 
 
         # update transform
@@ -75,10 +75,14 @@ class StatePublisher(Node):
 
 
     def lidar_odometry_callback(self, msg):
-        print("lidar odometry received")   
+        #print("lidar odometry received")   
         self.lidar_odom_x = msg.pose.pose.position.x
         self.lidar_odom_y = msg.pose.pose.position.y
         self.lidar_odom_theta = euler_from_quaternion(msg.pose.pose.orientation)[2]
+
+        self.odom_x = self.odom_x*0.2 + self.lidar_odom_x*0.8
+        self.odom_y = self.odom_y*0.2 + self.lidar_odom_y*0.8
+        self.odom_theta = self.odom_theta*0.2 + self.lidar_odom_theta*0.8
 
     def wheel_odometry_callback(self, msg):
         #print("odometry received")
@@ -91,9 +95,13 @@ class StatePublisher(Node):
             Ts = time - self.last_time    
             if(Ts > 0.0):
                 print("Ts", Ts)
-                self.wheel_odom_x = self.odom_x + v_reconstructed*Ts*cos(self.odom_theta);
-                self.wheel_odom_y = self.odom_y + v_reconstructed*Ts*sin(self.odom_theta);
-                self.wheel_odom_theta = self.odom_theta + w_reconstructed*Ts
+                self.wheel_odom_x = self.wheel_odom_x + v_reconstructed*Ts*cos(self.wheel_odom_theta)
+                self.wheel_odom_y = self.wheel_odom_y + v_reconstructed*Ts*sin(self.wheel_odom_theta)
+                self.wheel_odom_theta = self.wheel_odom_theta + w_reconstructed*Ts
+
+                self.odom_x = self.odom_x + v_reconstructed*Ts*cos(self.odom_theta)
+                self.odom_y = self.odom_y + v_reconstructed*Ts*sin(self.odom_theta)
+                self.odom_theta = self.odom_theta + w_reconstructed*Ts
 
         self.last_time = time
 
