@@ -17,7 +17,7 @@ class IO_linearization_MPC:
             dt (float): sampling time
         """
         self.N = horizon
-        self.acc_max = 0.5
+        self.acc_max = 5
 
         self.b = b
         
@@ -27,7 +27,7 @@ class IO_linearization_MPC:
         self.numberState = 2
 
         self.Q_pos = 100
-        self.R = 0.1
+        self.R = 10
 
         self.initialize_casadi()
 
@@ -131,7 +131,7 @@ class IO_linearization_MPC:
         pose_error += self.Q_pos*(self.x_casadi[self.N] - ref_x)@(self.x_casadi[self.N] - ref_x).T
         pose_error += self.Q_pos*(self.y_casadi[self.N] - ref_y)@(self.y_casadi[self.N] - ref_y).T
         
-        self.opti.minimize(pose_error + input_use*0)
+        self.opti.minimize(pose_error + input_use)
 
 
     def compute_control(self, initial_state, reference_x, reference_y):
@@ -149,12 +149,7 @@ class IO_linearization_MPC:
         self.opti.set_value(self.x_0, initial_state[0])
         self.opti.set_value(self.y_0, initial_state[1])
         
-        # Setting Reference ------------------------------------------
-        for k in range(0, self.N):
-                ref_x_dot = (reference_x[k+1] - reference_x[k])/self.dt
-                ref_y_dot = (reference_y[k+1] - reference_y[k])/self.dt
-          
-
+        # Setting Reference ------------------------------------------          
         self.opti.set_value(self.reference_x, reference_x)
         self.opti.set_value(self.reference_y, reference_y)
            
@@ -167,8 +162,8 @@ class IO_linearization_MPC:
         u2_io = sol.value(self.U_casadi)[1]
 
         state_yaw = initial_state[2]
-        v = math.cos(state_yaw)*u1_io + math.sin(state_yaw)*u2_io;
-        w = (-math.sin(state_yaw)*u1_io/self.b) + (math.cos(state_yaw)*u2_io/self.b);
+        v = math.cos(state_yaw)*u1_io + math.sin(state_yaw)*u2_io
+        w = (-math.sin(state_yaw)*u1_io/self.b) + (math.cos(state_yaw)*u2_io/self.b)
 
 
         return v[0], w[0]

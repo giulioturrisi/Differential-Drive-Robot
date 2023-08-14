@@ -11,6 +11,7 @@ from sampling_based.rrt import RRT
 # Import controllers ---------------------------------------
 sys.path.append('/home/python_scripts/controllers')
 from io_linearization import IO_linearization # type: ignore
+from io_linearization_mpc import IO_linearization_MPC # type: ignore
 from casadi_nmpc import Casadi_NMPC # type: ignore
 from nonlinear_lyapunov import Nonlinear_lyapunov # type: ignore
 from approximate_linearization import Approximate_linearization # type: ignore
@@ -42,7 +43,9 @@ print("Choose a controller:\n",
     "4 - Nonlinear Lyapunov\n",
     "5 - Approximate Linearization\n",
     "6 - Acados NMPC\n",
-    "7 - Iterative LQR")
+    "7 - Iterative LQR\n",
+    "8 - Sampling MPC\n",
+    "9 - IO Linearization MPC\n")
 
 controller_choice = input()
 controller_choice = int(controller_choice)
@@ -119,6 +122,16 @@ elif(controller_choice==6):
 elif(controller_choice==7):
     horizon = 20
     controller = iLQR(horizon=horizon, dt=dt)
+
+elif(controller_choice==8):
+    horizon = 20
+    controller = Sampling_MPC(horizon=horizon,dt= dt, init_jax = True, linear = False)
+    
+elif(controller_choice==9):
+    b = 0.1
+    horizon = 20
+    controller = IO_linearization_MPC(horizon, b=b, dt=dt)
+
 
 
 
