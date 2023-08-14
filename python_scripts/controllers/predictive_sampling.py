@@ -191,7 +191,7 @@ class Sampling_MPC:
         return cost
     
     
-    def compute_control(self, state, reference_x, reference_y, reference_theta):
+    def compute_control(self, state, reference_x, reference_y):
         """Compute control inputs
         Args:
             state (np.array): actual robot state
@@ -199,6 +199,11 @@ class Sampling_MPC:
         Returns:
             (np.array): optimized control inputs
         """
+        reference_theta = []
+        for i in range(self.horizon):
+            reference_theta.append(0.0)
+        reference_x.pop(-1)
+        reference_y.pop(-1)
         
         state_vec = jnp.tile(state, (self.num_computations,1))
         state_des = jnp.column_stack([reference_x, reference_y, reference_theta])
@@ -213,7 +218,7 @@ class Sampling_MPC:
         best_parameters = self.parameters_map[best_index]
         v, w = self.spline_fun(best_parameters, 0)
 
-        return v, w
+        return np.float64(v), np.float64(w)
 
 
 

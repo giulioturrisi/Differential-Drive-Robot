@@ -78,7 +78,7 @@ for j in range(np.shape(path_spline_x)[0]):
     reference_x = []
     reference_y = []
     reference_theta = []
-    for i in range(horizon):
+    for i in range(horizon+1):
         if(j+i < np.shape(path_spline_x)[0]):
             reference_x.append(path_spline_x[j+i])
             reference_y.append(path_spline_y[j+i])
@@ -88,10 +88,12 @@ for j in range(np.shape(path_spline_x)[0]):
             reference_y.append(path_spline_y[-1])
             reference_theta.append(path_spline_y[-1])
 
-    v, w = controller.compute_control(state_robot, reference_x, reference_y, reference_theta)
+    v, w = controller.compute_control(state_robot, reference_x, reference_y)
+
     
     print("Control actions: ", [v, w])
     print("Control time: ", time.time()-start_time)
+    
     state_robot = robot.integrate(state_robot, v, w)
     print("##############################")
     

@@ -29,7 +29,7 @@ class Nonlinear_lyapunov:
         self.previous_reference_dot = [0.0 ,0.0]
 
 
-    def compute_control(self,initial_state, reference_x, reference_y):
+    def compute_control(self, initial_state, reference_x, reference_y):
         """Compute the control actions
         Args:
             initial_state (np.array): actual state of the robot

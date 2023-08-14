@@ -27,6 +27,7 @@ from io_linearization_mpc import IO_linearization_MPC
 from nonlinear_lyapunov import Nonlinear_lyapunov
 from approximate_linearization import Approximate_linearization
 from casadi_nmpc import Casadi_NMPC
+from predictive_sampling import Sampling_MPC
 sys.path.append('/home/ros2_ws/src/controllers/controllers')
 from base_controller import Base_Controller
 
@@ -73,7 +74,6 @@ class Controller(Base_Controller):
                             #reference_x.append(0.1)
                             #reference_y.append(1)
 
-                
                 v, w = self.controller.compute_control(self.state_robot, reference_x, reference_y)
 
                 print("control time: ", time.time()-start_time)
@@ -140,6 +140,9 @@ class Controller(Base_Controller):
             self.horizon = 20
             self.b = 0.05
             self.controller = IO_linearization_MPC(self.horizon, b=self.b, dt=self.dt)
+        elif(self.which_controller == 9):
+            self.horizon = 20
+            self.controller = Sampling_MPC(horizon=self.horizon, dt=self.dt, init_jax = True, linear = False)
         else:
             print("Wrong input")
 
@@ -155,6 +158,7 @@ class Controller(Base_Controller):
         print("6: IO Linearization MPC")
         print("7: Nonlinear Lyapunov")
         print("8: Approximate Linearization")
+        print("9: Predictive Sampling MPC")
         print("---------------------------------------------------")
         while True:
             new_controller = input(">>> ")
@@ -190,6 +194,10 @@ class Controller(Base_Controller):
                 self.which_controller = 8
                 self.select_controller()
                 print("## Controller started with Approximate Linearization ##")
+            elif (new_controller == "9"):
+                self.which_controller = 9
+                self.select_controller()
+                print("## Controller started with Predictive Sampling MPC ##")
             else:
                 print("Wrong input")
                 continue
