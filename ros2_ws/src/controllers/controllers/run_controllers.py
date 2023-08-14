@@ -125,30 +125,29 @@ class Controller(Base_Controller):
             self.b = 0.05
             self.controller = IO_linearization(b=self.b, k1=self.k1, k2=self.k2, dt=self.dt)
         elif(self.which_controller == 6):
-            self.horizon = 0
-            self.k1 = 5
-            self.k2 = 5
-            self.k3 = 5
-            self.controller = Nonlinear_lyapunov(k1=self.k1, k2=self.k2, k3=self.k3, dt=self.dt)
+            self.horizon = 20
+            self.b = 0.05
+            self.controller = IO_linearization_MPC(self.horizon, b=self.b, dt=self.dt)
         elif(self.which_controller == 7):
             self.horizon = 0
             self.k1 = 5
             self.k2 = 5
             self.k3 = 5
-            self.controller = Approximate_linearization(k1=self.k1, k2=self.k2, k3=self.k3, dt=self.dt)
+            self.controller = Nonlinear_lyapunov(k1=self.k1, k2=self.k2, k3=self.k3, dt=self.dt)
         elif(self.which_controller == 8):
-            self.horizon = 20
-            self.b = 0.05
-            self.controller = IO_linearization_MPC(self.horizon, b=self.b, dt=self.dt)
+            self.horizon = 0
+            self.k1 = 5
+            self.k2 = 5
+            self.k3 = 5
+            self.controller = Approximate_linearization(k1=self.k1, k2=self.k2, k3=self.k3, dt=self.dt)
         elif(self.which_controller == 9):
             self.horizon = 20
             self.controller = Sampling_MPC(horizon=self.horizon, dt=self.dt, init_jax = True, linear = False)
         else:
             print("Wrong input")
+            self.list_controllers()
 
-
-
-    def interactive_command_line(self, ):
+    def list_controllers(self, ):
         print("---- You can change the controller by pressing ----")
         print("1: Acados NMPC")
         print("2: Casadi NMPC")
@@ -160,6 +159,10 @@ class Controller(Base_Controller):
         print("8: Approximate Linearization")
         print("9: Predictive Sampling MPC")
         print("---------------------------------------------------")
+
+
+    def interactive_command_line(self, ):
+        self.list_controllers()
         while True:
             new_controller = input(">>> ")
             if(new_controller == "1"):
@@ -200,6 +203,7 @@ class Controller(Base_Controller):
                 print("## Controller started with Predictive Sampling MPC ##")
             else:
                 print("Wrong input")
+                self.list_controllers()
                 continue
 
 
