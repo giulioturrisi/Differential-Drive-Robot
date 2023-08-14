@@ -5,7 +5,7 @@ This repo contains the code for controlling both a real and a simulated differen
 ## List of available controllers
 1. Approximate linearization
 2. Input-Output linearization
-3. Input-Output linearization Linear MPC via Casadi
+3. Input-Output linearization + Linear MPC via Casadi
 4. Dynamic linearization
 5. Nonlinear Lyapunov
 6. Nonlinear MPC via Casadi
