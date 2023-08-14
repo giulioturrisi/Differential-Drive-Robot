@@ -23,6 +23,7 @@ sys.path.append('/home/python_scripts/controllers')
 from dynamic_linearization import Dynamic_linearization 
 from ilqr import iLQR 
 from io_linearization import IO_linearization
+from io_linearization_mpc import IO_linearization_MPC
 from nonlinear_lyapunov import Nonlinear_lyapunov
 from approximate_linearization import Approximate_linearization
 from casadi_nmpc import Casadi_NMPC
@@ -52,7 +53,6 @@ class Controller(Base_Controller):
         if(self.simStep_done):
             if(self.path_ready):
                 print("###############")
-                print("state robot: ", self.state_robot)
                 start_time = time.time()
 
                 reference_x = []
@@ -136,6 +136,10 @@ class Controller(Base_Controller):
             self.k2 = 5
             self.k3 = 5
             self.controller = Approximate_linearization(k1=self.k1, k2=self.k2, k3=self.k3, dt=self.dt)
+        elif(self.which_controller == 8):
+            self.horizon = 20
+            self.b = 0.05
+            self.controller = IO_linearization_MPC(self.horizon, b=self.b, dt=self.dt)
         else:
             print("Wrong input")
 
@@ -148,8 +152,9 @@ class Controller(Base_Controller):
         print("3: ILQR")
         print("4: Dynamic Linearization")
         print("5: IO Linearization")
-        print("6: Nonlinear Lyapunov")
-        print("7: Approximate Linearization")
+        print("6: IO Linearization MPC")
+        print("7: Nonlinear Lyapunov")
+        print("8: Approximate Linearization")
         print("---------------------------------------------------")
         while True:
             new_controller = input(">>> ")
@@ -176,9 +181,13 @@ class Controller(Base_Controller):
             elif(new_controller == "6"):
                 self.which_controller = 6
                 self.select_controller()
-                print("## Controller started with Nonlinear Lyapunov ##")
+                print("## Controller started with IO Linearization MPC ##")
             elif(new_controller == "7"):
                 self.which_controller = 7
+                self.select_controller()
+                print("## Controller started with Nonlinear Lyapunov ##")
+            elif(new_controller == "8"):
+                self.which_controller = 8
                 self.select_controller()
                 print("## Controller started with Approximate Linearization ##")
             else:

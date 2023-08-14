@@ -47,7 +47,7 @@ class Acados_NMPC:
 
 
         # Set cost
-        Q_mat = 2 * np.diag([5, 5, 2])  # [x,y,yaw]
+        Q_mat = 2 * np.diag([100, 100, 0])  # [x,y,yaw]
         R_mat = 1 * np.diag([0.1, 0.1])
 
         ocp.cost.cost_type = "LINEAR_LS"
@@ -71,12 +71,12 @@ class Acados_NMPC:
         ocp.cost.yref = np.zeros((ny,))
         ocp.cost.yref_e = np.zeros((ny_e,))
 
-        '''# Set constraints
+        # Set constraints
         v_max = 1 
         w_max = 1 
         ocp.constraints.lbu = np.array([-v_max, -w_max])
         ocp.constraints.ubu = np.array([+v_max, +w_max])
-        ocp.constraints.idxbu = np.array([0,1])'''
+        ocp.constraints.idxbu = np.array([0,1])
 
         X0 = np.array([0.0, 0.0, 0.0])
         ocp.constraints.x0 = X0

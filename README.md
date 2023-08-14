@@ -2,6 +2,29 @@
 This repo contains the code for controlling both a real and a simulated differential drive robot via ROS2 using different planners, controllers, and open-source libraries for slam and odometry. 
 
 
+## List of available controllers
+1. Approximate linearization
+2. Input-Output linearization
+3. Input-Output linearization Linear MPC via Casadi
+4. Dynamic linearization
+5. Nonlinear Lyapunov
+6. Nonlinear MPC via Casadi
+7. Nonlinear MPC via Acados
+8. Iterative Linear Quadratic Regulator
+9. Iterative Linear Quadratic Regulator via Crocoddyl
+10. Predictive Sampling MPC
+
+
+## List of available planners
+1. A*
+2. Breadth First search
+3. Djikstra
+4. Greedy Best First search
+5. RRT
+6. RRT* (in progress)
+7. RRT-primitives
+
+
 ## Repository structure
 It includes the following folders and subfolders:
 
@@ -87,28 +110,6 @@ ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - on
 
 3. you can choose a goal pose in Rviz2 clicking 2D Goal Pose
    
-
-## List of available controllers
-1. Approximate linearization
-2. Input-Output linearization
-3. Dynamic linearization
-4. Nonlinear Lyapunov
-5. Nonlinear MPC via Casadi
-6. Nonlinear MPC via Acados
-7. Iterative Linear Quadratic Regulator
-8. Iterative Linear Quadratic Regulator via Crocoddyl
-9. Predictive Sampling MPC
-
-
-## List of available planners
-1. A*
-2. Breadth First search
-3. Djikstra
-4. Greedy Best First search
-5. RRT
-6. RRT* (in progress)
-7. RRT-primitives
-
 
 ## Status
 Still working in progress, the real robot exists but it's not yet finalized!

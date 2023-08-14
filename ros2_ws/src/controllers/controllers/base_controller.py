@@ -123,6 +123,7 @@ class Base_Controller(Node):
 
     # Publish the motor commands ------------------------------------
     def publish_command(self, v, w):
+        print("state robot: ", self.state_robot)
         print("control actions: ", [v,w])
         commanded_vel = Twist()
         commanded_vel.linear.x = float(v)
