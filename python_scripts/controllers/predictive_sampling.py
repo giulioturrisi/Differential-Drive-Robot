@@ -3,9 +3,15 @@ import jax.numpy as jnp
 from jax import jit
 from jax import random
 import os
+
+print("jax.default_backend()", jax.default_backend())
+print("ax.devices()", jax.devices())
 #os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = ".75"
+#os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = ".75"
 #jax.config.update('jax_platform_name', 'cpu')
+
+gpu_device = jax.devices('gpu')[0]
+cpu_device = jax.devices('cpu')[0]
 
 import numpy as np
 import matplotlib.pyplot as plt #
@@ -20,7 +26,7 @@ class Sampling_MPC:
     """This is a small class that implements a sampling based control law"""
 
 
-    def __init__(self, horizon = 200, dt = 0.01, num_computations = 1000, init_jax = True, linear = True):
+    def __init__(self, horizon = 200, dt = 0.01, num_computations = 10000, init_jax = True, linear = True, device="gpu"):
         """
         Args:
             horizon (int): how much to look into the future for optimizing the gains 
@@ -31,10 +37,16 @@ class Sampling_MPC:
         self.state_dim = 3
         self.control_dim = 2
         self.num_computations = num_computations
-        if(linear == True):
-            self.spline_fun = self.compute_linear_spline
+
+        if(device=="gpu"):
+            self.device = gpu_device
         else:
-            self.spline_fun = self.compute_cubic_spline 
+            self.device = cpu_device
+        
+        if(linear == True):
+            self.spline_fun = jax.jit(self.compute_linear_spline, device=self.device)
+        else:
+            self.spline_fun = jax.jit(self.compute_cubic_spline, device=self.device) 
 
         self.robot = Robot(self.dt)
 
@@ -42,6 +54,7 @@ class Sampling_MPC:
         self.Q.at[0,0].set(0.0)
         self.Q.at[1,1].set(0.0)
         self.Q.at[2,2].set(0.0)
+
         
 
         self.R = jnp.identity(self.control_dim)
@@ -51,7 +64,7 @@ class Sampling_MPC:
         # the first call of jax is very slow, hence we should do this since the beginning! ------------------
         if(init_jax):
             vectorized_forward_sim = jax.vmap(self.compute_forward_simulations, in_axes=(0,0,0), out_axes=0)
-            self.jit_vectorized_forward_sim = jax.jit(vectorized_forward_sim)
+            self.jit_vectorized_forward_sim = jax.jit(vectorized_forward_sim, device=self.device)
             
             threads = self.num_computations
             
@@ -209,14 +222,20 @@ class Sampling_MPC:
         state_des = jnp.column_stack([reference_x, reference_y, reference_theta])
         state_des_vec = jnp.tile(state_des, (self.num_computations,1)).reshape(self.num_computations, self.horizon, self.state_dim)
         
+        #time_start = time.time()
         #key = random.PRNGKey(42)
         #parameters_map = random.randint(key,(self.num_parameters*1,), minval=-200, maxval=200 )/100.
-       
-        cost = self.jit_vectorized_forward_sim(state_vec, state_des_vec, self.parameters_map)
+
         
-        best_index = np.nanargmin(cost)
+        time_start = time.time()
+        cost = self.jit_vectorized_forward_sim(state_vec, state_des_vec, self.parameters_map)
+        #print("cost computation time: ", time.time()-time_start)
+
+        best_index = jnp.nanargmin(cost)
         best_parameters = self.parameters_map[best_index]
+        #time_start = time.time()
         v, w = self.spline_fun(best_parameters, 0)
+        print("computation time: ", time.time()-time_start)
 
         return np.float64(v), np.float64(w)
 

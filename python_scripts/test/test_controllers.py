@@ -116,15 +116,15 @@ elif(controller_choice==5):
     controller = Approximate_linearization(k1=k1, k2=k2, k3=k3, dt=dt)
 
 elif(controller_choice==6):
-    horizon = 10
-    controller = NMPC(horizon, dt)
+    horizon = 50
+    controller = Acados_NMPC(horizon, dt)
 
 elif(controller_choice==7):
     horizon = 20
     controller = iLQR(horizon=horizon, dt=dt)
 
 elif(controller_choice==8):
-    horizon = 20
+    horizon = 50
     controller = Sampling_MPC(horizon=horizon,dt= dt, init_jax = True, linear = False)
     
 elif(controller_choice==9):
@@ -164,8 +164,8 @@ for j in range(np.shape(path_spline_x)[0]):
 
     v, w = controller.compute_control(state_robot, reference_x, reference_y)
     
-    print("Control actions: ", [v, w])
     print("Control time: ", time.time()-start_time)
+    print("Control actions: ", [v, w])
     state_robot = robot.integrate(state_robot, v, w)
     print("##############################")
     
