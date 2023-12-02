@@ -1,6 +1,6 @@
 # This is an auto generated Dockerfile for ros:desktop
 # generated from docker_images_ros2/create_ros_image.Dockerfile.em
-FROM nvidia/cuda:11.7.1-devel-ubuntu22.04
+FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 # nvidia-container-runtime
@@ -25,12 +25,14 @@ RUN apt update && apt install -y curl
 RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 RUN apt update
-RUN apt upgrade
+RUN apt upgrade -y
 
 # install ros2 packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-humble-desktop=0.10.0-1* \
+    ros-humble-desktop \
     && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt-get install ros-dev-tools -y
+RUN rosdep init && rosdep update
 #RUN apt-get install ros-humble-test-msgs \
 #    && rm -rf /var/lib/apt/lists/*
 
@@ -38,24 +40,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y mesa-utils && apt-get install -y gedit
 
 RUN apt-get update && apt-get install -y lsb-release wget gnupg
-RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-RUN apt-get update && apt-get install -y ignition-fortress
+#RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+#RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+#RUN apt-get update && apt-get install -y ignition-fortress
 RUN apt-get install -y git
 RUN apt-get install -y ros-humble-tf-transformations
 RUN apt-get install -y python3-pip
+RUN pip install numpy==1.24
 RUN pip install transforms3d
 RUN pip install pgm_reader
 RUN pip install casadi
 RUN pip install numba
-RUN pip install control
-
-
 
 #PIGPIO
 RUN apt install -y python-setuptools python3-setuptools
 RUN apt-get install -y python3-pip
 RUN wget https://github.com/joan2937/pigpio/archive/master.zip
+RUN apt-get install -y unzip
 RUN unzip master.zip
 RUN cd pigpio-master && make && make install
 RUN apt install -y xsltproc
@@ -72,30 +73,12 @@ RUN apt install -y ros-humble-nav2-bringup
 RUN apt-get update
 RUN apt install -y ros-humble-plotjuggler-ros
 
-#CERES
-## Install packages
-#RUN apt-get update -q && \
-#    apt-get install -y --fix-missing --no-install-recommends \
-#    cmake \
-#    libgoogle-glog-dev libgflags-dev \
-#    libatlas-base-dev \
-#    libeigen3-dev \
-#    libsuitesparse-dev \
-#    libmetis-dev
 
-#RUN git clone --depth=1 https://ceres-solver.googlesource.com/ceres-solver && \
-#    cd ceres-solver && \
-#    mkdir build && \
-#    cd build && \
-#    cmake -DOPENMP=OFF \
-#          -DCXX11=ON \
-#          -DBUILD_DOCUMENTATION=ON \
-#          .. && \
-#    make -j3 && \
-#    make test && \
-#    make install
+
+
 
 #PINOCCHIO
+RUN apt-get update
 RUN apt install -qqy lsb-release gnupg2 curl
 RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" | tee /etc/apt/sources.list.d/robotpkg.list
 RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
@@ -108,8 +91,8 @@ RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHON
 RUN echo 'export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH' >> /root/.bashrc
 
 #CROCODDYL
-RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg" |  sudo tee /etc/apt/sources.list.d/robotpkg.list
-RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg" |  sudo tee /etc/apt/sources.list.d/robotpkg.list
+RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg" |  tee /etc/apt/sources.list.d/robotpkg.list
+RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg" |  tee /etc/apt/sources.list.d/robotpkg.list
 RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
 RUN apt-get update
 RUN apt install robotpkg-py310-crocoddyl -y
@@ -135,9 +118,13 @@ RUN echo 'export ACADOS_SOURCE_DIR="/acados"' >> /root/.bashrc
 
 
 
-#JAX
-RUN pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+RUN apt-get update 
+RUN apt upgrade -y
 
+#JAX
+RUN apt-get update 
+#RUN pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+RUN pip install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 
 #SHELL COLOR
@@ -145,13 +132,16 @@ SHELL ["/bin/bash", "-c"]
 RUN echo 'export PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;37m\]\u\[\033[00m\]@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] "'  >> /root/.bashrc
 RUN echo 'export COPPELIASIM_ROOT_DIR=/home/coppeliasim_simulation/CoppeliaSim' >> /root/.bashrc
 RUN echo '. /home/ros2_ws/install/setup.bash' >> /root/.bashrc
+RUN echo '. /opt/ros/humble/setup.bash' >> /root/.bashrc
 
 RUN echo 'alias launch_rviz="ros2 run rviz2 rviz2 -d /home/ros2_ws/src/utilities/rviz_config/common.rviz"' >> /root/.bashrc
 RUN echo 'alias launch_slam="ros2 launch slam_toolbox online_async_launch.py"' >> /root/.bashrc
-RUN echo 'alias launch_state_publisher="cd /home/ros2_ws && ros2 launch state_estimation state_publisher_launch.py "' >> /root/.bashrc
 RUN echo 'alias launch_planners="ros2 run planners run_planners"' >> /root/.bashrc
 RUN echo 'alias launch_joy="ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'"' >> /root/.bashrc
-RUN echo 'alias launch_controller_io="ros2 run controllers run_io_linearization"' >> /root/.bashrc
+RUN echo 'alias launch_controllers="ros2 run controllers run_controllers"' >> /root/.bashrc
+
+RUN echo 'alias launch_lidar_odometry="ros2 launch pointcloud_to_laserscan sample_laserscan_to_pointcloud_launch.py | ros2 launch kiss_icp odometry.launch.py topic:=/pointcloud visualize:=false child_frame:=base_footprint max_range:=5.0 min_range:=0.2"' >> /root/.bashrc
+RUN echo 'alias launch_state_publisher="cd /home/ros2_ws && ros2 launch state_estimation state_publisher_launch.py "' >> /root/.bashrc
 
 
 RUN echo 'alias launch_sim_dynamics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../dynamics.ttt"' >> /root/.bashrc
@@ -160,10 +150,7 @@ RUN echo 'alias launch_sim_kinematics="cd /home/coppeliasim_simulation/CoppeliaS
 RUN echo 'alias python="python3"' >> /root/.bashrc
 
 
-
 WORKDIR /home
 RUN source /root/.bashrc
-
-
 
 

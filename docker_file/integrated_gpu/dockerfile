@@ -14,9 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y mesa-utils && apt-get install -y gedit
 
 RUN apt-get update && apt-get install -y lsb-release wget gnupg
-RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-RUN apt-get update && apt-get install -y ignition-fortress
+#RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+#RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+#RUN apt-get update && apt-get install -y ignition-fortress
 RUN apt-get install -y git
 RUN apt-get install -y ros-humble-tf-transformations
 RUN apt-get install -y python3-pip
@@ -30,6 +30,7 @@ RUN pip install numba
 RUN apt install -y python-setuptools python3-setuptools
 RUN apt-get install -y python3-pip
 RUN wget https://github.com/joan2937/pigpio/archive/master.zip
+RUN apt-get install -y unzip
 RUN unzip master.zip
 RUN cd pigpio-master && make && make install
 RUN apt install -y xsltproc
