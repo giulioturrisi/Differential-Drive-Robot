@@ -1,8 +1,14 @@
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.append(dir_path + '/../')
+from robot_model import Robot
+
 import jax
 import jax.numpy as jnp
 from jax import jit
 from jax import random
-import os
 
 print("jax.default_backend()", jax.default_backend())
 print("ax.devices()", jax.devices())
@@ -18,9 +24,7 @@ import matplotlib.pyplot as plt #
 import time
 
 import copy 
-import sys
-sys.path.append('/home/python_scripts/')
-from robot_model import Robot
+
 
 class Sampling_MPC:
     """This is a small class that implements a sampling based control law"""

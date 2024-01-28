@@ -17,9 +17,12 @@ np.set_printoptions(threshold=sys.maxsize)
 
 import threading
 
-sys.path.append('/home/python_scripts/controllers/acados')
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.append(dir_path + '/../../../../python_scripts/controllers/acados')
 from acados_nmpc import Acados_NMPC 
-sys.path.append('/home/python_scripts/controllers')
+sys.path.append(dir_path + '/../../../../python_scripts/controllers')
 from dynamic_linearization import Dynamic_linearization 
 from ilqr import iLQR 
 from io_linearization import IO_linearization
@@ -28,7 +31,8 @@ from nonlinear_lyapunov import Nonlinear_lyapunov
 from approximate_linearization import Approximate_linearization
 from casadi_nmpc import Casadi_NMPC
 from predictive_sampling import Sampling_MPC
-sys.path.append('/home/ros2_ws/src/controllers/controllers')
+
+sys.path.append(dir_path)
 from base_controller import Base_Controller
 
 

@@ -1,5 +1,8 @@
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 import sys
-sys.path.append('/home/python_scripts/planners/')
+sys.path.append(dir_path + '/../planners/')
 from grid_based.a_star import A_star # type: ignore 
 from grid_based.greedy_best_first_search import Greedy_Best_First_Search # type: ignore
 from grid_based.breadth_first_search import Breadth_First_Search # type: ignore
@@ -16,7 +19,7 @@ from pgm_reader import Reader
 
 
 if __name__ == "__main__":
-    f = '/home/python_scripts/maps/map.pgm'
+    f = dir_path + '/../maps/map.pgm'
     reader = Reader()
     image = reader.read_pgm(f)
     width = reader.width

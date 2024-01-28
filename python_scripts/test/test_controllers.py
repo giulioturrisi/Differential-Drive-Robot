@@ -1,6 +1,9 @@
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 import sys
 # Import planners ---------------------------------------
-sys.path.append('/home/python_scripts/planners/')
+sys.path.append(dir_path + '/../planners/')
 from grid_based.a_star import A_star # type: ignore
 from grid_based.greedy_best_first_search import Greedy_Best_First_Search # type: ignore
 from grid_based.breadth_first_search import Breadth_First_Search # type: ignore 
@@ -9,7 +12,7 @@ from grid_based.djikstra import Djikstra # type: ignore
 from sampling_based.rrt import RRT
 
 # Import controllers ---------------------------------------
-sys.path.append('/home/python_scripts/controllers')
+sys.path.append(dir_path + '/../controllers/')
 from io_linearization import IO_linearization # type: ignore
 from io_linearization_mpc import IO_linearization_MPC # type: ignore
 from casadi_nmpc import Casadi_NMPC # type: ignore
@@ -18,7 +21,7 @@ from approximate_linearization import Approximate_linearization # type: ignore
 from dynamic_linearization import Dynamic_linearization # type: ignore
 from ilqr import iLQR 
 from predictive_sampling import Sampling_MPC
-sys.path.append('/home/python_scripts/controllers/acados')
+sys.path.append(dir_path + '/../controllers/acados')
 from acados_nmpc import Acados_NMPC 
 
 

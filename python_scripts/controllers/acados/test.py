@@ -5,8 +5,11 @@ import scipy.linalg
 
 import time
 
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 import sys
-sys.path.append('/home/python_scripts/')
+sys.path.append(dir_path + '/../')
 from robot_model import Robot
 
 X0 = np.array([0.0, 1., 0.001])  # Intitalize the states 
