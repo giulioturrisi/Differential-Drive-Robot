@@ -52,44 +52,46 @@ git clone --recurse-submodules https://github.com/giulioturrisi/Differential-Dri
 ```
 
 
-2. install [miniforge](https://github.com/conda-forge/miniforge/releases) (x86_64) and follow the instruction [here](https://robostack.github.io/GettingStarted.html) to install ros-humble, and press
-```sh
-    mamba install ros-humble-slam-toolbox
-``` 
+2. install [miniforge](https://github.com/conda-forge/miniforge/releases) (x86_64) 
 
 
-3. create an environment using the file in the folder [installation/conda](https://github.com/giulioturrisi/Self-Balancing-Robot/tree/master/installation/conda):
+3. create an environment using the file in the folder [installation/conda](https://github.com/giulioturrisi/Differential-Drive-Robot/tree/master/installation/conda):
 
 ```sh
     conda env create -f mamba_environment.yml
 ``` 
 
-4. download [CoppeliaSim](https://www.coppeliarobotics.com/) 
+4. follow the instruction [here](https://robostack.github.io/GettingStarted.html) to install ros-humble, and press
+```sh
+    mamba install ros-humble-slam-toolbox
+``` 
 
-5. add in your .bashrc
+5. download [CoppeliaSim](https://www.coppeliarobotics.com/) 
+
+6. add in your .bashrc
 
 ```sh
 alias ddrive_env="conda activate ddrive_env && source your_path_to/Differential-Drive-Robot/ros2_ws/install/setup.bash"
 export COPPELIASIM_ROOT_DIR=your_path_to/CoppeliaSim
 ```
 
-6. add the following ls in ros2_ws/src/simROS2/meta/interfaces.txt 
+7. add the following ls in ros2_ws/src/simROS2/meta/interfaces.txt 
 ```sh
 geometry_msgs/msg/Twist
 geometry_msgs/msg/TwistStamped
 sensor_msgs/msg/LaserScan
 ```
 
-7. start your environment and go in ros2_ws
+8. start your environment and go in ros2_ws
 ```sh
-twip_env
+ddrive_env
 cd your_path_to/Differential-Drive-Robot/ros2_ws
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro humble
 ulimit -s unlimited
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
-8. if you need acados, go inside the [acados](https://github.com/giulioturrisi/Differential-Drive-Robott/tree/master/python_scripts/controllers/acados)/acados folder and press
+9. if you need acados, go inside the [acados](https://github.com/giulioturrisi/Differential-Drive-Robott/tree/master/python_scripts/controllers/acados)/acados folder and press
   
 ```sh
 mkdir build

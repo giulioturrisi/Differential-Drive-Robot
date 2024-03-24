@@ -21,8 +21,18 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 sys.path.append(dir_path + '/../../../../python_scripts/controllers/acados')
-from acados_nmpc import Acados_NMPC 
 sys.path.append(dir_path + '/../../../../python_scripts/controllers')
+
+try:
+    from acados_nmpc import Acados_NMPC 
+except:
+    print("Acados not installed")
+try:
+    from predictive_sampling import Sampling_MPC
+except:
+    print("Predictive Sampling not installed")
+
+
 from dynamic_linearization import Dynamic_linearization 
 from ilqr import iLQR 
 from io_linearization import IO_linearization
@@ -30,7 +40,7 @@ from io_linearization_mpc import IO_linearization_MPC
 from nonlinear_lyapunov import Nonlinear_lyapunov
 from approximate_linearization import Approximate_linearization
 from casadi_nmpc import Casadi_NMPC
-from predictive_sampling import Sampling_MPC
+
 
 sys.path.append(dir_path)
 from base_controller import Base_Controller
