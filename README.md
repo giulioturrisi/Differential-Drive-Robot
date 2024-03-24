@@ -46,6 +46,8 @@ It includes the following folders and subfolders:
 
 
 ## Build on linux
+You can use conda (experimental), or docker. For the first method, follow this readme. Otherwise, look [here](https://github.com/giulioturrisi/Differential-Drive-Robot/tree/main/installation/docker_file).
+
 1. clone the repo
 ```sh
 git clone --recurse-submodules https://github.com/giulioturrisi/Differential-Drive-Robot.git
