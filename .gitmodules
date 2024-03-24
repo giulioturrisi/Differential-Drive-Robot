@@ -1,6 +1,3 @@
-[submodule "ros2_ws/src/external/simExtROS2"]
-	path = ros2_ws/src/external/simExtROS2
-	url = https://github.com/CoppeliaRobotics/simExtROS2.git
 [submodule "ros2_ws/src/external/slam_toolbox"]
 	path = ros2_ws/src/external/slam_toolbox
 	url = https://github.com/SteveMacenski/slam_toolbox.git
