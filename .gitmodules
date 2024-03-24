@@ -13,3 +13,6 @@
 [submodule "ros2_ws/src/external/simROS2"]
 	path = ros2_ws/src/external/simROS2
 	url = https://github.com/CoppeliaRobotics/simROS2.git
+[submodule "ros2_ws/src/external/pigpio"]
+	path = ros2_ws/src/external/pigpio
+	url = https://github.com/joan2937/pigpio.git
