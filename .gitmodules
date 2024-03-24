@@ -13,3 +13,6 @@
 [submodule "ros2_ws/src/external/kiss-icp"]
 	path = ros2_ws/src/external/kiss-icp
 	url = https://github.com/PRBonn/kiss-icp.git
+[submodule "ros2_ws/src/external/simROS2"]
+	path = ros2_ws/src/external/simROS2
+	url = https://github.com/CoppeliaRobotics/simROS2.git
