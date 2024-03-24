@@ -110,7 +110,6 @@ export ACADOS_SOURCE_DIR="/your_path_to/Differential-Drive-Robot/python_scripts/
 All the commands below can be more easily launched via some aliases, such as
 
 ```sh
-export COPPELIASIM_ROOT_DIR=your_path_to/CoppeliaSim
 alias ddrive_launch_rviz="ros2 run rviz2 rviz2 -d your_path_to/Differential-Drive-Robot/ros2_ws/src/utilities/rviz_config/common.rviz"
 alias ddrive_launch_slam="ros2 launch slam_toolbox online_async_launch.py"
 alias ddrive_launch_planners="ros2 run planners run_planners"
