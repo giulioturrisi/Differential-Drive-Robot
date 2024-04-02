@@ -13,8 +13,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-desktop \
     && rm -rf /var/lib/apt/lists/*
-#RUN apt-get install ros-humble-test-msgs \
-#    && rm -rf /var/lib/apt/lists/*
+
 
 
 RUN apt-get update && apt-get install -y mesa-utils && apt-get install -y gedit
@@ -41,6 +40,8 @@ RUN unzip master.zip
 RUN cd pigpio-master && make && make install
 RUN apt install -y xsltproc
 
+
+
 #FOR NAV2
 RUN apt-get install -y libmagick++-dev
 RUN apt install -y graphicsmagick-libmagick-dev-compat
@@ -49,47 +50,28 @@ RUN apt install -y ros-humble-behaviortree-cpp-v3
 RUN apt install -y ros-humble-navigation2 
 RUN apt install -y ros-humble-nav2-bringup
 
+
+
 # VISUALIZATION
 RUN apt-get update
 RUN apt install -y ros-humble-plotjuggler-ros
 
-#CERES
-## Install packages
-#RUN apt-get update -q && \
-#    apt-get install -y --fix-missing --no-install-recommends \
-#    cmake \
-#    libgoogle-glog-dev libgflags-dev \
-#    libatlas-base-dev \
-#    libeigen3-dev \
-#    libsuitesparse-dev \
-#    libmetis-dev
-
-#RUN git clone --depth=1 https://ceres-solver.googlesource.com/ceres-solver && \
-#    cd ceres-solver && \
-#    mkdir build && \
-#    cd build && \
-#    cmake -DOPENMP=OFF \
-#          -DCXX11=ON \
-#          -DBUILD_DOCUMENTATION=ON \
-#          .. && \
-#    make -j5 && \
-#    make test && \
-#    make install
-
 
 
 #PINOCCHIO
-RUN apt-get update
-RUN apt install -qqy lsb-release gnupg2 curl
-RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" | sudo tee /etc/apt/sources.list.d/robotpkg.list
-RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
-RUN apt-get update
-RUN apt install -qqy robotpkg-py310-pinocchio
-RUN echo 'export PATH=/opt/openrobots/bin:$PATH' >> /root/.bashrc
-RUN echo 'export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH' >> /root/.bashrc
-RUN echo 'export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
-RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH' >> /root/.bashrc 
-RUN echo 'export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH' >> /root/.bashrc
+#RUN apt-get update
+#RUN apt install -qqy lsb-release gnupg2 curl
+#RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" | sudo tee /etc/apt/sources.list.d/robotpkg.list
+#RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add -
+#RUN apt-get update
+#RUN apt install -qqy robotpkg-py310-pinocchio
+#RUN echo 'export PATH=/opt/openrobots/bin:$PATH' >> /root/.bashrc
+#RUN echo 'export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH' >> /root/.bashrc
+#RUN echo 'export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
+#RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH' >> /root/.bashrc 
+#RUN echo 'export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH' >> /root/.bashrc
+
+
 
 #CROCODDYL
 RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg" |  sudo tee /etc/apt/sources.list.d/robotpkg.list
@@ -101,7 +83,6 @@ RUN echo 'export PATH=/opt/openrobots/bin:$PATH' >> /root/.bashrc
 RUN echo 'export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH' >> /root/.bashrc
 RUN echo 'export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
 RUN echo 'export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH' >> /root/.bashrc
-
 
 
 
@@ -117,6 +98,10 @@ RUN pip install -e /acados/interfaces/acados_template
 RUN echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/acados/lib"' >> /root/.bashrc
 RUN echo 'export ACADOS_SOURCE_DIR="/acados"' >> /root/.bashrc
 
+
+#JAX
+RUN apt-get update 
+RUN pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 
 RUN apt-get update 
