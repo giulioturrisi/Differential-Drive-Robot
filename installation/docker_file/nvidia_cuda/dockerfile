@@ -146,8 +146,8 @@ RUN echo 'alias launch_lidar_odometry="ros2 launch pointcloud_to_laserscan sampl
 RUN echo 'alias launch_state_publisher="cd /home/ros2_ws && ros2 launch state_estimation state_publisher_launch.py "' >> /root/.bashrc
 
 
-RUN echo 'alias launch_sim_dynamics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../dynamics.ttt"' >> /root/.bashrc
-RUN echo 'alias launch_sim_kinematics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../kinematics.ttt"' >> /root/.bashrc
+RUN echo 'alias launch_sim_dynamics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -f ../dynamics.ttt"' >> /root/.bashrc
+RUN echo 'alias launch_sim_kinematics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -f ../kinematics.ttt"' >> /root/.bashrc
 
 RUN echo 'alias python="python3"' >> /root/.bashrc
 

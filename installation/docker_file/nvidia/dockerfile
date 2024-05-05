@@ -123,8 +123,8 @@ RUN echo 'alias launch_joy="ros2 launch teleop_twist_joy teleop-launch.py joy_co
 RUN echo 'alias launch_controller_io="ros2 run controllers run_io_linearization"' >> /root/.bashrc
 
 
-RUN echo 'alias launch_sim_dynamics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../dynamics.ttt"' >> /root/.bashrc
-RUN echo 'alias launch_sim_kinematics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -s ../kinematics.ttt"' >> /root/.bashrc
+RUN echo 'alias launch_sim_dynamics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -f ../dynamics.ttt"' >> /root/.bashrc
+RUN echo 'alias launch_sim_kinematics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -f ../kinematics.ttt"' >> /root/.bashrc
 
 RUN echo 'alias python="python3"' >> /root/.bashrc
 
