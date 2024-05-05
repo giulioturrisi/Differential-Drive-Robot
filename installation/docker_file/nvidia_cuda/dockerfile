@@ -127,7 +127,7 @@ RUN apt upgrade -y
 #JAX
 RUN apt-get update 
 RUN pip install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-
+RUN pip install jaxlib
 
 #SHELL COLOR
 SHELL ["/bin/bash", "-c"]

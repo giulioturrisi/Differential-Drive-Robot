@@ -40,8 +40,8 @@ float angle_rad_Left_forTF = 0;
 float angle_rad_Right_forTF = 0;
 float v_reconstructed = 0;
 float w_reconstructed = 0;
-float v_reconstructed2 = 0;
-float w_reconstructed2 = 0;
+float v_reconstructed_old = 0;
+float w_reconstructed_old = 0;
 
 float odom_x = 0;
 float odom_y = 0;
@@ -176,15 +176,18 @@ class MotorController : public rclcpp::Node{
             //delta_theta = (r/d)*(angle_rad_Right_forTF - angle_rad_Left_forTF)/15.; //- delta_theta;
             //v_reconstructed = (delta_s/0.005)*0.7 + (delta_s/0.005)*0.3;
             //w_reconstructed = (delta_theta/0.005)*0.7 + (delta_theta/0.005)*0.3;
+            v_reconstructed_old = v_reconstructed;
+            w_reconstructed_old = w_reconstructed;
+
 
             v_reconstructed = (r/2.)*((angle_rad_Left_forTF + angle_rad_Right_forTF)/0.005);
             w_reconstructed = (r/d)*((angle_rad_Right_forTF - angle_rad_Left_forTF)/0.005);
+            
 
-            v_reconstructed2 = v_reconstructed*0.9 + v_reconstructed2*0.1;
-            w_reconstructed2 = w_reconstructed*0.9 + w_reconstructed*0.1;
+            v_reconstructed = v_reconstructed*0.9 + v_reconstructed_old*0.1;
+            w_reconstructed = w_reconstructed*0.9 + w_reconstructed_old*0.1;
 
-            v_reconstructed = v_reconstructed2;
-            w_reconstructed = w_reconstructed2;
+
             //std::cout << "v_reconstructed: " << v_reconstructed << std::endl;
             //std::cout << "w_reconstructed: " << w_reconstructed << std::endl;
             auto odom_message = geometry_msgs::msg::TwistStamped();

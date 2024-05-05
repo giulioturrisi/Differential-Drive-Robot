@@ -102,6 +102,7 @@ RUN echo 'export ACADOS_SOURCE_DIR="/acados"' >> /root/.bashrc
 #JAX
 RUN apt-get update 
 RUN pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+RUN pip install jaxlib
 
 
 RUN apt-get update 

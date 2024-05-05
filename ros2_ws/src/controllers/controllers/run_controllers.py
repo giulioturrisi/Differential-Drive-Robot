@@ -53,7 +53,7 @@ class Controller(Base_Controller):
 
         self.create_timer(self.dt, self.controller_callback)
 
-        self.which_controller = 2
+        self.which_controller = 5
         self.select_controller()
 
         

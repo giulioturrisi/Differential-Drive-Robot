@@ -100,6 +100,7 @@ RUN apt upgrade -y
 #JAX
 RUN apt-get update 
 RUN pip install --upgrade "jax[cpu]"
+RUN pip install jaxlib
 
 
 #SHELL COLOR
