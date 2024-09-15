@@ -98,10 +98,18 @@ class StatePublisher(Node):
                 self.wheel_odom_x = self.wheel_odom_x + v_reconstructed*Ts*cos(self.wheel_odom_theta)
                 self.wheel_odom_y = self.wheel_odom_y + v_reconstructed*Ts*sin(self.wheel_odom_theta)
                 self.wheel_odom_theta = self.wheel_odom_theta + w_reconstructed*Ts
+                if(self.wheel_odom_theta > pi):
+                    self.wheel_odom_theta = self.wheel_odom_theta - 2*pi
+                if(self.wheel_odom_theta < -pi):
+                    self.wheel_odom_theta = self.wheel_odom_theta + 2*pi
 
                 self.odom_x = self.odom_x + v_reconstructed*Ts*cos(self.odom_theta)
                 self.odom_y = self.odom_y + v_reconstructed*Ts*sin(self.odom_theta)
                 self.odom_theta = self.odom_theta + w_reconstructed*Ts
+                if(self.odom_theta > pi):
+                    self.odom_theta = self.odom_theta - 2*pi
+                if(self.odom_theta < -pi):
+                    self.odom_theta = self.odom_theta + 2*pi
 
         self.last_time = time
 

@@ -2,8 +2,10 @@ import numpy as np
 import math 
 import casadi as cs
 
-import jax
-import jax.numpy as jnp
+try:
+    import jax.numpy as jnp
+except:
+    print("Jax not installed correctly")
 
 class Robot:
     """Class that defines the little differential drive

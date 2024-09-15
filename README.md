@@ -104,6 +104,7 @@ launch_planners                                                    (planning)
 launch_controllers                                                 (control)
 launch_lidar_odometry                                              (tf and kiss-icp)
 launch_slam                                                        (slam-toolbox)
+launch_state_publisher                                             (filter for encoder and lidar)
 ros2 launch ydlidar_ros2_driver ydlidar_launch.py                  (ydlidar - only real robot)
 ```
 
