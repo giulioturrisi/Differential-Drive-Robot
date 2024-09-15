@@ -20,9 +20,17 @@ from nonlinear_lyapunov import Nonlinear_lyapunov # type: ignore
 from approximate_linearization import Approximate_linearization # type: ignore
 from dynamic_linearization import Dynamic_linearization # type: ignore
 from ilqr import iLQR 
-from predictive_sampling import Sampling_MPC
-sys.path.append(dir_path + '/../controllers/acados')
-from acados_nmpc import Acados_NMPC 
+
+try:
+    from predictive_sampling import Sampling_MPC
+except:
+    print("Sampling_MPC not available. You have some problem with jax")
+
+try:
+    sys.path.append(dir_path + '/../controllers/acados')
+    from acados_nmpc import Acados_NMPC 
+except:
+    print("Acados not installed")
 
 
 from scipy.interpolate import CubicSpline, Akima1DInterpolator

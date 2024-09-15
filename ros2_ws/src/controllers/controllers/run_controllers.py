@@ -30,7 +30,7 @@ except:
 try:
     from predictive_sampling import Sampling_MPC
 except:
-    print("Predictive Sampling not installed")
+    print("Sampling_MPC not available. You have some problem with jax")
 
 
 from dynamic_linearization import Dynamic_linearization 
