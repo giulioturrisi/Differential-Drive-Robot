@@ -53,8 +53,8 @@ float delta_s = 0;
 float delta_theta = 0;
 
 float Ts = 0.01;
-float r = 0.45;
-float d = 0.8;
+float r = 0.05;
+float d = 0.20;
 
 float speed_Right_outside = 0;
 float speed_Left_outside = 0;
