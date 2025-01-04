@@ -65,7 +65,7 @@ class Controller(Base_Controller):
 
 
     def controller_callback(self):
-        if(self.simStep_done):
+        if(self.enableSyncMode.data == False or self.simStep_done):
             if(self.path_ready):
                 print("###############")
                 start_time = time.time()

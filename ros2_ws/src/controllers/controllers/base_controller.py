@@ -49,7 +49,7 @@ class Base_Controller(Node):
 
         # Sincronization with simulation ---------------------------------------
         self.enableSyncMode = Bool();
-        self.enableSyncMode.data = True;
+        self.enableSyncMode.data = True # Put this to True if you want to synchronize with CoppeliaSim
         self.publisher_enableSyncMode =self.create_publisher(Bool,"enableSyncMode", 1);
         self.publisher_enableSyncMode.publish(self.enableSyncMode)
 
