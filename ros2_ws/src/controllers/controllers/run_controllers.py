@@ -142,8 +142,8 @@ class Controller(Base_Controller):
             self.controller = Dynamic_linearization(k1=self.k1, k2=self.k2, dt=self.dt)
         elif(self.which_controller == 5):
             self.horizon = 0
-            self.k1 = 5
-            self.k2 = 5
+            self.k1 = 15
+            self.k2 = 15
             self.b = 0.05
             self.controller = IO_linearization(b=self.b, k1=self.k1, k2=self.k2, dt=self.dt)
         elif(self.which_controller == 6):
