@@ -49,8 +49,8 @@ class Base_Controller(Node):
 
         # Sincronization with simulation ---------------------------------------
         self.enableSyncMode = Bool();
-        self.enableSyncMode.data = True # Put this to True if you want to synchronize with CoppeliaSim
-        self.publisher_enableSyncMode =self.create_publisher(Bool,"enableSyncMode", 1);
+        self.enableSyncMode.data = False # Put this to True if you want to synchronize with CoppeliaSim
+        self.publisher_enableSyncMode = self.create_publisher(Bool,"enableSyncMode", 1);
         self.publisher_enableSyncMode.publish(self.enableSyncMode)
 
         self.requested_step = False
@@ -72,7 +72,7 @@ class Base_Controller(Node):
             x = msg.poses[i].pose.position.x;
             y = msg.poses[i].pose.position.y;
             self.path.insert(0,[x,y])
-            #self.path.append([x,y])
+            
 
         self.path_ready = True;
         print("Path received!")

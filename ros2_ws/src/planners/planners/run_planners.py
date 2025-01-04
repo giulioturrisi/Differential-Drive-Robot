@@ -77,7 +77,7 @@ class Planners(Node):
         self.useFilteredMap = True
 
         # Spline dt ---------------------------------------
-        self.dt = 0.1
+        self.dt = 0.01
 
 
         # Plan Choice ---------------------------------------
@@ -143,7 +143,7 @@ class Planners(Node):
             # Publish new path ---------------------------------------
             path_msg = Path()
             path_msg.header.frame_id = "map"
-            for i in range(int(len(path)/0.1)):
+            for i in range(int(len(path)/self.dt)):
                 temp = spline(xs[i])
                 poseStamped = PoseStamped()
                 poseStamped.pose.position.x = temp[0]*self.map_resolution + self.map_origin[0]

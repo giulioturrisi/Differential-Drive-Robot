@@ -89,6 +89,10 @@ class Controller(Base_Controller):
                             #reference_y.append(1)
 
                 v, w = self.controller.compute_control(self.state_robot, reference_x, reference_y)
+                
+                # Clip the values ---------------------------------------
+                v = np.clip(v, -1., 1.)
+                w = np.clip(w, -3., 3.)
 
                 print("control time: ", time.time()-start_time)
 
@@ -97,10 +101,14 @@ class Controller(Base_Controller):
 
                 
                 # Remove used reference point ---------------------------------------
-                self.path.pop(0)
+                # I need to pop this point only if the robot is close enough to the reference point
+                # This is to avoid skipping. Maybe this can be done every tot steps
+                if(math.sqrt((self.state_robot[0]-self.path[0][0])**2 + (self.state_robot[1]-self.path[0][1])**2) < 0.1):
+                    self.path.pop(0)
                 if(len(self.path) == 0):
                     self.path_ready = False
                     self.publish_command(0,0)
+            
                             
 
 
