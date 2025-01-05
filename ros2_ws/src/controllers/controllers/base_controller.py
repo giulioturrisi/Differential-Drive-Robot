@@ -81,8 +81,8 @@ class Base_Controller(Node):
     # Velocity received by the joystick ---------------------------
     def getVel_callback(self, msg):
         self.path_ready = False
-        v = msg.linear.x*2.0
-        w = msg.angular.z*5.0
+        v = msg.linear.x/10.
+        w = msg.angular.z
         self.publish_command(v, w)
         self.controller.reset()
         
