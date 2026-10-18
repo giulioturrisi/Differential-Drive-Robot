@@ -10,7 +10,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_wheel_odometry = LaunchConfiguration('use_wheel_odometry', default='false')
 
-    urdf = './../coppeliasim_simulation/urdf_from_coppelia/differential_drive.urdf'
+    urdf = './../mujoco_simulation/urdf/differential_drive.urdf'
     
     with open(urdf, 'r') as infp:
         robot_desc = infp.read()

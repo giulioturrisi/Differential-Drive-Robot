@@ -29,6 +29,7 @@ RUN pip install transforms3d
 RUN pip install pgm_reader
 RUN pip install casadi
 RUN pip install numba
+RUN pip install mujoco
 
 
 
@@ -113,7 +114,6 @@ RUN apt upgrade -y
 #SHELL COLOR
 SHELL ["/bin/bash", "-c"]
 RUN echo 'export PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;37m\]\u\[\033[00m\]@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] "'  >> /root/.bashrc
-RUN echo 'export COPPELIASIM_ROOT_DIR=/home/coppeliasim_simulation/CoppeliaSim' >> /root/.bashrc
 RUN echo '. /home/ros2_ws/install/setup.bash' >> /root/.bashrc
 
 RUN echo 'alias launch_rviz="ros2 run rviz2 rviz2 -d /home/ros2_ws/src/utilities/rviz_config/common.rviz"' >> /root/.bashrc
@@ -124,8 +124,8 @@ RUN echo 'alias launch_joy="ros2 launch teleop_twist_joy teleop-launch.py joy_co
 RUN echo 'alias launch_controller_io="ros2 run controllers run_io_linearization"' >> /root/.bashrc
 
 
-RUN echo 'alias launch_sim_dynamics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -f ../dynamics.ttt"' >> /root/.bashrc
-RUN echo 'alias launch_sim_kinematics="cd /home/coppeliasim_simulation/CoppeliaSim && ./coppeliaSim.sh -f ../kinematics.ttt"' >> /root/.bashrc
+RUN echo 'alias launch_sim_dynamics="cd /home/mujoco_simulation && python3 run_simulation.py --mode dynamics"' >> /root/.bashrc
+RUN echo 'alias launch_sim_kinematics="cd /home/mujoco_simulation && python3 run_simulation.py --mode kinematics"' >> /root/.bashrc
 
 RUN echo 'alias python="python3"' >> /root/.bashrc
 

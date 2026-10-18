@@ -30,7 +30,7 @@ It includes the following folders and subfolders:
 
 1. ```python_scripts```: most of the ROS2 nodes call some classes here
  
-2. ```coppeliasim_simulation```: scenes used for simulating the robot (dynamically enabled or not)
+2. ```mujoco_simulation```: MuJoCo model of the robot (generated from the urdf) and of the environment, plus the script that simulates it via ROS2 (dynamically enabled or not, with a 2D lidar)
 
 3. ```ros2_ws```: collection of ROS2 nodes for controlling the robot with the aid of some external tools such as ```slam_toolbox``` (generate a map and localization) and ```kiss-icp``` (lidar odometry)
 
@@ -38,7 +38,7 @@ It includes the following folders and subfolders:
 ## Dependencies
 1. [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
 
-2. [CoppeliaSim](https://www.coppeliarobotics.com/downloads)
+2. [MuJoCo](https://github.com/google-deepmind/mujoco) (```pip install mujoco```)
 
 3. [kiss-icp](https://github.com/PRBonn/kiss-icp)
 
@@ -50,21 +50,12 @@ It includes the following folders and subfolders:
 git clone --recurse-submodules https://github.com/giulioturrisi/differential_drive.git
 ```
 
-2. extract CoppeliaSim in Differential-Drive-Robot/coppeliasim_simulation
-
-3. add the following ls in ros2_ws/src/simExtROS2/meta/interfaces.txt 
-```sh
-geometry_msgs/msg/Twist
-geometry_msgs/msg/TwistStamped
-sensor_msgs/msg/LaserScan
-```
-
-4. build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
+2. build the docker file inside Differential-Drive-Robot/docker_file/integrated_gpu or /nvidia
 ```sh
 docker build -t ros2_humble .
 ```
 
-5. add alias to start the docker
+3. add alias to start the docker
 ```sh
 cd 
 gedit .bashrc
@@ -75,7 +66,7 @@ alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Diff
 alias ddrive='docker exec -it ddrive_humble bash' (to attach a new terminal to the running docker)
 ```
 
-6. start docker and build
+4. start docker and build
 ```sh
 ddrive_humble
 cd ros2_ws
@@ -95,6 +86,7 @@ Follow the commands below to run all the framework:
 launch_sim_kinematics                                              (scene with kinematics)
 launch_sim_dynamics                                                (scene with dynamics)
 ```
+they run ```python3 mujoco_simulation/run_simulation.py --mode kinematics/dynamics``` (add ```--headless``` to run without the viewer, ```--lidar_rate``` to change the lidar frequency)
 
 2. on each new terminal, then launch all the other packages 
 ```sh
