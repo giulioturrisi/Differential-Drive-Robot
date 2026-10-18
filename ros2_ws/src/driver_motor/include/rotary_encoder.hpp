@@ -7,9 +7,7 @@ typedef void (*re_decoderCB_t)(int);
 
 class re_decoder
 {
-   int mygpioA, mygpioB, levA, levB, lastGpio;
-
-   bool prevA = 1, prevB = 1;
+   int mygpioA, mygpioB, levA, levB, lastEncoded;
 
    re_decoderCB_t mycallback;
 
