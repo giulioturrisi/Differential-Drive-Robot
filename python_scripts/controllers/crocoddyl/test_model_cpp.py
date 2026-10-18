@@ -8,10 +8,10 @@ model = crocoddyl.ActionModelUnicycle()
 model.dt = 0.01
 
 # Setting up the cost weights
-model.r = [
+model.costWeights = np.array([
     10.,  # state weight
     1.  # control weight
-]
+])
 
 # Formulating the optimal control problem
 T = 50  # number of knots

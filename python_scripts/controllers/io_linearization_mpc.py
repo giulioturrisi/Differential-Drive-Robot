@@ -17,7 +17,7 @@ class IO_linearization_MPC:
             dt (float): sampling time
         """
         self.N = horizon
-        self.acc_max = 5
+        self.u_max = 5  # bound on the velocity of point B
 
         self.b = b
         
@@ -89,11 +89,11 @@ class IO_linearization_MPC:
         """
         for k in range(self.N): # loop over control intervals
             #linear velocity
-            self.opti.subject_to(self.U_casadi[0,k] <= self.acc_max)
-            self.opti.subject_to(self.U_casadi[0,k] >= -self.acc_max)
+            self.opti.subject_to(self.U_casadi[0,k] <= self.u_max)
+            self.opti.subject_to(self.U_casadi[0,k] >= -self.u_max)
             #angular velocity
-            self.opti.subject_to(self.U_casadi[1,k] <= self.acc_max)
-            self.opti.subject_to(self.U_casadi[1,k] >= -self.acc_max)
+            self.opti.subject_to(self.U_casadi[1,k] <= self.u_max)
+            self.opti.subject_to(self.U_casadi[1,k] >= -self.u_max)
 
 
 
@@ -110,27 +110,18 @@ class IO_linearization_MPC:
         
 
 
-        for k in range(1, self.N):
-            ref_x = self.reference_x[k-1]
-            ref_y = self.reference_y[k-1]
-            
+        # Predicted state k is compared with reference k (k = 0 is the actual state) ----------------
+        for k in range(1, self.N+1):
+            pose_error += self.Q_pos*(self.x_casadi[k] - self.reference_x[k])**2
+            pose_error += self.Q_pos*(self.y_casadi[k] - self.reference_y[k])**2
 
-            pose_error += self.Q_pos*(self.x_casadi[k] - ref_x)@(self.x_casadi[k] - ref_x).T
-            pose_error += self.Q_pos*(self.y_casadi[k] - ref_y)@(self.y_casadi[k] - ref_y).T
-            
-            ref_u1 = 0
-            ref_u2 = 0
+        # Inputs (velocity of point B) are pushed toward the velocity of the reference --------------
+        for k in range(self.N):
+            ref_u1 = (self.reference_x[k+1] - self.reference_x[k])/self.dt
+            ref_u2 = (self.reference_y[k+1] - self.reference_y[k])/self.dt
+            input_use += self.R*(self.U_casadi[0,k] - ref_u1)**2
+            input_use += self.R*(self.U_casadi[1,k] - ref_u2)**2
 
-            input_use += self.R*(self.U_casadi[0,k] - ref_u1)@(self.U_casadi[0,k] - ref_u1).T 
-            input_use += self.R*(self.U_casadi[1,k] - ref_u2)@(self.U_casadi[1,k] - ref_u2).T 
-        
-        
-        # Last step N horizon -----------------------------------------------------------------------
-        ref_x = self.reference_x[self.N]
-        ref_y = self.reference_y[self.N]
-        pose_error += self.Q_pos*(self.x_casadi[self.N] - ref_x)@(self.x_casadi[self.N] - ref_x).T
-        pose_error += self.Q_pos*(self.y_casadi[self.N] - ref_y)@(self.y_casadi[self.N] - ref_y).T
-        
         self.opti.minimize(pose_error + input_use)
 
 
@@ -144,26 +135,31 @@ class IO_linearization_MPC:
             (np.array): control actions
         """
 
-        # Setting Initial State ---------------------------------------
+        # Setting Initial State: the model describes the point B at distance b from the center ----
         start_time = time.time()
-        self.opti.set_value(self.x_0, initial_state[0])
-        self.opti.set_value(self.y_0, initial_state[1])
-        
-        # Setting Reference ------------------------------------------          
+        state_yaw = initial_state[2]
+        self.opti.set_value(self.x_0, initial_state[0] + self.b*math.cos(state_yaw))
+        self.opti.set_value(self.y_0, initial_state[1] + self.b*math.sin(state_yaw))
+
+        # Setting Reference ------------------------------------------
         self.opti.set_value(self.reference_x, reference_x)
         self.opti.set_value(self.reference_y, reference_y)
-           
+
         # Compute solution ---------------------------------------
         start_time = time.time()
-        sol = self.opti.solve()
-       
-        # Taking just first action ---------------------------------------
-        u1_io = sol.value(self.U_casadi)[0]
-        u2_io = sol.value(self.U_casadi)[1]
+        try:
+            U = self.opti.solve().value(self.U_casadi)
+        except RuntimeError:
+            # Ipopt did not converge: use its last iterate instead of stopping the controller
+            print("IO linearization MPC: solver did not converge, using the last iterate")
+            U = self.opti.debug.value(self.U_casadi)
 
-        state_yaw = initial_state[2]
+        # Taking just first action ---------------------------------------
+        u1_io = U[0][0]
+        u2_io = U[1][0]
+
         v = math.cos(state_yaw)*u1_io + math.sin(state_yaw)*u2_io
         w = (-math.sin(state_yaw)*u1_io/self.b) + (math.cos(state_yaw)*u2_io/self.b)
 
 
-        return v[0], w[0]
+        return v, w

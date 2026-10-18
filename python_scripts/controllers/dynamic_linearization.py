@@ -20,6 +20,9 @@ class Dynamic_linearization:
 
         self.dt = dt
 
+        # the law is singular for v = 0: w is computed with |v| at least min_speed
+        self.min_speed = 0.05
+
         self.reset()
 
 
@@ -28,9 +31,9 @@ class Dynamic_linearization:
         """
         self.eps = 0.0
 
-        self.previous_state = None     
+        self.previous_state = None
         self.previous_reference = None
-        self.previous_reference_dot = [0.0 ,0.0]
+        self.previous_reference_dot = None
 
 
     def compute_control(self, initial_state, reference_x, reference_y):
@@ -47,34 +50,24 @@ class Dynamic_linearization:
         state_yaw = initial_state[2]
 
 
+        #reference vel, reference acc and robot vel (zero until they can be differentiated)
+        reference_x_dot = 0.0
+        reference_y_dot = 0.0
+        reference_x_ddot = 0.0
+        reference_y_ddot = 0.0
+        state_x_dot = 0.0
+        state_y_dot = 0.0
         if(self.previous_reference is not None):
-            #reference vel
             reference_x_dot = (reference_x - self.previous_reference[0])/self.dt;
             reference_y_dot = (reference_y - self.previous_reference[1])/self.dt;
 
-            #reference acc
-            reference_x_ddot = (reference_x_dot - self.previous_reference_dot[0])/self.dt
-            reference_y_ddot = (reference_y_dot - self.previous_reference_dot[1])/self.dt              
+            if(self.previous_reference_dot is not None):
+                reference_x_ddot = (reference_x_dot - self.previous_reference_dot[0])/self.dt
+                reference_y_ddot = (reference_y_dot - self.previous_reference_dot[1])/self.dt
 
-            #robot vel
             state_x_dot = (state_x - self.previous_state[0])/self.dt
             state_y_dot = (state_y - self.previous_state[1])/self.dt
-            #state_yaw_dot = 0.0
         else:
-            #reference vel
-            reference_x_dot = 0.01 
-            reference_y_dot = 0.01
-            
-            #reference acc
-            reference_x_ddot = 0.01
-            reference_y_ddot = 0.01
-
-            
-            #robot vel
-            state_x_dot = 0.0
-            state_y_dot = 0.0
-            #state_yaw_dot = 0.0
-
             self.previous_state = copy.deepcopy(initial_state)
 
 
@@ -91,14 +84,11 @@ class Dynamic_linearization:
 
         self.eps = self.eps + (u1*math.cos(state_yaw) + u2*math.sin(state_yaw))*self.dt
         if(math.fabs(self.eps) < 0.001):
-            if(self.eps > 0):
-                self.eps = 0.001
-            else:
-                self.eps = -0.001
-            
+            self.eps = -0.001 if self.eps < 0 else 0.001
+
 
         v = self.eps
-        w = (-u1*math.sin(state_yaw) + u2*math.cos(state_yaw))/v
+        w = (-u1*math.sin(state_yaw) + u2*math.cos(state_yaw))/math.copysign(max(math.fabs(v), self.min_speed), v)
 
         #previous state
         self.previous_state[0] = state_x

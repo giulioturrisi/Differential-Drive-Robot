@@ -1,3 +1,5 @@
+import math
+
 import numpy as np # type: ignore
 import matplotlib.pyplot as plt # type: ignore
 
@@ -10,7 +12,7 @@ class RRT:
         """Init func
         Args:
             start (np.array): actual state of the robot
-            goal (np.array): desired goal 
+            goal (np.array): desired goal
             map (np.array): multidimensional array containing the map
             resolution (float): dimension of each cell
         """
@@ -19,26 +21,27 @@ class RRT:
         self.goal = np.array([int(goal[0]/resolution), int(goal[1]/resolution)])
 
 
-        map_shape = map.shape 
-        self.height = map_shape[0]  
-        self.width = map_shape[1] 
+        map_shape = map.shape
+        self.height = map_shape[0]
+        self.width = map_shape[1]
 
-        
-        self.goal_bias = 0.5
+
+        self.goal_bias = 0.5        # probability of sampling the goal
+        self.step_size = 3.0        # maximum length of a new branch [cells]
 
         self.map = map
 
-        #x, y, theta, parent_node,
-        self.node_opened = np.array([[self.start[0], self.start[1], -1]])
+        #x, y, parent_node,
+        self.node_opened = np.array([[self.start[0], self.start[1], -1]], dtype=float)
 
-    
+
     def sample(self,):
         """Sample a new random point
         Returns:
             (list): x and y coordinate of the new point
         """
         rand = np.random.rand()
-        if(rand > self.goal_bias):
+        if(rand < self.goal_bias):
             desired_node = [self.goal[0], self.goal[1]]
         else:
             rand_x = np.random.rand()*self.height;
@@ -54,18 +57,8 @@ class RRT:
         Returns:
             (int): index in the global list of node point
         """
-        best_node = []
-        best_cost = 1000
-        best_index = 0
-        for i in range(len(self.node_opened)):
-            temp = self.node_opened[i]
-
-            h = np.sqrt(np.power(desired_node[0]-(temp[0]),2) + np.power(desired_node[1]-(temp[1]),2))
-            if(h < best_cost):
-                best_cost = h
-                best_node = temp
-                best_index = i
-        return best_index
+        distances = np.hypot(self.node_opened[:, 0] - desired_node[0], self.node_opened[:, 1] - desired_node[1])
+        return int(np.argmin(distances))
 
 
     def choose_primitives(self, near_index, desired_node):
@@ -74,20 +67,16 @@ class RRT:
             near_index (int): index of the nearest node
             desired_node (list): x-y coordinate of the desired node
         Returns:
-            (list): a new node is generated connecting the near node and the desired node with the line
+            (list): a new node is generated moving from the near node toward the desired node by at most step_size
         """
         near_node = self.node_opened[near_index]
-        
-        best_index = 1;
-        best_distance = 10000;
-        best_node = [0, 0, 0];
 
-        
         u1 = desired_node[0] - near_node[0];
-        u1 = u1*0.1
-
         u2 = desired_node[1] - near_node[1];
-        u2 = u2*0.1
+        distance = math.hypot(u1, u2)
+        if(distance > self.step_size):
+            u1 = u1*self.step_size/distance
+            u2 = u2*self.step_size/distance
 
         x_new = near_node[0] + u1;
         y_new = near_node[1] + u2;
@@ -104,7 +93,7 @@ class RRT:
             (list): a new feasible starting goal
         """
         best_node = []
-        best_cost = 1000
+        best_cost = np.inf
         for i in range(self.height):
             for j in range(self.width):
                 temp = self.map[i][j]
@@ -115,30 +104,60 @@ class RRT:
         return best_node
 
 
+    def cell_occupied(self, i, j):
+        """Check if a cell is not free (outside the map is not free)
+        Args:
+            i (int): x index of the cell
+            j (int): y index of the cell
+        Returns:
+            (bool): boolean for occupied cell
+        """
+        if(i < 0 or j < 0 or i >= self.height or j >= self.width):
+            return True
+        return self.map[i][j] != 254
+
+
+    def segment_in_collision(self, x_start, y_start, x_end, y_end):
+        """Check every cell crossed by a segment (grid traversal of Amanatides and Woo),
+        the cell (i, j) contains the points rounding to (i, j)
+        Returns:
+            (bool): boolean for collision checking
+        """
+        x_start, y_start, x_end, y_end = x_start + 0.5, y_start + 0.5, x_end + 0.5, y_end + 0.5
+        i, j = math.floor(x_start), math.floor(y_start)
+        i_end, j_end = math.floor(x_end), math.floor(y_end)
+        dx, dy = x_end - x_start, y_end - y_start
+
+        step_i = 1 if dx > 0 else -1
+        step_j = 1 if dy > 0 else -1
+        t_max_x = ((i + (step_i > 0)) - x_start)/dx if dx != 0 else math.inf
+        t_max_y = ((j + (step_j > 0)) - y_start)/dy if dy != 0 else math.inf
+        t_delta_x = abs(1/dx) if dx != 0 else math.inf
+        t_delta_y = abs(1/dy) if dy != 0 else math.inf
+
+        for _ in range(abs(i_end - i) + abs(j_end - j) + 1):
+            if(self.cell_occupied(i, j)):
+                return True
+            if(t_max_x < t_max_y):
+                t_max_x += t_delta_x
+                i += step_i
+            else:
+                t_max_y += t_delta_y
+                j += step_j
+        return False
+
+
     def in_collision(self, node_to_check, nearest_node_index):
-        """Check multiple point collisions while connecting two nodes
+        """Check collisions while connecting two nodes
         Args:
             node_to_check (list): x-y coordinate of the node to check
             nearest_node_index (int): starting node of the primitive
         Returns:
             (bool): boolean for collision checking
         """
-        x = node_to_check[0]
-        y = node_to_check[1]
-
-        if(self.map[int(round(x))][int(round(y))] != 254):
-            return True
-
         near_node = self.node_opened[nearest_node_index]
-        distance_x = x - near_node[0]
-        distance_y = y - near_node[1]
-        intermidiate_node = [near_node[0] + distance_x/2. , near_node[1] + distance_y/2.];
-        if(self.map[int(round(intermidiate_node[0]))][int(round(intermidiate_node[1]))] != 254):
-            return True
-        
+        return self.segment_in_collision(near_node[0], near_node[1], node_to_check[0], node_to_check[1])
 
-        return False
-                        
 
     def check_goal(self, next_cell):
         """Check if the goal is reached
@@ -164,9 +183,8 @@ class RRT:
             print("Start is unfeasible!")
             new_start = self.find_new_start()
             print("New start found..")
-            self.start = new_start
-            self.node_opened = []
-            self.node_opened.append([self.start[0], self.start[1], 0])
+            self.start = np.array(new_start)
+            self.node_opened = np.array([[self.start[0], self.start[1], -1]], dtype=float)
 
         return
 
@@ -187,7 +205,7 @@ class RRT:
         path = [[last_node[0], last_node[1]]]
         last_node = self.node_opened[int(last_node[2])]
 
-        for _ in range(self.width*self.width):
+        for _ in range(self.height*self.width):
             temp = last_node.tolist()
             path.append([temp[0], temp[1]])
             if(last_node[0] == self.start[0] and last_node[1] == self.start[1]):
@@ -214,16 +232,19 @@ class RRT:
             rgb_image = np.stack([self.map]*3, axis=2)/255.
             rgb_image[self.start[0]][self.start[1]] = [1,0,0]
             rgb_image[self.goal[0]][self.goal[1]] = [0,0,1]
-            f = plt.figure("Planning")   
-            ax = f.gca() 
+            f = plt.figure("Planning")
+            ax = f.gca()
             h = ax.imshow(rgb_image)
 
 
         while (finish == 0 and iterator <= max_iteration):
+            # every iteration counts, also the ones that end in a collision
+            iterator += 1
+
             sample_node = self.sample()
             nearest_node_index = self.find_nearest_node(sample_node)
             new_node = self.choose_primitives(nearest_node_index, sample_node)
-            
+
             #check collision
             if(self.in_collision(new_node, nearest_node_index) == True):
                 continue
@@ -232,9 +253,6 @@ class RRT:
             finish = self.check_goal(new_node)
             if(finish == 1):
                 break
-            #self.open_sons_cell(next_cell)
-
-            iterator += 1
 
             if(visualize):
                 rgb_image[int(round(new_node[0]))][int(round(new_node[1]))] = [0,1,0]
@@ -245,7 +263,6 @@ class RRT:
         #return 0
         return self.take_path(finish)
 
-   
 
 
 

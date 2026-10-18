@@ -47,8 +47,30 @@ def interpolate_path(path, dt):
     """
     time = np.arange(0, len(path), 1)
     spline = CubicSpline(time,np.array(path))
-    xs = np.arange(0, len(path), dt)
+    # from the first to the last node, without extrapolating
+    xs = np.linspace(0, len(path) - 1, int(round((len(path) - 1)/dt)) + 1)
     return spline, xs
+
+
+
+# Constant spacing resampling ---------------------------------------
+def resample_path(path, step):
+    """Spline interpolation of the planned path, resampled with a constant distance between points
+    Args:
+        path (list): path found by the planner
+        step (float): distance between two consecutive points (same unit of the path)
+    Returns:
+        (np.array): points along the path, the last one is the last node of the path
+    """
+    if(len(path) < 2):
+        return np.array(path, dtype=float).reshape(-1, 2)
+
+    spline, xs = interpolate_path(path, 0.01)
+    points = spline(xs)
+    arc_length = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(points, axis=0), axis=1))])
+
+    samples = np.append(np.arange(0, arc_length[-1], step), arc_length[-1])
+    return np.column_stack([np.interp(samples, arc_length, points[:, 0]), np.interp(samples, arc_length, points[:, 1])])
 
 
 

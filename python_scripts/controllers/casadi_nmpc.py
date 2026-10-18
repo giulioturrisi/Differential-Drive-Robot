@@ -16,8 +16,9 @@ class Casadi_NMPC:
             dt (float): sampling time
         """
         self.N = horizon
-        self.v_max = 2.0
-        self.w_max = 2.0
+        # same saturation applied by run_controllers.py
+        self.v_max = 1.0
+        self.w_max = 3.0
 
         self.n_actionsMPC = 2
         self.dt = dt
@@ -25,7 +26,7 @@ class Casadi_NMPC:
 
         self.Q_pos = 100
         self.Q_yaw = 0
-        self.R = 1
+        self.R = 0.001  # small: with a 0.2 s horizon a larger R prevents the correction of lateral errors
 
         self.initialize_casadi()
 
@@ -108,41 +109,22 @@ class Casadi_NMPC:
         self.reference_x = self.opti.parameter(self.N+1)
         self.reference_y = self.opti.parameter(self.N+1)
         self.reference_yaw = self.opti.parameter(self.N+1)
+        self.reference_v = self.opti.parameter(self.N)
+        self.reference_w = self.opti.parameter(self.N)
 
 
-        for k in range(1, self.N):
-            ref_x = self.reference_x[k-1]
-            ref_y = self.reference_y[k-1]
-            ref_yaw = self.reference_yaw[k-1]
+        # Predicted state k is compared with reference k (k = 0 is the actual state) ----------------
+        for k in range(1, self.N+1):
+            pose_error += self.Q_pos*(self.x_casadi[k] - self.reference_x[k])**2
+            pose_error += self.Q_pos*(self.y_casadi[k] - self.reference_y[k])**2
+            pose_error += self.Q_yaw*(self.yaw_casadi[k] - self.reference_yaw[k])**2
 
-            pose_error += self.Q_pos*(self.x_casadi[k] - ref_x)@(self.x_casadi[k] - ref_x).T
-            pose_error += self.Q_pos*(self.y_casadi[k] - ref_y)@(self.y_casadi[k] - ref_y).T
-            pose_error += self.Q_yaw*(self.yaw_casadi[k] - ref_yaw)@(self.yaw_casadi[k] - ref_yaw).T
+        # Inputs are pushed toward the velocities that follow the reference -------------------------
+        for k in range(self.N):
+            input_use += self.R*(self.U_casadi[0,k] - self.reference_v[k])**2
+            input_use += self.R*(self.U_casadi[1,k] - self.reference_w[k])**2
 
-            #if(k < self.N-1):
-            #    ref_x_ddot = (((self.reference_x[k+2] - self.reference_x[k+1])/self.dt ) - ref_x_dot)/self.dt
-            #    ref_y_ddot = (((self.reference_y[k+2] - self.reference_y[k+1])/self.dt ) - ref_y_dot)/self.dt
-            #else:
-            #    ref_x_ddot = 0.0
-            #    ref_y_ddot = 0.0
-            
-            #ref_v = np.sqrt(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot)
-            #ref_w = (ref_y_ddot*ref_x_dot - ref_x_ddot*ref_y_dot)/(ref_x_dot*ref_x_dot + ref_y_dot*ref_y_dot + 0.001)
-            ref_v = 0
-            ref_w = 0
-
-            input_use += self.R*(self.U_casadi[0,k] - ref_v)@(self.U_casadi[0,k] - ref_v).T 
-            input_use += self.R*(self.U_casadi[1,k] - ref_w)@(self.U_casadi[1,k] - ref_w).T 
-        
-        
-        # Last step N horizon -----------------------------------------------------------------------
-        ref_x = self.reference_x[self.N]
-        ref_y = self.reference_y[self.N]
-        pose_error += self.Q_pos*(self.x_casadi[self.N] - ref_x)@(self.x_casadi[self.N] - ref_x).T
-        pose_error += self.Q_pos*(self.y_casadi[self.N] - ref_y)@(self.y_casadi[self.N] - ref_y).T
-        pose_error += self.Q_yaw*(self.yaw_casadi[self.N] - ref_yaw)@(self.yaw_casadi[self.N] - ref_yaw).T
-        
-        self.opti.minimize(pose_error + input_use*0)
+        self.opti.minimize(pose_error + input_use)
 
 
     def compute_control(self, initial_state, reference_x, reference_y):
@@ -163,22 +145,33 @@ class Casadi_NMPC:
 
         # Setting Reference ------------------------------------------
         ref_yaw = []
+        ref_v = []
+        yaw = initial_state[2]
         for k in range(0, self.N):
                 ref_x_dot = (reference_x[k+1] - reference_x[k])/self.dt
                 ref_y_dot = (reference_y[k+1] - reference_y[k])/self.dt
-                ref_yaw.append(np.arctan2(ref_y_dot, ref_x_dot) )
+                ref_v.append(np.hypot(ref_x_dot, ref_y_dot))
+                # repeated reference points (end of the path) have no heading: keep the previous one
+                if(ref_v[-1] > 1e-3):
+                    yaw = np.arctan2(ref_y_dot, ref_x_dot)
+                ref_yaw.append(yaw)
         ref_yaw.append(ref_yaw[-1])
-        
+        ref_w = [np.arctan2(np.sin(ref_yaw[k+1] - ref_yaw[k]), np.cos(ref_yaw[k+1] - ref_yaw[k]))/self.dt for k in range(self.N)]
+
         self.opti.set_value(self.reference_yaw, ref_yaw)
         self.opti.set_value(self.reference_x, reference_x)
         self.opti.set_value(self.reference_y, reference_y)
-           
+        self.opti.set_value(self.reference_v, ref_v)
+        self.opti.set_value(self.reference_w, ref_w)
+
         # Compute solution ---------------------------------------
         start_time = time.time()
-        sol = self.opti.solve()
-       
-        # Taking just first action ---------------------------------------
-        v = sol.value(self.U_casadi)[0]
-        w = sol.value(self.U_casadi)[1]
+        try:
+            U = self.opti.solve().value(self.U_casadi)
+        except RuntimeError:
+            # Ipopt did not converge: use its last iterate instead of stopping the controller
+            print("Casadi NMPC: solver did not converge, using the last iterate")
+            U = self.opti.debug.value(self.U_casadi)
 
-        return v[0], w[0]
+        # Taking just first action ---------------------------------------
+        return U[0][0], U[1][0]

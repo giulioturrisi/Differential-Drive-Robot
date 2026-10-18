@@ -10,6 +10,8 @@ from grid_based.djikstra import Djikstra # type: ignore
 
 from sampling_based.rrt import RRT # type: ignore
 from sampling_based.rrt_primitives import RRT_primitives # type: ignore
+from sampling_based.rrt_star import RRT_star # type: ignore
+from sampling_based.informed_rrt_star import Informed_RRT_star # type: ignore
 
 import time
 
@@ -35,7 +37,7 @@ if __name__ == "__main__":
     resolution = 0.05
 
 
-    for k in range(0,6):
+    for k in range(0,8):
         start_time = time.time()
         if(k==0):
             planner = RRT(state_robot, goal, image, resolution)
@@ -49,6 +51,10 @@ if __name__ == "__main__":
             planner = Breadth_First_Search(state_robot, goal, image, resolution)
         elif(k==5):
             planner = Greedy_Best_First_Search(state_robot, goal, image, resolution)
+        elif(k==6):
+            planner = RRT_star(state_robot, goal, image, resolution)
+        elif(k==7):
+            planner = Informed_RRT_star(state_robot, goal, image, resolution)
         
         path = planner.plan(max_iteration, False)
 
@@ -64,4 +70,8 @@ if __name__ == "__main__":
             print("planning time Breadth First Search: ", time.time()-start_time)
         elif(k==5):
             print("planning time Greedy Best First Search: ", time.time()-start_time)
+        elif(k==6):
+            print("planning time RRT*: ", time.time()-start_time)
+        elif(k==7):
+            print("planning time Informed RRT*: ", time.time()-start_time)
         

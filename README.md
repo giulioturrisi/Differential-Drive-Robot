@@ -21,8 +21,9 @@ This repo contains the code for controlling both a real and a simulated differen
 3. Djikstra
 4. Greedy Best First search
 5. RRT
-6. RRT* (in progress)
-7. RRT-primitives
+6. RRT*
+7. Informed RRT*
+8. RRT-primitives
 
 
 ## Repository structure

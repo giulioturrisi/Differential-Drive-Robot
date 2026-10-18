@@ -1,3 +1,5 @@
+from collections import deque
+
 import numpy as np # type: ignore
 import matplotlib.pyplot as plt # type: ignore
 
@@ -27,7 +29,7 @@ class Breadth_First_Search:
         self.map = map
 
         # node to expand
-        self.frontiers = []
+        self.frontiers = deque()
         self.frontiers.append([self.start[0],self.start[1]])
 
         # node opened before
@@ -46,7 +48,7 @@ class Breadth_First_Search:
             temp = []
             return temp
         else:
-            temp = self.frontiers.pop(0)
+            temp = self.frontiers.popleft()
             self.node_opened.append([temp[0],temp[1]])
         return temp
 
@@ -59,7 +61,7 @@ class Breadth_First_Search:
             (int): index in the global list of node point
         """
         best_node = []
-        best_cost = 1000
+        best_cost = np.inf
         for i in range(len(self.node_opened)):
             temp = self.node_opened[i]
             #h = abs(self.goal[0]-(temp[0])) + abs(self.goal[1]-(temp[1]))
@@ -76,7 +78,7 @@ class Breadth_First_Search:
             (list): a new feasible starting goal
         """
         best_node = []
-        best_cost = 1000
+        best_cost = np.inf
         for i in range(self.height):
             for j in range(self.width):
                 temp = self.map[i][j]
@@ -103,7 +105,7 @@ class Breadth_First_Search:
                 x_new = x_parent + i
                 y_new = y_parent + j
 
-                if(x_new < self.height and y_new < self.width):
+                if(0 <= x_new < self.height and 0 <= y_new < self.width):
                     
                     
                     if(self.map[x_new][y_new] == 254  and np.array_equal(self.come_from[x_new][y_new],np.array([-1,-1]))):
@@ -131,16 +133,12 @@ class Breadth_First_Search:
             new_start = self.find_new_start()
             print("New start found..")
             self.start = new_start
-            self.frontiers = []
-            self.frontiers.append([self.start[0], self.start[1], 0])
+            self.frontiers = deque()
+            self.frontiers.append([self.start[0], self.start[1]])
 
             # node opened before
             self.come_from = np.ones((self.height,self.width,2),int)*-1;
             self.come_from[self.start[0]][self.start[1]] = [self.start[0],self.start[1]]
-
-
-            self.cost_so_far = np.ones((self.height,self.width,1),int)*1000;
-            self.cost_so_far[self.start[0]][self.start[1]] = 0
         return
 
 
@@ -159,7 +157,7 @@ class Breadth_First_Search:
         path = [last_cell]
         last_cell = self.come_from[last_cell[0]][last_cell[1]]
 
-        for _ in range(self.width*self.width):
+        for _ in range(self.height*self.width):
             path.append(last_cell.tolist()) 
             if(last_cell[0] == self.start[0] and last_cell[1] == self.start[1]):
                 break

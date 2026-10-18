@@ -24,8 +24,8 @@ class UnicycleModelDerived(crocoddyl.DifferentialActionModelAbstract):
 
         
          # Computing the cost residual and value
-        data.r = np.matrix(self.costWeights * np.array([np.asscalar(x[0]), np.asscalar(x[1]), np.asscalar(x[2]), np.asscalar(u[0]), np.asscalar(u[1])])).T
-        data.cost = .5 * np.asscalar(sum(np.asarray(data.r)**2))
+        data.r = np.matrix(self.costWeights * np.array([x[0].item(), x[1].item(), x[2].item(), u[0].item(), u[1].item()])).T
+        data.cost = .5 * float(np.sum(np.asarray(data.r)**2))
 
 
     def calcDiff(self, data, x, u=None):

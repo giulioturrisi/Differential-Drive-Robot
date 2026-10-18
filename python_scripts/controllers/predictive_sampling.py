@@ -16,8 +16,14 @@ print("ax.devices()", jax.devices())
 #os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = ".75"
 #jax.config.update('jax_platform_name', 'cpu')
 
-gpu_device = jax.devices('gpu')[0]
-cpu_device = jax.devices('cpu')[0]
+def get_device(name):
+    """Return the first jax device of the given type (cpu or gpu), falling back to the cpu
+    """
+    try:
+        return jax.devices(name)[0]
+    except RuntimeError:
+        print("No " + name + " device available for jax, using the cpu")
+        return jax.devices('cpu')[0]
 
 import numpy as np
 import matplotlib.pyplot as plt #
@@ -42,11 +48,8 @@ class Sampling_MPC:
         self.control_dim = 2
         self.num_computations = num_computations
 
-        if(device=="gpu"):
-            self.device = gpu_device
-        else:
-            self.device = cpu_device
-        
+        self.device = get_device(device)
+
         if(linear == True):
             self.spline_fun = jax.jit(self.compute_linear_spline, device=self.device)
         else:
@@ -55,23 +58,25 @@ class Sampling_MPC:
         self.robot = Robot(self.dt)
 
         self.Q = jnp.identity(self.state_dim)
-        self.Q.at[0,0].set(0.0)
-        self.Q.at[1,1].set(0.0)
-        self.Q.at[2,2].set(0.0)
-
-        
-
         self.R = jnp.identity(self.control_dim)
 
         self.num_parameters = 16
 
+        # Sampling around the best parameters of the previous step ------------------
+        self.key = random.PRNGKey(42)
+        self.sigma = 0.3
+        self.uniform_fraction = 0.1
+        self.parameters_limit = 2.0
+        self.best_parameters = jnp.zeros(self.num_parameters)
+        self.parameters_map = self.sample_parameters()
+
+        vectorized_forward_sim = jax.vmap(self.compute_forward_simulations, in_axes=(0,0,0), out_axes=0)
+        self.jit_vectorized_forward_sim = jax.jit(vectorized_forward_sim, device=self.device)
+
         # the first call of jax is very slow, hence we should do this since the beginning! ------------------
         if(init_jax):
-            vectorized_forward_sim = jax.vmap(self.compute_forward_simulations, in_axes=(0,0,0), out_axes=0)
-            self.jit_vectorized_forward_sim = jax.jit(vectorized_forward_sim, device=self.device)
-            
             threads = self.num_computations
-            
+
             reference_x = []
             reference_y = []
             reference_theta = []
@@ -82,28 +87,41 @@ class Sampling_MPC:
             state_des = jnp.column_stack([reference_x, reference_y, reference_theta])
             xs_des = jnp.tile(state_des, (self.num_computations,1)).reshape(self.num_computations, self.horizon, self.state_dim)
             xs = jnp.zeros((self.state_dim*threads,)).reshape(threads,self.state_dim)
-            
-            key = random.PRNGKey(42)
-            parameters_map = random.randint(key,(self.num_parameters*threads,), minval=-200, maxval=200 )/100.
-            self.parameters_map = parameters_map.reshape(threads,self.num_parameters)
-            
+
             self.jit_vectorized_forward_sim(xs, xs_des, self.parameters_map)
 
-            
+
     def reset(self,):
         """Every control class should have a reset function
         """
         return
-    
-    
-    def compute_linear_spline(self, parameters, step):
-        index = 0
-        index = jax.numpy.where(step > self.horizon/4, 2, index)
-        index = jax.numpy.where(step > self.horizon/2, 4, index)
-        index = jax.numpy.where(step > self.horizon-10, 6, index) 
 
-        q = (step*0.01 - 0)/(self.horizon*0.01)
-        v = (1-q)*parameters[index+0] + q*parameters[index+1]
+
+    def sample_parameters(self,):
+        """Sample new parameters: gaussian noise around the best ones of the previous step,
+        plus a share of uniform samples for exploration. The previous best is kept as first sample
+        Returns:
+            (jnp.array): parameters, one row for each rollout
+        """
+        self.key, key_gaussian, key_uniform = random.split(self.key, 3)
+        num_uniform = int(self.num_computations*self.uniform_fraction)
+
+        gaussian = self.best_parameters + self.sigma*random.normal(key_gaussian, (self.num_computations - num_uniform, self.num_parameters))
+        uniform = random.uniform(key_uniform, (num_uniform, self.num_parameters), minval=-self.parameters_limit, maxval=self.parameters_limit)
+        parameters = jnp.clip(jnp.concatenate([gaussian, uniform], axis=0), -self.parameters_limit, self.parameters_limit)
+
+        return parameters.at[0].set(self.best_parameters)
+
+
+    def compute_linear_spline(self, parameters, step):
+        """Piecewise linear commands over 4 equal segments of the horizon:
+        knots of v in parameters[0:5], knots of w in parameters[8:13]
+        """
+        segment_length = self.horizon/4.
+        index = jnp.minimum(jnp.floor(step/segment_length), 3).astype(int)
+        q = step/segment_length - index
+
+        v = (1-q)*parameters[index] + q*parameters[index+1]
         w = (1-q)*parameters[index+8] + q*parameters[index+9]
 
         return v, w
@@ -219,26 +237,19 @@ class Sampling_MPC:
         reference_theta = []
         for i in range(self.horizon):
             reference_theta.append(0.0)
-        reference_x.pop(-1)
-        reference_y.pop(-1)
-        
-        state_vec = jnp.tile(state, (self.num_computations,1))
-        state_des = jnp.column_stack([reference_x, reference_y, reference_theta])
-        state_des_vec = jnp.tile(state_des, (self.num_computations,1)).reshape(self.num_computations, self.horizon, self.state_dim)
-        
-        #time_start = time.time()
-        #key = random.PRNGKey(42)
-        #parameters_map = random.randint(key,(self.num_parameters*1,), minval=-200, maxval=200 )/100.
 
-        
+        state_vec = jnp.tile(state, (self.num_computations,1))
+        state_des = jnp.column_stack([reference_x[:self.horizon], reference_y[:self.horizon], reference_theta])
+        state_des_vec = jnp.tile(state_des, (self.num_computations,1)).reshape(self.num_computations, self.horizon, self.state_dim)
+
         time_start = time.time()
+        self.parameters_map = self.sample_parameters()
         cost = self.jit_vectorized_forward_sim(state_vec, state_des_vec, self.parameters_map)
         #print("cost computation time: ", time.time()-time_start)
 
         best_index = jnp.nanargmin(cost)
-        best_parameters = self.parameters_map[best_index]
-        #time_start = time.time()
-        v, w = self.spline_fun(best_parameters, 0)
+        self.best_parameters = self.parameters_map[best_index]
+        v, w = self.spline_fun(self.best_parameters, 0)
         print("computation time: ", time.time()-time_start)
 
         return np.float64(v), np.float64(w)
@@ -366,12 +377,12 @@ if __name__=="__main__":
         reference_x = []
         reference_y = []
         reference_theta = []
-        for i in range(control.horizon):
+        for i in range(control.horizon+1):
                 reference_x.append(x_des[0])
                 reference_y.append(x_des[1])
                 reference_theta.append(0.0)
 
-        v, w = control.compute_control(x, reference_x, reference_y, reference_theta)
+        v, w = control.compute_control(x, reference_x, reference_y)
         
         print("Control actions: ", [v, w])
         print("Control time: ", time.time()-start_time)

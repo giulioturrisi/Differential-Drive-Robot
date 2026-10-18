@@ -29,13 +29,13 @@ class Robot:
             v (float): linear speed
             w (float): angular speed
         Returns:
-            (np.array): new state of the robot
+            (np.array): new state of the robot (the input state is not modified)
         """
-        state[0] = state[0] + v*cs.np.cos(state[2])*self.dt
-        state[1] = state[1] + v*cs.np.sin(state[2])*self.dt
-        state[2] = state[2] + w*self.dt
+        x_new = state[0] + v*cs.np.cos(state[2])*self.dt
+        y_new = state[1] + v*cs.np.sin(state[2])*self.dt
+        theta_new = state[2] + w*self.dt
 
-        return state
+        return np.array([x_new, y_new, theta_new])
     
     def integrate_jax(self, state, v, w):
         """Integrate the system kynematics
