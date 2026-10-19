@@ -1,0 +1,5 @@
+# The build context is the root of the repo: send only what the dockerfile copies
+*
+!installation/pixi.toml
+!installation/pixi.lock
+!python_scripts/controllers/acados/acados/interfaces/acados_template

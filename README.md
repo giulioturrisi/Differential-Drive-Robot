@@ -58,10 +58,10 @@ curl -fsSL https://pixi.sh/install.sh | sh
 git clone --recurse-submodules https://github.com/giulioturrisi/Differential-Drive-Robot.git
 ```
 
-3. install the environment and build acados and the ROS2 workspace
+3. install and activate the environment (the first time it downloads all the dependencies), then build acados and the ROS2 workspace
 ```sh
 cd Differential-Drive-Robot/installation
-pixi install
+pixi shell                                                         (or pixi shell -e nvidia with an NVIDIA GPU, jax with CUDA)
 pixi run build
 ```
 ```pixi run clean``` removes all the build artifacts
@@ -71,9 +71,9 @@ pixi run build
 All the commands below are pixi tasks defined in ```installation/pixi.toml``` (```pixi task list``` shows them). On each new terminal activate the environment once
 ```sh
 cd Differential-Drive-Robot/installation
-pixi shell
+pixi shell                                                         (or pixi shell -e nvidia)
 ```
-then the tasks can be launched from any folder with ```pixi run <task>```. Without activating the environment, use ```pixi run -m installation <task>``` from the root of the repo.
+then the tasks can be launched from any folder with ```pixi run <task>```, in the activated environment. Without activating the environment, use ```pixi run -m installation <task>``` from the root of the repo (adding ```-e nvidia``` for the nvidia environment).
 
 Follow the commands below to run all the framework:
 

@@ -54,6 +54,16 @@ crocoddyl = "*"
 mujoco-python = "*"
 transforms3d = "*"
 
+# NVIDIA GPU (jax with CUDA), used via `pixi run -e nvidia <task>` ---------
+[feature.nvidia.system-requirements]
+cuda = "12"
+
+[feature.nvidia.dependencies]
+jaxlib = { version = "*", build = "*cuda*" }
+
+[environments]
+nvidia = ["nvidia"]
+
 [pypi-dependencies]
 pgm_reader = "*"
 acados_template = { path = "../python_scripts/controllers/acados/acados/interfaces/acados_template", editable = true }
