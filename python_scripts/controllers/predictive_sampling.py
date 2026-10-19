@@ -84,7 +84,7 @@ class Sampling_MPC:
                     reference_x.append(0.0)
                     reference_y.append(0.0)
                     reference_theta.append(0.0)
-            state_des = jnp.column_stack([reference_x, reference_y, reference_theta])
+            state_des = jnp.column_stack([jnp.asarray(reference_x), jnp.asarray(reference_y), jnp.asarray(reference_theta)])
             xs_des = jnp.tile(state_des, (self.num_computations,1)).reshape(self.num_computations, self.horizon, self.state_dim)
             xs = jnp.zeros((self.state_dim*threads,)).reshape(threads,self.state_dim)
 
@@ -239,7 +239,7 @@ class Sampling_MPC:
             reference_theta.append(0.0)
 
         state_vec = jnp.tile(state, (self.num_computations,1))
-        state_des = jnp.column_stack([reference_x[:self.horizon], reference_y[:self.horizon], reference_theta])
+        state_des = jnp.column_stack([jnp.asarray(reference_x[:self.horizon]), jnp.asarray(reference_y[:self.horizon]), jnp.asarray(reference_theta)])
         state_des_vec = jnp.tile(state_des, (self.num_computations,1)).reshape(self.num_computations, self.horizon, self.state_dim)
 
         time_start = time.time()
@@ -269,7 +269,7 @@ if __name__=="__main__":
             reference_x.append(x_des[0])
             reference_y.append(x_des[1])
             reference_theta.append(0.0)
-    state_des = jnp.column_stack([reference_x, reference_y, reference_theta])
+    state_des = jnp.column_stack([jnp.asarray(reference_x), jnp.asarray(reference_y), jnp.asarray(reference_theta)])
 
     #threads = 2
     xs = jnp.tile(x, (control.num_computations,1)).reshape(control.num_computations, control.state_dim)
