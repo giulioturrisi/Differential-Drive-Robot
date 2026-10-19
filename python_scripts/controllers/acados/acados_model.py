@@ -47,7 +47,7 @@ def export_robot_model() -> AcadosModel:
     # dynamics
     #f_expl = vertcat(v * cos(theta), v * sin(theta), F, theta_d, T)
     unicycle = Robot(dt = 0.01)
-    f_expl = unicycle.fk(x, u)
+    f_expl = vertcat(*unicycle.fk(x, u))
 
     print("f_expl", f_expl)
 

@@ -37,22 +37,24 @@
    }
 }*/
 
-void re_decoder::_pulse(int gpio, int level, uint32_t tick)
+void re_decoder::_pulse(int gpio, int level, uint32_t /*tick*/)
 {
-   bool A,B;
+   // only one channel changes: the other one keeps its last level
+   int A = levA;
+   int B = levB;
    if (gpio == mygpioA) A = level; else B = level;
-   
 
-   if(levA == A && levB == B) return; 
+
+   if(levA == A && levB == B) return;
 
 
    int encoded = (A << 1) | B;
-   int sum = (lastGpio << 2) | encoded;
+   int sum = (lastEncoded << 2) | encoded;
 
    if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) (mycallback)(-1);
    if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) (mycallback)(1);
 
-   lastGpio = encoded;
+   lastEncoded = encoded;
    levA = A;
    levB = B;
 
@@ -78,11 +80,6 @@ re_decoder::re_decoder(int gpioA, int gpioB, re_decoderCB_t callback)
 
    mycallback = callback;
 
-   levA=0;
-   levB=0;
-
-   lastGpio = -1;
-
    gpioSetMode(gpioA, PI_INPUT);
    gpioSetMode(gpioB, PI_INPUT);
 
@@ -90,6 +87,12 @@ re_decoder::re_decoder(int gpioA, int gpioB, re_decoderCB_t callback)
 
    gpioSetPullUpDown(gpioA, PI_PUD_UP);
    gpioSetPullUpDown(gpioB, PI_PUD_UP);
+
+   /* the decoding starts from the actual state of the encoder */
+
+   levA = gpioRead(gpioA);
+   levB = gpioRead(gpioB);
+   lastEncoded = (levA << 1) | levB;
 
    /* monitor encoder level changes */
 

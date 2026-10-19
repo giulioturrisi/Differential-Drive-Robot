@@ -1,0 +1,28 @@
+# Docker image with the pixi environment of installation/pixi.toml (default environment).
+#
+# Build from the root of the repo:
+#   docker build -f installation/docker/integrated_gpu/dockerfile -t ros2_humble .
+#
+# Run (the repo is mounted in /home):
+#   alias ddrive_humble="xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix --device=/dev/dri --device=/dev/input/ -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY --name ddrive_humble ros2_humble"
+#   alias ddrive='docker exec -it ddrive_humble bash'    (to attach a new terminal to the running docker)
+#
+# Inside the container the environment is already active: `pixi run build` the first time,
+# then `pixi run launch_...` as in the README.
+FROM ghcr.io/prefix-dev/pixi:0.63.2-noble
+
+# OpenGL drivers of the host GPU (Intel/AMD), used by rviz and the MuJoCo viewer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-dri libglx-mesa0 libegl-mesa0 \
+    && rm -rf /var/lib/apt/lists/*
+ENV __EGL_VENDOR_LIBRARY_DIRS=/usr/share/glvnd/egl_vendor.d
+
+# The environment lives outside /home, where the repo is mounted at runtime
+RUN pixi config set --global detached-environments /opt/pixi
+
+WORKDIR /home
+COPY installation/pixi.toml installation/pixi.lock installation/
+COPY python_scripts/controllers/acados/acados/interfaces/acados_template python_scripts/controllers/acados/acados/interfaces/acados_template
+RUN pixi install --locked -m installation && pixi clean cache --yes
+
+RUN echo 'eval "$(pixi shell-hook -m /home/installation)"' >> /root/.bashrc

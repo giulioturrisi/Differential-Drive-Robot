@@ -14,7 +14,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name), glob('launch/*.py')),
-        (os.path.join('share', package_name), glob('../../coppeliasim_simulation/urdf_from_coppelia/*'))
+        (os.path.join('share', package_name), glob('../../mujoco_simulation/urdf/*'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,

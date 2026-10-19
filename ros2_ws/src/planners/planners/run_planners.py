@@ -35,9 +35,11 @@ from grid_based.djikstra import Djikstra # type: ignore
 
 from sampling_based.rrt import RRT # type: ignore
 from sampling_based.rrt_primitives import RRT_primitives # type: ignore
+from sampling_based.rrt_star import RRT_star # type: ignore
+from sampling_based.informed_rrt_star import Informed_RRT_star # type: ignore
 
 sys.path.append(dir_path + '/../../../../python_scripts')
-from path_utilities import interpolate_path, filter_map, draw_map # type: ignore
+from path_utilities import resample_path, filter_map, draw_map # type: ignore
 
 # Collection of multiple planners ---------------------------------------
 
@@ -65,7 +67,7 @@ class Planners(Node):
         self.map_origin = np.zeros(2)
         self.map = np.zeros((10,10))
         self.map_resolution = 0.05
-        self.max_iteration = 1000
+        self.max_iteration = 20000
         self.visualize = False
 
         # Plan only if there is a request and a map---------------------------------------
@@ -76,8 +78,9 @@ class Planners(Node):
         self.safety = 5
         self.useFilteredMap = True
 
-        # Spline dt ---------------------------------------
+        # Path sampling: the controllers take one point every dt, so the robot moves at reference_speed ----------
         self.dt = 0.01
+        self.reference_speed = 0.2
 
 
         # Plan Choice ---------------------------------------
@@ -133,18 +136,23 @@ class Planners(Node):
             elif(self.which_planner == 6):
                 planner = RRT_primitives(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
 
+            elif(self.which_planner == 7):
+                planner = RRT_star(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+
+            elif(self.which_planner == 8):
+                planner = Informed_RRT_star(state_shifted, goal_shifted, self.map, round(self.map_resolution,2))
+
             path = planner.plan(self.max_iteration,self.visualize)
             
 
-            # Spline for smoothing ---------------------------------------
-            spline, xs = interpolate_path(path, self.dt)
+            # Spline for smoothing, one point every reference_speed*dt ---------------------------------------
+            path_points = resample_path(path, self.reference_speed*self.dt/self.map_resolution)
 
 
             # Publish new path ---------------------------------------
             path_msg = Path()
             path_msg.header.frame_id = "map"
-            for i in range(int(len(path)/self.dt)):
-                temp = spline(xs[i])
+            for temp in path_points:
                 poseStamped = PoseStamped()
                 poseStamped.pose.position.x = temp[0]*self.map_resolution + self.map_origin[0]
                 poseStamped.pose.position.y = temp[1]*self.map_resolution + self.map_origin[1]
@@ -218,6 +226,8 @@ class Planners(Node):
         print("4: Djikstra")
         print("5: RRT")
         print("6: RRT with primitives")
+        print("7: RRT*")
+        print("8: Informed RRT*")
         print("---------------------------------------------------")
         while True:
             new_planner = input(">>> ")
@@ -239,6 +249,12 @@ class Planners(Node):
             elif(new_planner == "6"):
                 self.which_planner = 6
                 print("## Planner started with RRT with primitives ##")
+            elif(new_planner == "7"):
+                self.which_planner = 7
+                print("## Planner started with RRT* ##")
+            elif(new_planner == "8"):
+                self.which_planner = 8
+                print("## Planner started with Informed RRT* ##")
             else:
                 print("Wrong input")
                 continue

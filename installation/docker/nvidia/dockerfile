@@ -1,0 +1,29 @@
+# Docker image with the pixi environment of installation/pixi.toml (nvidia environment, jax with CUDA).
+# Requires the NVIDIA Container Toolkit on the host.
+#
+# Build from the root of the repo:
+#   docker build -f installation/docker/nvidia/dockerfile -t ros2_humble .
+#
+# Run (the repo is mounted in /home):
+#   alias ddrive_humble='xhost + && docker run -it --rm -v /path/to/your_folder/Differential-Drive-Robot:/home/ -v /tmp/.X11-unix:/tmp/.X11-unix:rw --device=/dev/input/ -e DISPLAY=$DISPLAY -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY -e QT_X11_NO_MITSHM=1 --gpus all --name ddrive_humble ros2_humble'
+#   alias ddrive='docker exec -it ddrive_humble bash'    (to attach a new terminal to the running docker)
+#
+# Inside the container the environment is already active: `pixi run build` the first time,
+# then `pixi run launch_...` as in the README.
+FROM ghcr.io/prefix-dev/pixi:0.63.2-noble
+
+# The NVIDIA driver (CUDA and OpenGL) is mounted by the container toolkit
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV __EGL_VENDOR_LIBRARY_DIRS=/usr/share/glvnd/egl_vendor.d
+
+# The environment lives outside /home, where the repo is mounted at runtime
+RUN pixi config set --global detached-environments /opt/pixi
+
+WORKDIR /home
+COPY installation/pixi.toml installation/pixi.lock installation/
+COPY python_scripts/controllers/acados/acados/interfaces/acados_template python_scripts/controllers/acados/acados/interfaces/acados_template
+# No GPU is visible during the build: mock the CUDA driver (the real one is used at runtime)
+RUN CONDA_OVERRIDE_CUDA=12 pixi install --locked -m installation -e nvidia && pixi clean cache --yes
+
+RUN echo 'eval "$(pixi shell-hook -m /home/installation -e nvidia)"' >> /root/.bashrc

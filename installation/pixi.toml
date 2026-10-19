@@ -1,0 +1,91 @@
+[workspace]
+name = "ddrive_env"
+description = "Control of a real and simulated differential drive robot via ROS2 Humble"
+authors = ["Giulio Turrisi <giulio.turrisi@iit.it>"]
+channels = ["robostack-humble", "conda-forge"]
+platforms = ["linux-64"]
+
+# All the paths below are relative to this folder (installation/)
+
+[activation]
+# Overlay of the colcon workspace (missing until the first `pixi run build`)
+scripts = ["../ros2_ws/install/setup.sh"]
+
+[activation.env]
+ACADOS_SOURCE_DIR = "$PIXI_PROJECT_ROOT/../python_scripts/controllers/acados/acados"
+LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:$PIXI_PROJECT_ROOT/../python_scripts/controllers/acados/acados/lib"
+
+[dependencies]
+python = "*"
+
+# ROS2 -----------------------------------------------------------------
+ros-humble-desktop = "*"
+ros-humble-robot-state-publisher = "*"
+ros-humble-slam-toolbox = "*"
+ros-humble-joy = "*"
+ros-humble-teleop-twist-joy = "*"
+ros-humble-plotjuggler-ros = "*"
+
+# Build tools ----------------------------------------------------------
+colcon-common-extensions = "*"
+c-compiler = "*"
+cxx-compiler = "*"
+cmake = "*"
+make = "*"
+pkg-config = "*"
+
+# acados (built from source in python_scripts/controllers/acados/acados)
+libblasfeo = "*"
+
+# kiss-icp (built from source in ros2_ws/src/external)
+eigen = "*"
+sophus = "*"
+tsl_robin_map = "*"
+tbb-devel = "*"
+
+# Python ---------------------------------------------------------------
+numpy = "*"
+scipy = "*"
+matplotlib = "*"
+casadi = "*"
+numba = "*"
+jax = "*"
+crocoddyl = "*"
+mujoco-python = "*"
+transforms3d = "*"
+
+# NVIDIA GPU (jax with CUDA), used via `pixi run -e nvidia <task>` ---------
+[feature.nvidia.system-requirements]
+cuda = "12"
+
+[feature.nvidia.dependencies]
+jaxlib = { version = "*", build = "*cuda*" }
+
+[environments]
+nvidia = ["nvidia"]
+
+[pypi-dependencies]
+pgm_reader = "*"
+acados_template = { path = "../python_scripts/controllers/acados/acados/interfaces/acados_template", editable = true }
+
+[tasks]
+# Build ----------------------------------------------------------------
+# blasfeo from conda-forge: casadi already ships it, a second copy would clash at runtime
+build-acados = { cmd = "cmake -S . -B build -DACADOS_WITH_SYSTEM_BLASFEO:BOOL=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DACADOS_INSTALL_DIR=$ACADOS_SOURCE_DIR && cmake --build build --target install --parallel", cwd = "../python_scripts/controllers/acados/acados", description = "Build and install acados (submodule)" }
+build = { cmd = "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release", cwd = "../ros2_ws", depends-on = ["build-acados"], description = "Build acados and the ROS2 workspace" }
+clean = { cmd = "rm -rf ros2_ws/build ros2_ws/install ros2_ws/log python_scripts/controllers/acados/acados/build python_scripts/controllers/acados/acados/lib python_scripts/controllers/acados/acados/include", cwd = "..", description = "Remove the build artifacts of acados and of the ROS2 workspace" }
+
+# Simulation -----------------------------------------------------------
+launch_sim_kinematics = { cmd = "python run_simulation.py --mode kinematics", cwd = "../mujoco_simulation", description = "MuJoCo scene with kinematics" }
+launch_sim_dynamics = { cmd = "python run_simulation.py --mode dynamics", cwd = "../mujoco_simulation", description = "MuJoCo scene with dynamics" }
+
+# ROS2 nodes -----------------------------------------------------------
+launch_joy = { cmd = "ros2 launch teleop_twist_joy teleop-launch.py joy_config:=xbox", description = "Joystick teleoperation" }
+launch_rviz = { cmd = "rviz2 -d ../ros2_ws/src/utilities/rviz_config/common.rviz", description = "Visualization" }
+launch_planners = { cmd = "ros2 run planners run_planners", description = "Planning" }
+# cwd: acados exports its generated solver (codegen_ocp_*) in the working directory
+launch_controllers = { cmd = "ros2 run controllers run_controllers", cwd = "../python_scripts/controllers/acados", description = "Control" }
+launch_lidar_odometry = { cmd = "ros2 launch pointcloud_to_laserscan sample_laserscan_to_pointcloud_launch.py | ros2 launch kiss_icp odometry.launch.py topic:=/pointcloud visualize:=false child_frame:=base_footprint max_range:=5.0 min_range:=0.2", description = "tf and kiss-icp" }
+launch_slam = { cmd = "ros2 launch slam_toolbox online_async_launch.py", description = "slam-toolbox" }
+launch_state_publisher = { cmd = "ros2 launch state_estimation state_publisher_launch.py", cwd = "../ros2_ws", description = "Filter for encoder and lidar" }
+launch_plotjuggler = { cmd = "ros2 run plotjuggler plotjuggler", description = "PlotJuggler" }

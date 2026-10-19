@@ -1,0 +1,57 @@
+<!--
+  Environment of the old CoppeliaSim scenes (kinematics.ttt / dynamics.ttt):
+  5x5 m floor, 20 cm high walls (5 cm thick) and a plant, same poses.
+-->
+<mujoco model="differential_drive_scene">
+  <include file="differential_drive.xml"/>
+
+  <option timestep="0.002" integrator="implicitfast"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <global azimuth="90" elevation="-60"/>
+  </visual>
+
+  <default>
+    <default class="wall">
+      <geom type="box" material="wall"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="floor" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+      markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="floor" texture="floor" texuniform="true" texrepeat="4 4" reflectance="0.1"/>
+    <material name="wall" rgba="0.85 0.85 0.8 1"/>
+    <material name="plant" rgba="0.25 0.55 0.25 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 3" dir="0 0 -1" directional="true"/>
+    <geom name="floor" type="plane" size="2.5 2.5 0.05" material="floor"/>
+
+    <geom name="wall_0" class="wall" pos="-0.3 -1.475 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_1" class="wall" pos="0.225 -1.475 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_2" class="wall" pos="1.275 -1.475 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_3" class="wall" pos="-0.825 -1 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_4" class="wall" pos="0.75 -1 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_5" class="wall" pos="1.75 -1 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_6" class="wall" pos="-1.3 -0.475 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_7" class="wall" pos="-1.8 0 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_8" class="wall" pos="1.225 0 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_9" class="wall" pos="1.75 0 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_10" class="wall" pos="-1.025 0.375 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_11" class="wall" pos="0.75 0.5 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_12" class="wall" pos="-1.8 0.975 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_13" class="wall" pos="1.75 1 0.1" size="0.025 0.5 0.1"/>
+    <geom name="wall_14" class="wall" pos="-1.025 1.4 0.1" size="0.025 0.05 0.1"/>
+    <geom name="wall_15" class="wall" pos="-1.325 1.475 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_16" class="wall" pos="-1.025 1.475 0.1" size="0.125 0.025 0.1"/>
+    <geom name="wall_17" class="wall" pos="-0.5 1.475 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_18" class="wall" pos="0.5 1.475 0.1" size="0.5 0.025 0.1"/>
+    <geom name="wall_19" class="wall" pos="1.25 1.475 0.1" size="0.5 0.025 0.1"/>
+
+    <geom name="plant" type="cylinder" pos="0.525 -1.2 0.165" size="0.15 0.165" material="plant"/>
+  </worldbody>
+</mujoco>

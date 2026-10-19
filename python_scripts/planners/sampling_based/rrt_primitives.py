@@ -10,7 +10,7 @@ class RRT_primitives:
         """Init func
         Args:
             start (np.array): actual state of the robot
-            goal (np.array): desired goal 
+            goal (np.array): desired goal
             map (np.array): multidimensional array containing the map
             resolution (float): dimension of each cell
         """
@@ -19,32 +19,35 @@ class RRT_primitives:
         self.goal = np.array([int(goal[0]/resolution), int(goal[1]/resolution)])
 
 
-        map_shape = map.shape 
-        self.height = map_shape[0]  
-        self.width = map_shape[1] 
+        map_shape = map.shape
+        self.height = map_shape[0]
+        self.width = map_shape[1]
 
-        
-        self.multipling_factor = 5
+
+        self.multipling_factor = 5          # length of a primitive [cells]
+        self.turning_angle = math.pi/4.     # heading change of a turning primitive [rad]
         self.dt = 1
-        self.goal_bias = 0.7
+        self.goal_bias = 0.3                # probability of sampling the goal
+        self.goal_tolerance = self.multipling_factor      # the last straight connection is at most one primitive long [cells]
+        self.collision_step = 0.5           # distance between two collision checks along a primitive [cells]
 
         self.map = map
 
         #x, y, theta, control inputs, parent_node,
-        self.node_opened = np.array([[self.start[0], self.start[1], start[2], 0, 0, -1]])
+        self.node_opened = np.array([[self.start[0], self.start[1], start[2], 0, 0, -1]], dtype=float)
 
-        #primitives
+        #primitives [v, w], w > 0 turns counterclockwise
         forward = [1,0]
         backward = [-1,0]
-        turn_left = [0, -1]
-        turn_right = [0, 1]
-        arc_left_forward = [1, -1]
-        arc_right_forward = [1, 1]
-        arc_left_backward = [-1, -1];
-        arc_right_backward = [-1, 1];
+        turn_left = [0, 1]
+        turn_right = [0, -1]
+        arc_left_forward = [1, 1]
+        arc_right_forward = [1, -1]
+        arc_left_backward = [-1, 1];
+        arc_right_backward = [-1, -1];
 
         self.primitives = [forward, backward , turn_left, turn_right, arc_left_forward, arc_right_forward, arc_left_backward, arc_right_backward]
-    
+
 
     def sample(self,):
         """Sample a new random point
@@ -52,7 +55,7 @@ class RRT_primitives:
             (list): x and y coordinate of the new point
         """
         rand = np.random.rand()
-        if(rand > self.goal_bias):
+        if(rand < self.goal_bias):
             desired_node = [self.goal[0], self.goal[1]]
         else:
             rand_x = np.random.rand()*self.height;
@@ -68,62 +71,59 @@ class RRT_primitives:
         Returns:
             (int): index in the global list of a node point
         """
-        best_node = []
-        best_cost = 1000
-        best_index = 0
-        for i in range(len(self.node_opened)):
-            temp = self.node_opened[i]
-
-            h = np.sqrt(np.power(desired_node[0]-(temp[0]),2) + np.power(desired_node[1]-(temp[1]),2))
-            if(h < best_cost):
-                best_cost = h
-                best_node = temp
-                best_index = i
-        return best_index
+        distances = np.hypot(self.node_opened[:, 0] - desired_node[0], self.node_opened[:, 1] - desired_node[1])
+        return int(np.argmin(distances))
 
 
-    def sample_primitives(self,rand_index):
-        """Connect two node with a random sampled primitives
+    def simulate_primitive(self, node, primitive):
+        """Integrate a primitive starting from a node, checking collisions along the motion
+        Args:
+            node (np.array): starting node
+            primitive (list): normalized linear and angular speed of the primitive
+        Returns:
+            (list): final x, y, theta and control inputs (None if there is a collision)
+        """
+        v = primitive[0]*self.multipling_factor
+        w = primitive[1]*self.turning_angle
+
+        num_steps = max(1, int(math.ceil(abs(v)*self.dt/self.collision_step)))
+        x = node[0]
+        y = node[1]
+        theta = node[2]
+        for _ in range(num_steps):
+            x_previous, y_previous = x, y
+            x = x + v*math.cos(theta)*self.dt/num_steps
+            y = y + v*math.sin(theta)*self.dt/num_steps
+            theta = theta + w*self.dt/num_steps
+            if(self.segment_in_collision([x_previous, y_previous], [x, y])):
+                return None
+
+        return [x, y, theta, v, w]
+
+
+    def sample_primitives(self, near_index, desired_node):
+        """Connect two node with the primitive that gets closer to the desired node
         Args:
             near_index (int): index of the nearest node
             desired_node (list): x-y coordinate of the desired node
         Returns:
-            (list): a new node is generated connecting the near node and the desired node with the line
-            (bool): boolean for reporting collision using the primitive
+            (list): a new node is generated connecting the near node and the desired node with a primitive
+            (bool): boolean for reporting collision of all the primitives
         """
-        #rand_index = np.random.randint(self.node_opened.shape[0])
-        near_node = self.node_opened[rand_index]
-        
-        len_primitives = len(self.primitives)
-        rand_primitive_index = np.random.randint(len_primitives)
-        primitive = self.primitives[rand_primitive_index]
+        near_node = self.node_opened[near_index]
 
-        v = primitive[0]*self.multipling_factor
-        w = primitive[1]*self.multipling_factor
+        best_node = None
+        best_distance = np.inf
+        for primitive in self.primitives:
+            new_node = self.simulate_primitive(near_node, primitive)
+            if(new_node is None):
+                continue
+            distance = math.hypot(new_node[0] - desired_node[0], new_node[1] - desired_node[1])
+            if(distance < best_distance):
+                best_distance = distance
+                best_node = new_node + [near_index]
 
-
-        x_new1 = near_node[0] + v*math.cos(near_node[2])*self.dt/3.
-        y_new1 = near_node[1] + v*math.sin(near_node[2])*self.dt/3.
-        theta_new1 = near_node[2] + w*self.dt/3.
-        collision_1 = self.in_collision([x_new1, y_new1, theta_new1])
-
-        x_new2 = x_new1 + v*math.cos(theta_new1)*self.dt/3.
-        y_new2 = y_new1 + v*math.sin(theta_new1)*self.dt/3.
-        theta_new2 = theta_new1 + w*self.dt/3.
-        collision_2 = self.in_collision([x_new2, y_new2, theta_new2])
-
-        
-        x_new3 = x_new2 + v*math.cos(theta_new2)*self.dt/3.
-        y_new3 = y_new2 + v*math.sin(theta_new2)*self.dt/3.
-        theta_new3 = theta_new2 + w*self.dt/3.
-        collision_3 = self.in_collision([x_new3, y_new3, theta_new3])     
-        
-        collision = collision_1 or collision_2 or collision_3
-
-
-        new_node = [x_new3, y_new3, theta_new3, v, w, rand_index]
-
-        return new_node, collision
+        return best_node, best_node is None
 
 
 
@@ -133,7 +133,7 @@ class RRT_primitives:
             (list): a new feasible starting goal
         """
         best_node = []
-        best_cost = 1000
+        best_cost = np.inf
         for i in range(self.height):
             for j in range(self.width):
                 temp = self.map[i][j]
@@ -144,22 +144,62 @@ class RRT_primitives:
         return best_node
 
 
+    def cell_occupied(self, i, j):
+        """Check if a cell is not free (outside the map is not free)
+        Args:
+            i (int): x index of the cell
+            j (int): y index of the cell
+        Returns:
+            (bool): boolean for occupied cell
+        """
+        if(i < 0 or j < 0 or i >= self.height or j >= self.width):
+            return True
+        return self.map[i][j] != 254
+
+
     def in_collision(self, node_to_check):
-        """Check multiple point collisions while connecting two nodes
+        """Check if a node is in collision (outside the map is a collision)
         Args:
             node_to_check (list): x-y coordinate of the node to check
-            nearest_node_index (int): starting node of the primitive
         Returns:
             (bool): boolean for collision checking
         """
-        x = node_to_check[0]
-        y = node_to_check[1]
+        return self.cell_occupied(int(round(node_to_check[0])), int(round(node_to_check[1])))
 
-        if(self.map[int(round(x))][int(round(y))] != 254):
-            return True
 
+    def segment_in_collision(self, node_from, node_to):
+        """Check every cell crossed by the straight segment between two nodes (grid traversal of
+        Amanatides and Woo), the cell (i, j) contains the points rounding to (i, j)
+        Args:
+            node_from (list): x-y coordinate of the first node
+            node_to (list): x-y coordinate of the second node
+        Returns:
+            (bool): boolean for collision checking
+        """
+        x_start, y_start = node_from[0] + 0.5, node_from[1] + 0.5
+        x_end, y_end = node_to[0] + 0.5, node_to[1] + 0.5
+        i, j = math.floor(x_start), math.floor(y_start)
+        i_end, j_end = math.floor(x_end), math.floor(y_end)
+        dx, dy = x_end - x_start, y_end - y_start
+
+        step_i = 1 if dx > 0 else -1
+        step_j = 1 if dy > 0 else -1
+        t_max_x = ((i + (step_i > 0)) - x_start)/dx if dx != 0 else math.inf
+        t_max_y = ((j + (step_j > 0)) - y_start)/dy if dy != 0 else math.inf
+        t_delta_x = abs(1/dx) if dx != 0 else math.inf
+        t_delta_y = abs(1/dy) if dy != 0 else math.inf
+
+        for _ in range(abs(i_end - i) + abs(j_end - j) + 1):
+            if(self.cell_occupied(i, j)):
+                return True
+            if(t_max_x < t_max_y):
+                t_max_x += t_delta_x
+                i += step_i
+            else:
+                t_max_y += t_delta_y
+                j += step_j
         return False
-                        
+
 
     def check_goal(self, next_cell):
         """Check if the goal is reached
@@ -172,7 +212,7 @@ class RRT_primitives:
         y = next_cell[1]
 
         h = np.sqrt(np.power(self.goal[0]-x,2) + np.power(self.goal[1]-y,2))
-        if (h < 0.1):
+        if (h < self.goal_tolerance):
             return True
         else:
             return False
@@ -185,9 +225,9 @@ class RRT_primitives:
             print("Start is unfeasible!")
             new_start = self.find_new_start()
             print("New start found..")
-            self.start = new_start
-            self.node_opened = []
-            self.node_opened.append([self.start[0], self.start[1], 0])
+            self.start = np.array(new_start)
+            start_theta = self.node_opened[0][2]
+            self.node_opened = np.array([[self.start[0], self.start[1], start_theta, 0, 0, -1]], dtype=float)
 
         return
 
@@ -208,13 +248,13 @@ class RRT_primitives:
         path = [[last_node[0], last_node[1]]]
         last_node = self.node_opened[int(last_node[-1])]
 
-        for _ in range(self.width*self.width):
+        for _ in range(self.height*self.width):
             temp = last_node.tolist()
             path.append([temp[0], temp[1]])
             if(last_node[0] == self.start[0] and last_node[1] == self.start[1]):
                 break
             last_node = self.node_opened[int(last_node[-1])]
-        
+
         return path
 
 
@@ -235,27 +275,31 @@ class RRT_primitives:
             rgb_image = np.stack([self.map]*3, axis=2)/255.
             rgb_image[self.start[0]][self.start[1]] = [1,0,0]
             rgb_image[self.goal[0]][self.goal[1]] = [0,0,1]
-            f = plt.figure("Planning")   
-            ax = f.gca() 
+            f = plt.figure("Planning")
+            ax = f.gca()
             h = ax.imshow(rgb_image)
 
 
         while (finish == 0 and iterator <= max_iteration):
+            # every iteration counts, also the ones that end in a collision
+            iterator += 1
+
             sample_node = self.sample()
             nearest_node_index = self.find_nearest_node(sample_node)
-            new_node, collision = self.sample_primitives(nearest_node_index)
-            
+            new_node, collision = self.sample_primitives(nearest_node_index, sample_node)
+
             #check collision
             if(collision == True):
                 continue
 
             self.node_opened = np.concatenate((self.node_opened, [new_node]), axis = 0)
-            finish = self.check_goal(new_node)
-            if(finish == 1):
+
+            # close to the goal: connect it with a straight segment if free
+            if(self.check_goal(new_node) and not self.segment_in_collision(new_node, self.goal)):
+                goal_node = [self.goal[0], self.goal[1], new_node[2], 0, 0, len(self.node_opened) - 1]
+                self.node_opened = np.concatenate((self.node_opened, [goal_node]), axis = 0)
+                finish = 1
                 break
-
-
-            iterator += 1
 
             if(visualize):
                 rgb_image[int(round(new_node[0]))][int(round(new_node[1]))] = [0,1,0]
@@ -266,7 +310,6 @@ class RRT_primitives:
 
         return self.take_path(finish)
 
-   
 
 
 

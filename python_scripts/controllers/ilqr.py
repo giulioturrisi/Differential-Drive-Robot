@@ -150,7 +150,9 @@ class iLQR:
             
             # calculate Q_u, Qx
             Q_u = (self.R@u) + B_step.T@V_x
-            Q_x = self.Q@(state_actual - state_des) + A_step.T@V_x
+            state_error = state_actual - state_des
+            state_error[2] = np.arctan2(np.sin(state_error[2]), np.cos(state_error[2]))
+            Q_x = self.Q@state_error + A_step.T@V_x
 
 
             k = -pinv_Q_uu@Q_u
@@ -256,14 +258,16 @@ class iLQR:
         """
         state_des_vec = np.zeros((self.horizon+1,3,1))
 
-        ref_yaw = 0
+        ref_yaw = state[2]
         for k in range(0,self.horizon):
             ref_x = reference_x[k]
             ref_y = reference_y[k]
-            
+
             ref_x_d = (reference_x[k+1] - ref_x)/self.dt
             ref_y_d = (reference_y[k+1] - ref_y)/self.dt
-            ref_yaw = np.arctan2(ref_y_d, ref_x_d) 
+            # repeated reference points (end of the path) have no heading: keep the previous one
+            if(np.hypot(ref_x_d, ref_y_d) > 1e-3):
+                ref_yaw = np.arctan2(ref_y_d, ref_x_d)
             
             state_des_vec[k] = np.array([ref_x , ref_y, ref_yaw]).reshape(self.state_dim,1)
 
@@ -306,10 +310,10 @@ if __name__=="__main__":
     state = np.zeros(3)
     state[1] = -1
     state[2] = 0.001 #yaw
-    state_des = np.zeros((controller.horizon,3,1))
+    state_des = np.zeros((controller.horizon+1,3,1))
     
     start_time = time.time()
-    controller.compute_control(state, reference_x=state_des[:,0], reference_y=state_des[:,1])
+    controller.compute_control(state, reference_x=state_des[:,0,0], reference_y=state_des[:,1,0])
     print("Control time: ", time.time()-start_time)
 
     plt.plot(controller.state_vec[:,1])

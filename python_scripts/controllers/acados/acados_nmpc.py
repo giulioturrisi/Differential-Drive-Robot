@@ -142,6 +142,8 @@ class Acados_NMPC:
 
         # Solve ocp -----------------------------------------------------------------
         status = self.acados_ocp_solver.solve()
+        if(status != 0):
+            print("Acados NMPC: solver returned status", status)
 
         control = self.acados_ocp_solver.get(0, "u")
 

@@ -1,3 +1,6 @@
+import heapq
+import math
+
 import numpy as np # type: ignore
 import matplotlib.pyplot as plt # type: ignore
 
@@ -10,7 +13,7 @@ class Greedy_Best_First_Search:
         """Init func
         Args:
             start (np.array): actual state of the robot
-            goal (np.array): desired goal 
+            goal (np.array): desired goal
             map (np.array): multidimensional array containing the map
             resolution (float): dimension of each cell
         """
@@ -18,30 +21,38 @@ class Greedy_Best_First_Search:
         self.start = np.array([int(start[0]/resolution), int(start[1]/resolution)])
         self.goal = np.array([int(goal[0]/resolution), int(goal[1]/resolution)])
 
+        map_shape = map.shape
+        self.height = map_shape[0]
+        self.width = map_shape[1]
 
-        map_shape = map.shape 
-        self.height = map_shape[0]  
-        self.width = map_shape[1] 
 
-        
         self.map = map
 
-        # node to expand
+        self.init_search()
+
+
+    def init_search(self,):
+        """Initialize the search from the start cell
+        """
+        # node to expand, ordered only by [distance from the goal, x, y]
         self.frontiers = []
-        self.frontiers.append([self.start[0], self.start[1], 0])
+        heapq.heappush(self.frontiers, (0.0, int(self.start[0]), int(self.start[1])))
 
         # node opened before
         self.come_from = np.ones((self.height,self.width,2),int)*-1;
         self.come_from[self.start[0]][self.start[1]] = [self.start[0],self.start[1]]
 
 
-        self.cost_so_far = np.ones((self.height,self.width,1),int)*1000;
-        self.cost_so_far[self.start[0]][self.start[1]] = 0
+        self.closed = np.zeros((self.height,self.width), bool)
 
-        self.graph_cost = 1
-        
 
         self.node_opened = []
+
+
+    def heuristic(self, x, y):
+        """Manhattan distance from the goal
+        """
+        return abs(self.goal[0]-x) + abs(self.goal[1]-y)
 
 
     def find_next_cell(self,):
@@ -49,22 +60,15 @@ class Greedy_Best_First_Search:
         Returns:
             (list): x and y coordinate of the new point
         """
-        best_node = []
-        best_cost = 1000
-        best_index = -1
-        for i in range(len(self.frontiers)):
-            temp = self.frontiers[i][:2]
-            temp_cost = self.frontiers[i][2]
-            if(temp_cost < best_cost):
-                best_cost = temp_cost
-                best_node = temp
-                best_index = i
-
-        if(best_index == -1):
-            return best_node
-        else:
-            self.frontiers.pop(best_index)
-            return best_node
+        while(len(self.frontiers) > 0):
+            _, x, y = heapq.heappop(self.frontiers)
+            # a cell can be in the frontier more than once, only its best entry is expanded
+            if(self.closed[x][y]):
+                continue
+            self.closed[x][y] = True
+            self.node_opened.append([x, y])
+            return [x, y]
+        return []
 
 
     def find_nearest_cell(self,desired_cell):
@@ -75,7 +79,7 @@ class Greedy_Best_First_Search:
             (int): index in the global list of node point
         """
         best_node = []
-        best_cost = 1000
+        best_cost = np.inf
         for i in range(len(self.node_opened)):
             temp = self.node_opened[i]
             #h = abs(self.goal[0]-(temp[0])) + abs(self.goal[1]-(temp[1]))
@@ -92,7 +96,7 @@ class Greedy_Best_First_Search:
             (list): a new feasible starting goal
         """
         best_node = []
-        best_cost = 1000
+        best_cost = np.inf
         for i in range(self.height):
             for j in range(self.width):
                 temp = self.map[i][j]
@@ -108,25 +112,27 @@ class Greedy_Best_First_Search:
         Args:
             parent (list): cell to expand
         """
-        x_parent = parent[0]
-        y_parent = parent[1]
+        x_parent = parent[0];
+        y_parent = parent[1];
 
         #need to check 8 sons!
         for i in range(-1,2):
-            for j in range(-1,2):   
+            for j in range(-1,2):
                 if(i == 0 and j == 0):
-                    continue
+                    continue;
                 x_new = x_parent + i
                 y_new = y_parent + j
 
-                if(x_new < self.height and y_new < self.width):
-                    if(self.map[x_new][y_new] != 254):
-                        break
-                    new_cost = abs(self.goal[0]-(x_new)) + abs(self.goal[1]-(y_new))
-                    if(np.array_equal(self.come_from[x_new][y_new],np.array([-1,-1])) or new_cost < self.cost_so_far[x_new][y_new]):
-                        self.frontiers.append([x_new, y_new, new_cost])     
-                        self.come_from[x_new][y_new] = [x_parent,y_parent]  # where i come from!      
-                        self.cost_so_far[x_new][y_new] = new_cost
+                if(x_new < 0 or y_new < 0 or x_new >= self.height or y_new >= self.width):
+                    continue
+                if(self.map[x_new][y_new] != 254 or self.closed[x_new][y_new]):
+                    continue
+
+                # each cell enters the frontier only once, the first time it is discovered
+                if(np.array_equal(self.come_from[x_new][y_new],np.array([-1,-1]))):
+                    h = self.heuristic(x_new, y_new)
+                    heapq.heappush(self.frontiers, (h, x_new, y_new))
+                    self.come_from[x_new][y_new] = [x_parent,y_parent]  # where i come from!
 
 
     def check_goal(self,next_cell):
@@ -136,8 +142,8 @@ class Greedy_Best_First_Search:
         Returns:
             (bool): boolean for goal reaching
         """
-        x = next_cell[0]
-        y = next_cell[1]
+        x = next_cell[0];
+        y = next_cell[1];
         return 1 if (x == self.goal[0] and y == self.goal[1]) else 0
 
 
@@ -148,17 +154,8 @@ class Greedy_Best_First_Search:
             print("Start is unfeasible!")
             new_start = self.find_new_start()
             print("New start found..")
-            self.start = new_start
-            self.frontiers = []
-            self.frontiers.append([self.start[0], self.start[1], 0])
-
-            # node opened before
-            self.come_from = np.ones((self.height,self.width,2),int)*-1;
-            self.come_from[self.start[0]][self.start[1]] = [self.start[0],self.start[1]]
-
-
-            self.cost_so_far = np.ones((self.height,self.width,1),int)*1000;
-            self.cost_so_far[self.start[0]][self.start[1]] = 0
+            self.start = np.array(new_start)
+            self.init_search()
         return
 
 
@@ -177,14 +174,12 @@ class Greedy_Best_First_Search:
         path = [last_cell]
         last_cell = self.come_from[last_cell[0]][last_cell[1]]
 
-
-
-        for _ in range(self.width*self.width):
-            path.append(last_cell.tolist()) 
+        for _ in range(self.height*self.width):
+            path.append(last_cell.tolist())
             if(last_cell[0] == self.start[0] and last_cell[1] == self.start[1]):
                 break
             last_cell = self.come_from[last_cell[0]][last_cell[1]]
-
+        #print("path",path)
         return path
 
 
@@ -205,16 +200,16 @@ class Greedy_Best_First_Search:
             rgb_image = np.stack([self.map]*3, axis=2)/255.
             rgb_image[self.start[0]][self.start[1]] = [1,0,0]
             rgb_image[self.goal[0]][self.goal[1]] = [0,0,1]
-            f = plt.figure("Planning")   
-            ax = f.gca() 
-            h = ax.imshow(rgb_image)   
+            f = plt.figure("Planning")
+            ax = f.gca()
+            h = ax.imshow(rgb_image)
 
 
         while (finish == 0 and iterator <= max_iteration):
             next_cell = self.find_next_cell()
             if(next_cell == []):
                 break
-            
+
             finish = self.check_goal(next_cell)
             if(finish == 1):
                 break
@@ -231,7 +226,6 @@ class Greedy_Best_First_Search:
 
         return self.take_path(finish)
 
-   
 
 
 

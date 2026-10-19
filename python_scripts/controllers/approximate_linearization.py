@@ -21,11 +21,16 @@ class Approximate_linearization:
 
         self.dt = dt
 
+        # below this reference speed the desired heading is not defined
+        self.min_reference_speed = 1e-3
+
+        self.reset()
+
     def reset(self,):
         """Every control class should have a reset function
         """
         self.previous_reference = None
-        self.previous_reference_dot = [0.0 ,0.0]
+        self.previous_reference_dot = None
 
 
     def compute_control(self, initial_state, reference_x, reference_y):
@@ -42,50 +47,35 @@ class Approximate_linearization:
         state_yaw = initial_state[2]
 
 
+        # Reference velocity and acceleration by finite differences ---------
+        reference_x_dot = 0.0
+        reference_y_dot = 0.0
+        reference_x_ddot = 0.0
+        reference_y_ddot = 0.0
         if(self.previous_reference is not None):
-            previous_reference_x = self.previous_reference[0]
-            previous_reference_y = self.previous_reference[1] 
+            reference_x_dot = (reference_x - self.previous_reference[0])/self.dt;
+            reference_y_dot = (reference_y - self.previous_reference[1])/self.dt;
 
-            reference_x_dot = (reference_x - previous_reference_x)/self.dt;
-            reference_y_dot = (reference_y - previous_reference_y)/self.dt;
-
-            reference_x_ddot = (reference_x_dot - self.previous_reference_dot[0])/self.dt
-            reference_y_ddot = (reference_y_dot - self.previous_reference_dot[1])/self.dt              
-            
-            self.previous_reference = [reference_x, reference_y] 
+            if(self.previous_reference_dot is not None):
+                reference_x_ddot = (reference_x_dot - self.previous_reference_dot[0])/self.dt
+                reference_y_ddot = (reference_y_dot - self.previous_reference_dot[1])/self.dt
             self.previous_reference_dot = [reference_x_dot, reference_y_dot]
-        else:
-            reference_x_dot = 0.01
-            reference_y_dot = 0.01
-            
-            reference_x_ddot = 0.01
-            reference_y_ddot = 0.01
+        self.previous_reference = [reference_x, reference_y]
 
-          
 
         vd = math.sqrt(reference_x_dot*reference_x_dot + reference_y_dot*reference_y_dot)
-        wd = (reference_y_ddot*reference_x_dot - reference_x_ddot*reference_y_dot)/(reference_x_dot*reference_x_dot + reference_y_dot*reference_y_dot)
-
-        '''if(vd > 3):
-            vd = 3.0
-        elif(vd < -3):
-            vd = -3.0
-        
-
-        if(wd > 3):
-            wd = 3.0
-        elif(wd < -3):
-            wd = -3.0'''
+        if(vd > self.min_reference_speed):
+            wd = (reference_y_ddot*reference_x_dot - reference_x_ddot*reference_y_dot)/(vd*vd)
+            reference_yaw = math.atan2(reference_y_dot, reference_x_dot)
+        else:
+            # still reference: no desired heading, only the position error is corrected
+            wd = 0.0
+            reference_yaw = state_yaw
 
 
         e1 = math.cos(state_yaw)*(reference_x - state_x) + math.sin(state_yaw)*(reference_y - state_y);
         e2 = -math.sin(state_yaw)*(reference_x - state_x) + math.cos(state_yaw)*(reference_y - state_y);
-
-        reference_z = math.atan2(reference_x_dot, reference_y_dot)
-        e3 = reference_z - state_yaw;
-
-        u1 = self.k1*e1
-        u2 = self.k2*e2 + self.k3*e3
+        e3 = math.atan2(math.sin(reference_yaw - state_yaw), math.cos(reference_yaw - state_yaw))
 
         v = vd*math.cos(e3) + self.k1*e1;
         w = wd + self.k2*np.sign(vd)*e2 +self.k3*e3;

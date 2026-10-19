@@ -1,0 +1,69 @@
+<!--
+  Differential drive robot, generated from urdf/differential_drive.urdf with the
+  MuJoCo URDF compiler (same frames, masses and inertias used by robot_state_publisher).
+
+  Added on top of the URDF, taken from the old CoppeliaSim scenes:
+    - free joint, so that the robot can move on the floor
+    - front ball caster (frictionless point contact)
+    - Hokuyo URG-04LX housing and the "lidar" site used as scan origin (see lidar_2d.py)
+    - velocity motors on the wheels (used in dynamics mode)
+-->
+<mujoco model="differential_drive">
+  <compiler angle="radian" autolimits="true"/>
+
+  <default>
+    <default class="differential_drive">
+      <joint damping="0.0005" armature="0.0001"/>
+      <default class="wheel">
+        <geom type="cylinder" size="0.045 0.005" friction="1 0.005 0.0001" material="grey"/>
+      </default>
+      <default class="motor">
+        <velocity kv="0.5" ctrlrange="-30 30" forcerange="-0.15 0.15"/>
+      </default>
+    </default>
+  </default>
+
+  <asset>
+    <material name="grey_light" rgba="0.5 0.5 0.5 1"/>
+    <material name="grey" rgba="0.2 0.2 0.2 1"/>
+    <material name="hokuyo" rgba="1 1 0.11 1"/>
+  </asset>
+
+  <worldbody>
+    <body name="base_footprint" pos="0 0 0.05" childclass="differential_drive">
+      <freejoint name="root"/>
+      <inertial pos="0 0 0" mass="1.8809319734573" diaginertia="0.0042234761640429 0.0058123935014009 0.0084555726498365"/>
+      <geom name="chassis" type="box" size="0.0895 0.074 0.0355" material="grey_light"/>
+
+      <body name="wheel_right" pos="-0.026999 0.091 -0.005" quat="0.0363933 -0.0363879 0.706187 0.706152">
+        <inertial pos="0 0 0" mass="0.063617251813412" diaginertia="3.2736381399445e-05 3.2736381399445e-05 6.4412466599606e-05"/>
+        <joint name="joint_right" axis="0 0 1"/>
+        <geom name="wheel_right" class="wheel"/>
+      </body>
+
+      <body name="wheel_left" pos="-0.029 -0.09 -0.005" quat="0.5 -0.5 0.5 0.5">
+        <inertial pos="0 0 0" mass="0.063617251813412" diaginertia="3.2736381399445e-05 3.2736381399445e-05 6.4412466599606e-05"/>
+        <joint name="joint_left" axis="0 0 1"/>
+        <geom name="wheel_left" class="wheel"/>
+      </body>
+
+      <body name="ball_caster" pos="0.05 0 -0.04275">
+        <inertial pos="0 0 0" mass="0.3" diaginertia="6.3e-06 6.3e-06 6.3e-06"/>
+        <geom name="ball_caster" type="sphere" size="0.00725" condim="1" priority="1" material="grey"/>
+      </body>
+
+      <!-- Scan frame: x forward, z up, i.e. aligned with base_footprint -->
+      <body name="laser_frame" pos="0 0 0.035">
+        <inertial pos="0 0 0" mass="0.2" diaginertia="1.2e-04 1.2e-04 8.3e-05"/>
+        <geom name="hokuyo_body" type="box" size="0.025 0.025 0.0205" pos="0 0 -0.0145" material="grey"/>
+        <geom name="hokuyo_head" type="cylinder" size="0.01985 0.0145" pos="0 0 0.0205" material="hokuyo"/>
+        <site name="lidar" pos="0 0 0.028"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <velocity name="motor_right" class="motor" joint="joint_right"/>
+    <velocity name="motor_left" class="motor" joint="joint_left"/>
+  </actuator>
+</mujoco>

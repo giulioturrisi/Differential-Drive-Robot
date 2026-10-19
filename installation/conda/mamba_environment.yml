@@ -1,27 +1,63 @@
+# Same dependencies of installation/pixi.toml, for conda/mamba users (pixi is the default).
+# From the root of the repo:
+#   mamba env create -f installation/conda/mamba_environment.yml
+#   mamba activate ddrive_env
+#   pip install -e python_scripts/controllers/acados/acados/interfaces/acados_template
+#   conda env config vars set ACADOS_SOURCE_DIR=$PWD/python_scripts/controllers/acados/acados LD_LIBRARY_PATH=$PWD/python_scripts/controllers/acados/acados/lib
+#   mamba activate ddrive_env
+# then build acados and the ROS2 workspace with the commands of the `build-acados` and `build` tasks in pixi.toml
 name: ddrive_env
 channels:
+- robostack-humble
 - conda-forge
-- nvidia
-- robostack-staging
 dependencies:
-- python=3.11.8
-- casadi
+- python
+
+# ROS2
+- ros-humble-desktop
+- ros-humble-robot-state-publisher
+- ros-humble-slam-toolbox
+- ros-humble-joy
+- ros-humble-teleop-twist-joy
+- ros-humble-plotjuggler-ros
+
+# Build tools
+- colcon-common-extensions
+- c-compiler
+- cxx-compiler
+- cmake
+- make
+- pkg-config
+
+# acados (built from source in python_scripts/controllers/acados/acados)
+- libblasfeo
+
+# kiss-icp (built from source in ros2_ws/src/external)
+- eigen
+- sophus
+- tsl_robin_map
+- tbb-devel
+
+# Python
 - numpy
+- scipy
 - matplotlib
-- jaxlib=*=*cuda*
+- casadi
+- numba
 - jax
-- cuda-nvcc
-- hpp-fcl 
-- example-robot-data 
-- pinocchio
-- jupyterlab 
-- meshcat-python 
-- scipy 
+- jaxlib             # NVIDIA GPU: replace with jaxlib=*=*cuda*
+- crocoddyl
+- mujoco-python
+- transforms3d
+
+# Extra (not used by the code)
+- hpp-fcl
+- example-robot-data
+- jupyterlab
+- meshcat-python
 - ipywidgets
+
+- pip
 - pip:
-  - transforms3d
-  - xmlschema
-  - numba
   - pgm_reader
-
-
+  - xmlschema
